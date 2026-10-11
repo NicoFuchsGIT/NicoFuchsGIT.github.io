@@ -3,484 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nico Fuchs | R&D Telemetry</title>
+    <title>Nico Fuchs | 3D Portfolio</title>
     <style>
-        :root {
-            --bg-color: #0d1117;
-            --panel-bg: #161b22;
-            --accent-cyan: #00f0ff;
-            --accent-blue: #3b82f6;
-            --text-main: #c9d1d9;
-            --text-muted: #8b949e;
-            --border-color: #30363d;
-            --font-mono: 'Courier New', Courier, monospace;
-            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: var(--font-sans);
-            padding: 20px;
-            display: flex;
+            margin: 0;
+            overflow: hidden; /* Verhindert Scrollbalken */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        #canvas-container {
+            width: 100vw;
             height: 100vh;
-            overflow: hidden;
+            display: block;
         }
 
-        /* Sidebar Navigation */
-        .sidebar {
-            width: 60px;
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 20px;
-            gap: 30px;
+        /* Das UI Overlay (Fadenkreuz / Info) */
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none; /* Klicks gehen durch diesen Text durch ins 3D */
+            color: #333;
         }
 
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            border: 2px solid var(--text-muted);
-            border-radius: 4px;
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        p {
+            margin: 5px 0 0 0;
+            font-family: monospace;
+            color: #666;
+        }
+
+        /* Das versteckte Modal (Fenster), das beim Klick aufgeht */
+        #project-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 80%;
+            max-width: 600px;
+            display: none; /* Standardmäßig versteckt */
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        #project-modal.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -45%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            color: #999;
+            transition: color 0.2s;
         }
 
-        .nav-icon:hover, .nav-icon.active {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-        }
-
-        /* Main Dashboard Area */
-        .dashboard {
-            flex-grow: 1;
-            padding: 0 30px;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-        }
-
-        .header h1 {
-            font-family: var(--font-mono);
-            font-size: 1.8rem;
-            color: white;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .header h1 span {
-            color: var(--accent-cyan);
-        }
-
-        .status {
-            font-family: var(--font-mono);
-            color: #3fb950;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background-color: #3fb950;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #3fb950;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-
-        /* Grid Layout */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 20px;
-            padding-bottom: 30px;
-        }
-
-        /* Telemetry Panels */
-        .panel {
-            background-color: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 20px;
-            position: relative;
-        }
-
-        .panel-header {
-            font-family: var(--font-mono);
-            font-size: 0.85rem;
-            color: var(--accent-cyan);
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px dashed var(--border-color);
-            padding-bottom: 5px;
-        }
-
-        .panel-content {
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .tech-tags {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
+        .close-btn:hover {
+            color: #000;
         }
 
         .tag {
-            background: rgba(0, 240, 255, 0.1);
-            color: var(--accent-cyan);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-        }
-
-        /* Live Graph Canvas */
-        canvas {
-            width: 100%;
-            height: 120px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color);
-            margin-top: 10px;
-        }
-
-        /* Load Bar */
-        .load-bar-container {
-            margin-top: 15px;
-        }
-
-        .load-label {
-            font-family: var(--font-mono);
+            background: #000;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
             font-size: 0.8rem;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .load-bar {
-            width: 100%;
-            height: 12px;
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
-
-        .load-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
-        }
-
-        /* Tacho Styles */
-        .tacho-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 15px;
-        }
-
-        .tacho-container {
-            position: relative;
-            width: 240px;
-            height: 120px; /* Half circle */
-            overflow: hidden;
-        }
-
-        .tacho-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 240px;
-            height: 240px; /* Full circle, bottom half is hidden */
-            border-radius: 50%;
-            border: 15px solid var(--border-color);
-            border-top-color: var(--accent-cyan);
-            border-left-color: var(--accent-blue);
-            transform: rotate(45deg);
-            box-sizing: border-box;
-            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.1);
-        }
-
-        .tacho-needle {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 4px;
-            height: 100px;
-            background-color: #ff3366;
-            transform-origin: bottom center;
-            transform: translateX(-50%) rotate(-90deg); /* -90deg is 0, +90deg is max */
-            border-radius: 2px;
-            box-shadow: 0 0 10px #ff3366;
-            z-index: 2;
-        }
-
-        .tacho-center {
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
-            background-color: var(--panel-bg);
-            border: 3px solid #ff3366;
-            border-radius: 50%;
-            z-index: 3;
-        }
-
-        .tacho-readout {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: var(--font-mono);
-            font-size: 1.8rem;
-            color: white;
-            z-index: 1;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
-        }
-
-        .tacho-unit {
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 5px;
-            text-transform: uppercase;
+            display: inline-block;
+            margin-right: 5px;
+            margin-bottom: 15px;
         }
     </style>
+
+    <!-- Import Maps für modernes JavaScript (erlaubt das Laden von Three.js ohne Server/Bundler) -->
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="nav-icon active" title="Dashboard"></div>
-        <div class="nav-icon" title="Projects"></div>
-        <div class="nav-icon" title="Hardware"></div>
-        <div class="nav-icon" title="Contact"></div>
+    <!-- Hier lebt die 3D Szene -->
+    <div id="canvas-container"></div>
+
+    <!-- UI Overlay (Immer sichtbar) -->
+    <div id="ui-layer">
+        <h1>Nico Fuchs</h1>
+        <p>R&D Engineer // Interactive Portfolio</p>
+        <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke und ziehe zum Umsehen. Klicke auf den gelben Ring!)</p>
     </div>
 
-    <div class="dashboard">
-        <div class="header">
-            <div>
-                <h1>Nico_Fuchs <span>// R&D Engineer</span></h1>
-                <p style="font-family: var(--font-mono); color: var(--text-muted); margin-top: 5px;">SYS.LOC: Vienna, AT | TARGET: Munich, DE</p>
-            </div>
-            <div class="status">
-                <div class="status-dot"></div>
-                SYSTEM ONLINE
-            </div>
-        </div>
-
-        <div class="grid">
-            <!-- Panel 1: Profile -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span>[01] SYSTEM.INFO</span>
-                    <span>_PROFILE</span>
-                </div>
-                <div class="panel-content">
-                    B.Sc. Candidate in Sports Engineering and Ergonomics.
-                    Specialized in closing the "Sim-to-Real" gap. I build complete pipelines:
-                    from capturing physical sensor data to training machine learning models,
-                    down to the mechanical hardware implementation.
-                    <div class="tech-tags">
-                        <span class="tag">PYTHON</span>
-                        <span class="tag">PYTORCH</span>
-                        <span class="tag">DATA_ACQUISITION</span>
-                        <span class="tag">RAPID_PROTOTYPING</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel 2: Sensor Pipeline (Live Graph) -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span>[02] SENSOR.PIPELINE</span>
-                    <span>LIVE_DATA</span>
-                </div>
-                <div class="panel-content">
-                    Acoustic impact localization using piezoelectric sensors (NI DAQ).
-                    Live filtering with NumPy/SciPy and pattern recognition via 1D-CNN.
-                    <canvas id="telemetryChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Panel 3: Structural Analysis -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span>[03] STRUCTURAL.LOAD</span>
-                    <span>TESTING</span>
-                </div>
-                <div class="panel-content">
-                    Validation of bending and deformation behavior under extreme loads using Vicon 3D-Motion-Capture.
-                    <div class="load-bar-container">
-                        <div class="load-label"><span>Max Load Applied</span><span>520 kg</span></div>
-                        <div class="load-bar"><div class="load-fill" style="width: 95%;"></div></div>
-                    </div>
-                    <div class="load-bar-container">
-                        <div class="load-label"><span>Deformation Tracking</span><span>Optic/3D</span></div>
-                        <div class="load-bar"><div class="load-fill" style="width: 100%; background: var(--accent-blue);"></div></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel 4: Hardware & CAD -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span>[04] HARDWARE.MECHANICS</span>
-                    <span>CAD / BUILD</span>
-                </div>
-                <div class="panel-content">
-                    Bridging theory and reality through hands-on mechanical work.
-                    Maintenance of complex motorcycle mechanics (Suzuki GSF 600) and custom electronics design.
-                    <div class="tech-tags">
-                        <span class="tag">PTC_CREO</span>
-                        <span class="tag">KiCad</span>
-                        <span class="tag">3D_PRINTING (FDM/Resin)</span>
-                        <span class="tag">WRENCHING</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel 5: Mouse Telemetry (Der neue Tacho) -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span>[05] HUMAN.INTERFACE</span>
-                    <span>CURSOR_TELEMETRY</span>
-                </div>
-                <div class="panel-content" style="text-align: center;">
-                    Live tracking of interface interaction speed (velocity).
-                    <div class="tacho-wrapper">
-                        <div class="tacho-container">
-                            <div class="tacho-bg"></div>
-                            <div class="tacho-readout" id="speedValue">0</div>
-                            <div class="tacho-needle" id="speedNeedle"></div>
-                            <div class="tacho-center"></div>
-                        </div>
-                        <div class="tacho-unit">px / sec</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Das Fenster, das sich nach dem Klick öffnet -->
+    <div id="project-modal">
+        <span class="close-btn" id="close-modal">×</span>
+        <div class="tag">MACHINE_LEARNING</div>
+        <div class="tag">NI_DAQ</div>
+        <div class="tag">SENSORIK</div>
+        <h2>Spikeball Impact Localization</h2>
+        <p style="color: #333; line-height: 1.6; font-family: inherit;">
+            Entwicklung eines akustischen Lokalisierungssystems für Spikeball.
+            Durch den Einsatz von piezoelektrischen Sensoren und Machine-Learning-Algorithmen
+            wird der exakte Einschlagort des Balls auf dem Netz berechnet.
+        </p>
+        <p style="color: #333; line-height: 1.6; font-family: inherit; margin-top: 10px;">
+            <strong>Hardware:</strong> Komplett selbst konstruierte Sensor-Integration und Signalverarbeitungspipeline.
+        </p>
     </div>
 
-    <script>
-        // --- 1. Graph Animation für Panel 2 ---
-        const canvas = document.getElementById('telemetryChart');
-        const ctx = canvas.getContext('2d');
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = 120;
-        let offset = 0;
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        function drawGraph() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            for(let i=0; i<canvas.width; i+=40) { ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); }
-            for(let i=0; i<canvas.height; i+=30) { ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); }
-            ctx.stroke();
+        // 1. SZENE & KAMERA AUFBAUEN
+        const scene = new THREE.Scene();
+        // Die Hintergrundfarbe der Halle (sehr helles Grau/Weiß)
+        scene.background = new THREE.Color(0xf5f5f7);
+        // Nebel sorgt dafür, dass der Raum "unendlich" wirkt, da der Boden in der Ferne verblasst
+        scene.fog = new THREE.Fog(0xf5f5f7, 10, 40);
 
-            ctx.beginPath();
-            ctx.strokeStyle = '#00f0ff';
-            ctx.lineWidth = 2;
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = '#00f0ff';
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        // Positioniere die Kamera (wie ein Mensch, der im Raum steht)
+        camera.position.set(0, 1.5, 5);
 
-            for (let i = 0; i < canvas.width; i++) {
-                let noise = Math.random() * 10 - 5;
-                let spike = (i + offset) % 150 < 5 ? (Math.random() * 60 - 30) : 0;
-                let y = canvas.height / 2 + Math.sin((i + offset) * 0.05) * 20 + noise + spike;
-                if (i === 0) ctx.moveTo(i, y); else ctx.lineTo(i, y);
+        // 2. RENDERER (Die Grafik-Engine)
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Sehr weiche Schatten
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // 3. LICHT (Das Studio-Setup)
+        // Umgebungslicht
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        // Ein starkes Hauptlicht, das Schatten wirft
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(5, 10, 5);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        scene.add(dirLight);
+
+        // 4. DER RAUM (Der Studio-Boden)
+        const floorGeometry = new THREE.PlaneGeometry(100, 100);
+        const floorMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            roughness: 0.8,
+            metalness: 0.1
+        });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = -Math.PI / 2; // Boden flach hinlegen
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // 5. PLATZHALTER-OBJEKT: Das "Spikeball-Netz" (Gelber Ring)
+        // Später löschst du diesen Block und lädst stattdessen dein .glb Modell mit dem GLTFLoader!
+        const ringGeometry = new THREE.TorusGeometry(0.8, 0.05, 16, 100);
+        const ringMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffcc00,
+            roughness: 0.4,
+            metalness: 0.2
+        });
+        const spikeballNet = new THREE.Mesh(ringGeometry, ringMaterial);
+        spikeballNet.position.set(0, 0.3, 0); // Leicht über dem Boden schwebend
+        spikeballNet.rotation.x = -Math.PI / 2; // Flach hinlegen
+        spikeballNet.castShadow = true;
+
+        // Wir weisen dem Objekt einen Namen zu, damit wir es beim Klicken identifizieren können
+        spikeballNet.userData = { name: "SpikeballProjekt" };
+        scene.add(spikeballNet);
+
+        // Array aller Objekte, die man anklicken kann
+        const interactableObjects = [spikeballNet];
+
+        // 6. STEUERUNG (Maus-Bewegung)
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // Macht die Kamerabewegung "schwer" und weich
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2 - 0.05; // Verhindert, dass man unter den Boden gucken kann
+        controls.minDistance = 2; // Wie nah man ran zoomen darf
+        controls.maxDistance = 10; // Wie weit man weg zoomen darf
+
+        // 7. RAYCASTING (Klick-Erkennung)
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('click', (event) => {
+            // Umrechnung der Mauskoordinaten für Three.js (-1 bis +1)
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            // Strahl von der Kamera durch die Mausposition schießen
+            raycaster.setFromCamera(mouse, camera);
+
+            // Prüfen, ob der Strahl unsere interaktiven Objekte trifft
+            const intersects = raycaster.intersectObjects(interactableObjects);
+
+            if (intersects.length > 0) {
+                // Treffer! Wir öffnen das HTML Modal
+                const hitObject = intersects[0].object;
+                if(hitObject.userData.name === "SpikeballProjekt") {
+                    document.getElementById('project-modal').classList.add('active');
+                }
             }
-
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-            offset += 3;
-            requestAnimationFrame(drawGraph);
-        }
-        drawGraph();
-
-        // --- 2. Tacho Logik für Panel 5 ---
-        let lastMouseX = 0;
-        let lastMouseY = 0;
-        let lastTime = performance.now();
-        let currentSpeed = 0;
-        let targetSpeed = 0;
-
-        const needle = document.getElementById('speedNeedle');
-        const valueDisplay = document.getElementById('speedValue');
-        const maxSpeedLimit = 4000; // Skalierung: Ab 4000 px/s schlägt die Nadel voll aus
-
-        // Event Listener misst die Distanz zwischen zwei Mauspositionen
-        document.addEventListener('mousemove', (e) => {
-            const now = performance.now();
-            const dt = now - lastTime;
-
-            if (dt > 0) {
-                const dx = e.clientX - lastMouseX;
-                const dy = e.clientY - lastMouseY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                // Pixel pro Sekunde
-                targetSpeed = (distance / dt) * 1000;
-            }
-
-            lastMouseX = e.clientX;
-            lastMouseY = e.clientY;
-            lastTime = now;
         });
 
-        // Eigener Loop für flüssige Nadelbewegung (Dämpfung)
-        function updateTacho() {
-            // Nadel nähert sich flüssig der Zielgeschwindigkeit an (Smoothing)
-            currentSpeed += (targetSpeed - currentSpeed) * 0.1;
+        // 8. UI LOGIK (Fenster schließen)
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('project-modal').classList.remove('active');
+        });
 
-            // Wenn die Maus stoppt, fällt die Zielgeschwindigkeit rasch ab
-            targetSpeed *= 0.92;
+        // 9. ANIMATION LOOP (Sorgt dafür, dass das Bild gezeichnet wird)
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // Wichtig für das sanfte Nachziehen der Kamera
 
-            // Begrenzen der Geschwindigkeit auf den Maximalwert des Tachos
-            let clampedSpeed = Math.min(Math.max(currentSpeed, 0), maxSpeedLimit);
+            // Optional: Wir lassen den Ring ganz langsam pulsieren oder schweben, damit er lebendig wirkt
+            const time = performance.now() * 0.001;
+            spikeballNet.position.y = 0.3 + Math.sin(time * 2) * 0.02;
 
-            // Winkel berechnen: -90° (ganz links) bis +90° (ganz rechts)
-            let angle = -90 + (clampedSpeed / maxSpeedLimit) * 180;
-
-            // DOM Updates
-            if (needle && valueDisplay) {
-                needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-                // Zahl im Tacho leicht gedämpft anzeigen, damit man sie lesen kann
-                valueDisplay.textContent = Math.round(currentSpeed);
-            }
-
-            requestAnimationFrame(updateTacho);
+            renderer.render(scene, camera);
         }
-        updateTacho();
+
+        // Auf Fenstergrößenänderung reagieren
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
     </script>
 </body>
 </html>
