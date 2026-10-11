@@ -117,6 +117,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
             gap: 20px;
+            padding-bottom: 30px;
         }
 
         /* Telemetry Panels */
@@ -194,9 +195,85 @@
 
         .load-fill {
             height: 100%;
-            width: 85%;
             background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        /* Tacho Styles */
+        .tacho-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .tacho-container {
+            position: relative;
+            width: 240px;
+            height: 120px; /* Half circle */
+            overflow: hidden;
+        }
+
+        .tacho-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 240px;
+            height: 240px; /* Full circle, bottom half is hidden */
+            border-radius: 50%;
+            border: 15px solid var(--border-color);
+            border-top-color: var(--accent-cyan);
+            border-left-color: var(--accent-blue);
+            transform: rotate(45deg);
+            box-sizing: border-box;
+            box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+
+        .tacho-needle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            height: 100px;
+            background-color: #ff3366;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-90deg); /* -90deg is 0, +90deg is max */
+            border-radius: 2px;
+            box-shadow: 0 0 10px #ff3366;
+            z-index: 2;
+        }
+
+        .tacho-center {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background-color: var(--panel-bg);
+            border: 3px solid #ff3366;
+            border-radius: 50%;
+            z-index: 3;
+        }
+
+        .tacho-readout {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            color: white;
+            z-index: 1;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .tacho-unit {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -291,38 +368,46 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Panel 5: Mouse Telemetry (Der neue Tacho) -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>[05] HUMAN.INTERFACE</span>
+                    <span>CURSOR_TELEMETRY</span>
+                </div>
+                <div class="panel-content" style="text-align: center;">
+                    Live tracking of interface interaction speed (velocity).
+                    <div class="tacho-wrapper">
+                        <div class="tacho-container">
+                            <div class="tacho-bg"></div>
+                            <div class="tacho-readout" id="speedValue">0</div>
+                            <div class="tacho-needle" id="speedNeedle"></div>
+                            <div class="tacho-center"></div>
+                        </div>
+                        <div class="tacho-unit">px / sec</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Simple script to animate the telemetry chart in Panel 2
+        // --- 1. Graph Animation für Panel 2 ---
         const canvas = document.getElementById('telemetryChart');
         const ctx = canvas.getContext('2d');
-
-        // Resize canvas to fit container
         canvas.width = canvas.parentElement.clientWidth;
         canvas.height = 120;
-
         let offset = 0;
 
         function drawGraph() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw grid lines (Telemetry style)
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            for(let i=0; i<canvas.width; i+=40) {
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-            }
-            for(let i=0; i<canvas.height; i+=30) {
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-            }
+            for(let i=0; i<canvas.width; i+=40) { ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); }
+            for(let i=0; i<canvas.height; i+=30) { ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); }
             ctx.stroke();
 
-            // Draw the "Sensor Data" line
             ctx.beginPath();
             ctx.strokeStyle = '#00f0ff';
             ctx.lineWidth = 2;
@@ -330,23 +415,72 @@
             ctx.shadowColor = '#00f0ff';
 
             for (let i = 0; i < canvas.width; i++) {
-                // Simulate Piezo sensor noise with occasional spikes
                 let noise = Math.random() * 10 - 5;
                 let spike = (i + offset) % 150 < 5 ? (Math.random() * 60 - 30) : 0;
                 let y = canvas.height / 2 + Math.sin((i + offset) * 0.05) * 20 + noise + spike;
-
-                if (i === 0) ctx.moveTo(i, y);
-                else ctx.lineTo(i, y);
+                if (i === 0) ctx.moveTo(i, y); else ctx.lineTo(i, y);
             }
 
             ctx.stroke();
-            ctx.shadowBlur = 0; // reset
-
-            offset += 3; // speed of the scroll
+            ctx.shadowBlur = 0;
+            offset += 3;
             requestAnimationFrame(drawGraph);
         }
-
         drawGraph();
+
+        // --- 2. Tacho Logik für Panel 5 ---
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let lastTime = performance.now();
+        let currentSpeed = 0;
+        let targetSpeed = 0;
+
+        const needle = document.getElementById('speedNeedle');
+        const valueDisplay = document.getElementById('speedValue');
+        const maxSpeedLimit = 4000; // Skalierung: Ab 4000 px/s schlägt die Nadel voll aus
+
+        // Event Listener misst die Distanz zwischen zwei Mauspositionen
+        document.addEventListener('mousemove', (e) => {
+            const now = performance.now();
+            const dt = now - lastTime;
+
+            if (dt > 0) {
+                const dx = e.clientX - lastMouseX;
+                const dy = e.clientY - lastMouseY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                // Pixel pro Sekunde
+                targetSpeed = (distance / dt) * 1000;
+            }
+
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+            lastTime = now;
+        });
+
+        // Eigener Loop für flüssige Nadelbewegung (Dämpfung)
+        function updateTacho() {
+            // Nadel nähert sich flüssig der Zielgeschwindigkeit an (Smoothing)
+            currentSpeed += (targetSpeed - currentSpeed) * 0.1;
+
+            // Wenn die Maus stoppt, fällt die Zielgeschwindigkeit rasch ab
+            targetSpeed *= 0.92;
+
+            // Begrenzen der Geschwindigkeit auf den Maximalwert des Tachos
+            let clampedSpeed = Math.min(Math.max(currentSpeed, 0), maxSpeedLimit);
+
+            // Winkel berechnen: -90° (ganz links) bis +90° (ganz rechts)
+            let angle = -90 + (clampedSpeed / maxSpeedLimit) * 180;
+
+            // DOM Updates
+            if (needle && valueDisplay) {
+                needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+                // Zahl im Tacho leicht gedämpft anzeigen, damit man sie lesen kann
+                valueDisplay.textContent = Math.round(currentSpeed);
+            }
+
+            requestAnimationFrame(updateTacho);
+        }
+        updateTacho();
     </script>
 </body>
 </html>
