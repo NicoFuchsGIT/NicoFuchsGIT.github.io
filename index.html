@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nico Fuchs | R&D Telemetry</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --accent-cyan: #00f0ff;
+            --accent-blue: #3b82f6;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --font-mono: 'Courier New', Courier, monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            padding: 20px;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 60px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            gap: 30px;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--text-muted);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-icon:hover, .nav-icon.active {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        /* Main Dashboard Area */
+        .dashboard {
+            flex-grow: 1;
+            padding: 0 30px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header h1 span {
+            color: var(--accent-cyan);
+        }
+
+        .status {
+            font-family: var(--font-mono);
+            color: #3fb950;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #3fb950;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #3fb950;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+        }
+
+        /* Telemetry Panels */
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .panel-header {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .panel-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .tech-tags {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+        }
+
+        /* Live Graph Canvas */
+        canvas {
+            width: 100%;
+            height: 120px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            margin-top: 10px;
+        }
+
+        /* Load Bar */
+        .load-bar-container {
+            margin-top: 15px;
+        }
+
+        .load-label {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .load-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .load-fill {
+            height: 100%;
+            width: 85%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="nav-icon active" title="Dashboard"></div>
+        <div class="nav-icon" title="Projects"></div>
+        <div class="nav-icon" title="Hardware"></div>
+        <div class="nav-icon" title="Contact"></div>
+    </div>
+
+    <div class="dashboard">
+        <div class="header">
+            <div>
+                <h1>Nico_Fuchs <span>// R&D Engineer</span></h1>
+                <p style="font-family: var(--font-mono); color: var(--text-muted); margin-top: 5px;">SYS.LOC: Vienna, AT | TARGET: Munich, DE</p>
+            </div>
+            <div class="status">
+                <div class="status-dot"></div>
+                SYSTEM ONLINE
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Panel 1: Profile -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>[01] SYSTEM.INFO</span>
+                    <span>_PROFILE</span>
+                </div>
+                <div class="panel-content">
+                    B.Sc. Candidate in Sports Engineering and Ergonomics.
+                    Specialized in closing the "Sim-to-Real" gap. I build complete pipelines:
+                    from capturing physical sensor data to training machine learning models,
+                    down to the mechanical hardware implementation.
+                    <div class="tech-tags">
+                        <span class="tag">PYTHON</span>
+                        <span class="tag">PYTORCH</span>
+                        <span class="tag">DATA_ACQUISITION</span>
+                        <span class="tag">RAPID_PROTOTYPING</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 2: Sensor Pipeline (Live Graph) -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>[02] SENSOR.PIPELINE</span>
+                    <span>LIVE_DATA</span>
+                </div>
+                <div class="panel-content">
+                    Acoustic impact localization using piezoelectric sensors (NI DAQ).
+                    Live filtering with NumPy/SciPy and pattern recognition via 1D-CNN.
+                    <canvas id="telemetryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Panel 3: Structural Analysis -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>[03] STRUCTURAL.LOAD</span>
+                    <span>TESTING</span>
+                </div>
+                <div class="panel-content">
+                    Validation of bending and deformation behavior under extreme loads using Vicon 3D-Motion-Capture.
+                    <div class="load-bar-container">
+                        <div class="load-label"><span>Max Load Applied</span><span>520 kg</span></div>
+                        <div class="load-bar"><div class="load-fill" style="width: 95%;"></div></div>
+                    </div>
+                    <div class="load-bar-container">
+                        <div class="load-label"><span>Deformation Tracking</span><span>Optic/3D</span></div>
+                        <div class="load-bar"><div class="load-fill" style="width: 100%; background: var(--accent-blue);"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 4: Hardware & CAD -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span>[04] HARDWARE.MECHANICS</span>
+                    <span>CAD / BUILD</span>
+                </div>
+                <div class="panel-content">
+                    Bridging theory and reality through hands-on mechanical work.
+                    Maintenance of complex motorcycle mechanics (Suzuki GSF 600) and custom electronics design.
+                    <div class="tech-tags">
+                        <span class="tag">PTC_CREO</span>
+                        <span class="tag">KiCad</span>
+                        <span class="tag">3D_PRINTING (FDM/Resin)</span>
+                        <span class="tag">WRENCHING</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple script to animate the telemetry chart in Panel 2
+        const canvas = document.getElementById('telemetryChart');
+        const ctx = canvas.getContext('2d');
+
+        // Resize canvas to fit container
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = 120;
+
+        let offset = 0;
+
+        function drawGraph() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid lines (Telemetry style)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let i=0; i<canvas.width; i+=40) {
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+            }
+            for(let i=0; i<canvas.height; i+=30) {
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+            }
+            ctx.stroke();
+
+            // Draw the "Sensor Data" line
+            ctx.beginPath();
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = '#00f0ff';
+
+            for (let i = 0; i < canvas.width; i++) {
+                // Simulate Piezo sensor noise with occasional spikes
+                let noise = Math.random() * 10 - 5;
+                let spike = (i + offset) % 150 < 5 ? (Math.random() * 60 - 30) : 0;
+                let y = canvas.height / 2 + Math.sin((i + offset) * 0.05) * 20 + noise + spike;
+
+                if (i === 0) ctx.moveTo(i, y);
+                else ctx.lineTo(i, y);
+            }
+
+            ctx.stroke();
+            ctx.shadowBlur = 0; // reset
+
+            offset += 3; // speed of the scroll
+            requestAnimationFrame(drawGraph);
+        }
+
+        drawGraph();
+    </script>
+</body>
+</html>
