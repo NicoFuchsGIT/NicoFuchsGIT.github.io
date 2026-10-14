@@ -59,6 +59,16 @@ Jedes Objekt bekommt ein Fenster, das zu seinem Inhalt passt, statt einer Einhei
 | **SunCafe** | SunCafe-Projekt (lebt in einem anderen Repo, Inhalt noch offen) |
 | **TU Edge** (Auto) | Erst wenn Nico bei TU Wien Racing genommen wird. Bis dahin nicht sichtbar, aber der Platz ist eingeplant. |
 
+### Impressum und Kontakt
+
+- Es gibt eine **Impressumsseite** (EN/DE). Darauf stehen nur **E-Mail und Instagram**, keine Adresse und keine Telefonnummer.
+- Dazu kommt eine kurze **Datenschutzseite** (EN/DE). Es gibt keine Analytics, keine Cookies und keine Drittanbieter-Requests (siehe „Bibliotheken selbst hosten“).
+- Erreichbar über einen kleinen Link in der Ecke neben Kontakt und Sprachumschalter, und im Fallback.
+
+### Paper
+
+- Das Spikeball-Paper liegt als **PDF direkt im Repo** und wird im Spikeball-Fenster zum Download angeboten (nur Englisch).
+
 ### Sprache
 
 - Standard: **Englisch**, mit Umschalter auf **Deutsch**.
@@ -80,7 +90,7 @@ Jedes Objekt bekommt ein Fenster, das zu seinem Inhalt passt, statt einer Einhei
 - **Hochformat:** Die Reihenfolge und das Studio bleiben gleich, aber die Anordnung darf sich anpassen: ein engerer Bogen bzw. zwei Reihen mit Nico vorne mittig, damit jedes Objekt ein ordentliches Tap-Ziel ist (mindestens ca. 44 px, zusätzlich HTML-Labels als Tap-Fläche). Kein seitliches Wischen.
 - **Bibliotheken selbst hosten:** three.js und die nötigen Addons (GLTFLoader, Draco- bzw. Meshopt-Decoder) liegen im Repo statt auf unpkg. Das ist schneller und schickt keine Besucher-IPs an Dritte.
 - **Kein Tracking bzw. keine Analytics**, also auch kein Cookie-Banner.
-- **Kontakt:** LinkedIn-Link plus mailto-Link. Kein Formular.
+- **Kontakt:** LinkedIn-Link plus mailto-Link (dazu Instagram wie im Impressum). Kein Formular.
 - **Handy:** Antippen statt Hover, Fenster im Vollbild. Die Kamera passt Abstand bzw. Blickwinkel so an, dass alle Objekte auch im Hochformat ins Bild passen. Das Mitschwenken entfällt am Handy (keine Neigungssteuerung, das erspart die iOS-Berechtigungsabfrage).
 - **Fallback:** Ohne WebGL (oder bei Fehler beim Laden) gibt es eine einfache HTML-Liste mit denselben Inhalten.
 - **Immer sichtbar:** Name und Titel oben links (wie im Prototyp), dazu LinkedIn-Link, Kontakt und Sprachumschalter in einer Ecke.
