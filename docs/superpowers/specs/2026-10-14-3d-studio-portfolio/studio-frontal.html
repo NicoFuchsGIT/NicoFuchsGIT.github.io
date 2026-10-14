@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio Frontal</title>
+<style>
+  :root { --bg:#f5f5f7; --ink:#1d1d1f; --mute:#6e6e73; --line:#d2d2d7; --accent:#f5c400; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#111; --ink:#f5f5f7; --mute:#a1a1a6; --line:#3a3a3c; } }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; padding:24px 16px; }
+  h1 { font-size:1.3rem; margin:0 0 4px; }
+  .sub { color:var(--mute); margin:0 0 18px; font-size:.95rem; max-width:900px; }
+  .stage { max-width:1100px; border-radius:12px; overflow:hidden; border:1px solid var(--line); }
+  svg { width:100%; height:auto; display:block; }
+  .lbl { font-family:monospace; font-size:13px; fill:#1d1d1f; text-anchor:middle; }
+  .hint { font-family:monospace; font-size:11px; fill:#6e6e73; text-anchor:middle; }
+  .hot { cursor:pointer; }
+  .hot:hover .glow { opacity:1; }
+  .glow { opacity:0; transition:opacity .2s; }
+  ul { color:var(--mute); font-size:.92rem; line-height:1.5; max-width:900px; }
+</style>
+</head>
+<body>
+<h1>Grundidee: ein Raum, eine ruhige Kamera, alle Objekte im Blick</h1>
+<p class="sub">Frontalansicht wie auf deinem zweiten Bild: weiße Hohlkehle ohne Ecken, spiegelnder Boden, zwei Softboxen als Rahmen. Fahr mit der Maus über die Objekte, um den Hover-Zustand zu sehen.</p>
+<div class="stage">
+<svg viewBox="0 0 1100 560">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e9e9ec"/><stop offset=".62" stop-color="#fbfbfc"/><stop offset="1" stop-color="#f1f1f3"/>
+    </linearGradient>
+    <radialGradient id="spot" cx=".5" cy=".7" r=".5">
+      <stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="refl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1100" height="560" fill="url(#wall)"/>
+  <ellipse cx="550" cy="390" rx="520" ry="120" fill="url(#spot)"/>
+  <rect x="0" y="0" width="1100" height="34" fill="#2a2a2c"/>
+  <rect x="300" y="34" width="500" height="10" rx="5" fill="#fff" stroke="#ddd"/>
+
+  <!-- Softboxen -->
+  <g opacity=".85">
+    <line x1="70" y1="250" x2="40" y2="520" stroke="#333" stroke-width="2"/><line x1="70" y1="250" x2="100" y2="520" stroke="#333" stroke-width="2"/>
+    <ellipse cx="90" cy="200" rx="60" ry="70" fill="#222"/>
+    <line x1="1030" y1="250" x2="1000" y2="520" stroke="#333" stroke-width="2"/><line x1="1030" y1="250" x2="1060" y2="520" stroke="#333" stroke-width="2"/>
+    <ellipse cx="1010" cy="200" rx="60" ry="70" fill="#222"/>
+  </g>
+
+  <!-- Holzmöbel (links hinten) -->
+  <g class="hot">
+    <ellipse class="glow" cx="215" cy="372" rx="70" ry="12" fill="#f5c400" opacity="0"/>
+    <rect x="165" y="300" width="100" height="12" fill="#b07a45"/>
+    <rect x="172" y="312" width="8" height="58" fill="#8c5d31"/><rect x="250" y="312" width="8" height="58" fill="#8c5d31"/>
+    <rect x="165" y="372" width="100" height="22" fill="url(#refl)"/>
+    <text class="lbl" x="215" y="410">Woodworking</text>
+  </g>
+
+  <!-- Powerlifting Rack -->
+  <g class="hot">
+    <ellipse class="glow" cx="370" cy="402" rx="70" ry="12" fill="#f5c400" opacity="0"/>
+    <rect x="325" y="250" width="8" height="150" fill="#333"/><rect x="407" y="250" width="8" height="150" fill="#333"/>
+    <rect x="300" y="300" width="140" height="5" fill="#555"/>
+    <rect x="300" y="285" width="14" height="36" rx="3" fill="#111"/><rect x="426" y="285" width="14" height="36" rx="3" fill="#111"/>
+    <rect x="320" y="402" width="100" height="22" fill="url(#refl)"/>
+    <text class="lbl" x="370" y="440">Powerlifting</text>
+  </g>
+
+  <!-- Ich (Mitte) -->
+  <g class="hot">
+    <ellipse class="glow" cx="550" cy="452" rx="60" ry="12" fill="#f5c400" opacity="0"/>
+    <circle cx="550" cy="270" r="22" fill="#cfcfd4"/>
+    <rect x="522" y="296" width="56" height="90" rx="20" fill="#cfcfd4"/>
+    <rect x="530" y="380" width="16" height="70" rx="6" fill="#cfcfd4"/><rect x="554" y="380" width="16" height="70" rx="6" fill="#cfcfd4"/>
+    <rect x="515" y="452" width="70" height="26" fill="url(#refl)"/>
+    <text class="lbl" x="550" y="496">Nico · CV</text>
+  </g>
+
+  <!-- Spikeball -->
+  <g class="hot">
+    <ellipse class="glow" cx="730" cy="430" rx="70" ry="14" fill="#f5c400" opacity="0"/>
+    <ellipse cx="730" cy="405" rx="58" ry="14" fill="none" stroke="#f5c400" stroke-width="7"/>
+    <ellipse cx="730" cy="405" rx="50" ry="10" fill="#222" opacity=".25"/>
+    <line x1="690" y1="412" x2="684" y2="428" stroke="#222" stroke-width="3"/><line x1="770" y1="412" x2="776" y2="428" stroke="#222" stroke-width="3"/>
+    <text class="lbl" x="730" y="462">Spikeball Localization</text>
+  </g>
+
+  <!-- SunCafe -->
+  <g class="hot">
+    <ellipse class="glow" cx="890" cy="390" rx="60" ry="12" fill="#f5c400" opacity="0"/>
+    <rect x="860" y="320" width="60" height="64" rx="4" fill="#fff" stroke="#bbb"/>
+    <circle cx="890" cy="345" r="13" fill="#f5c400"/>
+    <rect x="860" y="386" width="60" height="18" fill="url(#refl)"/>
+    <text class="lbl" x="890" y="420">SunCafe</text>
+  </g>
+
+  <!-- TU Edge Platzhalter -->
+  <g opacity=".35">
+    <path d="M430 210 q120 -40 240 0 l20 30 h-280 z" fill="none" stroke="#888" stroke-dasharray="6 5" stroke-width="2"/>
+    <text class="hint" x="550" y="200">Platz für TU Edge (später, hinten mittig)</text>
+  </g>
+</svg>
+</div>
+<ul>
+  <li>Kamera steht fest auf Augenhöhe. Du schaust ins Studio wie auf Bild 2.</li>
+  <li>Objekte stehen in einem flachen Bogen, du in der Mitte. Alles ist ohne Drehen sichtbar (Variante A, „aufgeklappt“).</li>
+  <li>Hover: Licht unter dem Objekt plus Label. Klick: Infofenster wie in deinem jetzigen Prototyp.</li>
+  <li>Ganz schlichte Formen. Die Platzhalter werden später durch richtige 3D-Modelle ersetzt.</li>
+</ul>
+</body>
+</html>
