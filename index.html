@@ -138,6 +138,8 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+        import { createSpikeballModel, pickableMeshes, partIdFromObject, applyEnvironment } from './models/spikeball-titan/spikeball-model.js';
 
         // 1. SZENE & KAMERA AUFBAUEN
         const scene = new THREE.Scene();
@@ -183,25 +185,19 @@
         floor.receiveShadow = true;
         scene.add(floor);
 
-        // 5. PLATZHALTER-OBJEKT: Das "Spikeball-Netz" (Gelber Ring)
-        // Später löschst du diesen Block und lädst stattdessen dein .glb Modell mit dem GLTFLoader!
-        const ringGeometry = new THREE.TorusGeometry(0.8, 0.05, 16, 100);
-        const ringMaterial = new THREE.MeshStandardMaterial({
-            color: 0xffcc00,
-            roughness: 0.4,
-            metalness: 0.2
-        });
-        const spikeballNet = new THREE.Mesh(ringGeometry, ringMaterial);
-        spikeballNet.position.set(0, 0.3, 0); // Leicht über dem Boden schwebend
-        spikeballNet.rotation.x = -Math.PI / 2; // Flach hinlegen
-        spikeballNet.castShadow = true;
+        // 5. SPIKEBALL-MODELL
+        // Prozedural aus dem Produktfoto rekonstruiert (img2threejs), siehe models/spikeball-titan/.
+        // Echte Szene-Hierarchie: jedes Teil (Ring, Netz, Halter, Füße, Logos) ist ein benannter Knoten.
+        const spikeball = createSpikeballModel();
+        spikeball.scale.setScalar(1.7); // Modell ist ~0.93 m breit
+        // Bildbasiertes Licht nur fuer das Modell (Boden und Studio-Look der Szene bleiben unveraendert)
+        const pmrem = new THREE.PMREMGenerator(renderer);
+        applyEnvironment(spikeball, pmrem.fromScene(new RoomEnvironment(), 0.04).texture, 0.5);
+        pmrem.dispose();
+        scene.add(spikeball);
 
-        // Wir weisen dem Objekt einen Namen zu, damit wir es beim Klicken identifizieren können
-        spikeballNet.userData = { name: "SpikeballProjekt" };
-        scene.add(spikeballNet);
-
-        // Array aller Objekte, die man anklicken kann
-        const interactableObjects = [spikeballNet];
+        // Alle Meshes des Modells sind anklickbar (jedes Teil öffnet das Projekt-Fenster)
+        const interactableObjects = pickableMeshes(spikeball);
 
         // 6. STEUERUNG (Maus-Bewegung)
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -229,7 +225,7 @@
             if (intersects.length > 0) {
                 // Treffer! Wir öffnen das HTML Modal
                 const hitObject = intersects[0].object;
-                if(hitObject.userData.name === "SpikeballProjekt") {
+                if (partIdFromObject(spikeball, hitObject) !== null) {
                     document.getElementById('project-modal').classList.add('active');
                 }
             }
@@ -245,9 +241,8 @@
             requestAnimationFrame(animate);
             controls.update(); // Wichtig für das sanfte Nachziehen der Kamera
 
-            // Optional: Wir lassen den Ring ganz langsam pulsieren oder schweben, damit er lebendig wirkt
-            const time = performance.now() * 0.001;
-            spikeballNet.position.y = 0.3 + Math.sin(time * 2) * 0.02;
+            // Das Spielfeld dreht sich ganz langsam, damit die 3D-Form sichtbar wird
+            spikeball.rotation.y = performance.now() * 0.001 * 0.15;
 
             renderer.render(scene, camera);
         }
