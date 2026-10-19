@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Immer hell, auch im System-Dunkelmodus (F-06) -->
+    <meta name="color-scheme" content="light only">
     <title>Nico Fuchs | 3D Portfolio</title>
     <style>
+        :root { color-scheme: light only; }
+
         body {
             margin: 0;
             overflow: hidden; /* Verhindert Scrollbalken */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f0f0;
+            background-color: #f8f8fa;
         }
 
         #canvas-container {
@@ -118,7 +122,7 @@
     <div id="ui-layer">
         <h1>Nico Fuchs</h1>
         <p>R&D Engineer // Interactive Portfolio</p>
-        <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke und ziehe zum Umsehen. Klicke auf den gelben Ring, das Rack, die Werkbank oder die 3D-Drucker!)</p>
+        <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke auf den gelben Ring, das Rack, die Werkbank oder die 3D-Drucker!)</p>
     </div>
 
     <!-- Das Fenster, das sich nach dem Klick öffnet -->
@@ -178,59 +182,29 @@
 
     <script type="module">
         import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+        import { createStudio, addContactShadow } from './js/studio.js';
+        import { MenuCamera } from './js/menu-camera.js';
 
-        // 1. SZENE & KAMERA AUFBAUEN
-        const scene = new THREE.Scene();
-        // Die Hintergrundfarbe der Halle (sehr helles Grau/Weiß)
-        scene.background = new THREE.Color(0xf5f5f7);
-        // Nebel sorgt dafür, dass der Raum "unendlich" wirkt, da der Boden in der Ferne verblasst
-        scene.fog = new THREE.Fog(0xf5f5f7, 10, 40);
+        // Desktop = Maus mit Hover; alles andere bekommt die Handy-Variante (kein Mitschwenken, günstigere Spiegelung)
+        const desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        // Positioniere die Kamera (wie ein Mensch, der im Raum steht)
-        camera.position.set(0, 1.5, 5);
-
-        // 2. RENDERER (Die Grafik-Engine)
+        // 1. RENDERER, SZENE, KAMERA
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Sehr weiche Schatten
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // N-02
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // 3. LICHT (Das Studio-Setup)
-        // Umgebungslicht
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
 
-        // Ein starkes Hauptlicht, das Schatten wirft
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(5, 10, 5);
-        dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 2048;
-        dirLight.shadow.mapSize.height = 2048;
-        scene.add(dirLight);
+        // 2. STUDIO: Hohlkehle, Spiegelboden, Lichtband, Softboxen, Environment-Map (js/studio.js)
+        const studio = createStudio(renderer, scene, { mobile: !desktop });
 
-        // 4. DER RAUM (Der Studio-Boden)
-        const floorGeometry = new THREE.PlaneGeometry(100, 100);
-        const floorMaterial = new THREE.MeshStandardMaterial({
-            color: 0xffffff,
-            roughness: 0.8,
-            metalness: 0.1
-        });
-        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-        floor.rotation.x = -Math.PI / 2; // Boden flach hinlegen
-        floor.receiveShadow = true;
-        scene.add(floor);
-
-        // Bildbasiertes Licht nur fuer die Modelle (Boden und Studio-Look der Szene bleiben unveraendert)
-        const pmrem = new THREE.PMREMGenerator(renderer);
-        const envMap = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-        pmrem.dispose();
+        // Menü-Kamera: fest, minimal mitschwenkend, Einstiegsfahrt mit Licht-an (js/menu-camera.js)
+        const menuCam = new MenuCamera(camera, { sway: desktop && !reducedMotion, intro: !reducedMotion });
 
         // Alle Modelle sind Draco-komprimierte GLBs aus Blender
         const dracoLoader = new DRACOLoader();
@@ -240,24 +214,37 @@
 
         // Alle Meshes der Modelle sind anklickbar (userData.project sagt, welches Fenster aufgeht)
         const interactableObjects = [];
+        // Gruppen der Objekte: daraus berechnet die Kamera ihren Bildausschnitt
+        const objectGroups = [];
 
-        // Laedt ein GLB in die Gruppe: Schatten, Umgebungslicht und Klick-Ziel fuer jedes Mesh
+        // Rahmen = alle Objekte (im Querformat plus Softboxen); bevor ein Modell da ist, zählt ein Würfel um seine Position
+        function updateFrame() {
+            const frame = new THREE.Box3();
+            const softboxes = camera.aspect >= 1 ? studio.frameObjects : [];
+            for (const group of [...objectGroups, ...softboxes]) {
+                const box = new THREE.Box3().setFromObject(group);
+                if (box.isEmpty()) box.setFromCenterAndSize(group.position, new THREE.Vector3(1, 1.2, 1)).translate(new THREE.Vector3(0, 0.6, 0));
+                frame.union(box);
+            }
+            menuCam.frame(frame);
+        }
+
+        // Laedt ein GLB in die Gruppe: Klick-Ziel fuer jedes Mesh, danach Kontaktschatten und neuer Bildausschnitt
         function loadModel(url, group, project) {
+            objectGroups.push(group);
             gltfLoader.load(url, (gltf) => {
                 gltf.scene.traverse((obj) => {
                     if (!obj.isMesh) return;
-                    obj.castShadow = true;
-                    obj.receiveShadow = true;
-                    obj.material.envMap = envMap;
-                    obj.material.envMapIntensity = 0.5;
                     obj.userData.project = project;
                     interactableObjects.push(obj);
                 });
                 group.add(gltf.scene);
+                addContactShadow(renderer, scene, gltf.scene);
+                updateFrame();
             });
         }
 
-        // 5. SPIKEBALL-MODELL (Spikeball Titan Set)
+        // 3. SPIKEBALL-MODELL (Spikeball Titan Set)
         // Aus Blender exportiert (models/spikeball-titan/source/export_glb.py), Draco-komprimiert.
         // Netz aus geknoteter Schnur, ueber den Rahmen bis unter die Unterkante gezogen; ~1 m breit.
         const spikeball = new THREE.Group();
@@ -275,7 +262,7 @@
         spikeball.add(spikeballHit);
         interactableObjects.push(spikeballHit);
 
-        // 5b. POWERLIFTING-RACK (Legend Monolift + Eleiko Powerbar, 225 kg)
+        // 3b. POWERLIFTING-RACK (Legend Monolift + Eleiko Powerbar, 225 kg)
         // Aus Blender exportiert (models/legend-monolift/source/export_glb.py), Draco-komprimiert.
         // Echte Maße: 2,4 m breit, 2,64 m hoch, Hebeseite zeigt nach +Z (zur Kamera).
         const rack = new THREE.Group();
@@ -286,7 +273,7 @@
 
         loadModel('./models/legend-monolift/web/monolift.glb', rack, 'powerlifting');
 
-        // 5c. WERKSTATT (Tischkreissaege links, Werkbank mit Aufsatz rechts)
+        // 3c. WERKSTATT (Tischkreissaege links, Werkbank mit Aufsatz rechts)
         // Aus Blender exportiert (models/woodworking/source/export_glb.py), Draco-komprimiert.
         // Echte Maße: 3,75 m breit, 2,1 m hoch.
         const workshop = new THREE.Group();
@@ -297,7 +284,7 @@
 
         loadModel('./models/woodworking/web/workshop.glb', workshop, 'woodworking');
 
-        // 5d. 3D-DRUCK (Bambu Lab H2D mit AMS links, Formlabs Form 4 mit Wash/Cure rechts)
+        // 3d. 3D-DRUCK (Bambu Lab H2D mit AMS links, Formlabs Form 4 mit Wash/Cure rechts)
         // Aus Blender exportiert (models/3d-printing/source/export_glb.py), Draco-komprimiert.
         // Echte Maße: 1,9 m breit, 1,85 m hoch (mit Wandregal).
         const printing = new THREE.Group();
@@ -308,20 +295,24 @@
 
         loadModel('./models/3d-printing/web/printtable.glb', printing, '3d-printing');
 
-        // 6. STEUERUNG (Maus-Bewegung)
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; // Macht die Kamerabewegung "schwer" und weich
-        controls.dampingFactor = 0.05;
-        controls.target.set(0, 0.6, 0); // Blick auf Hüfthöhe, damit Rack und Ring ins Bild passen
-        controls.maxPolarAngle = Math.PI / 2 - 0.05; // Verhindert, dass man unter den Boden gucken kann
-        controls.minDistance = 2; // Wie nah man ran zoomen darf
-        controls.maxDistance = 10; // Wie weit man weg zoomen darf
+        updateFrame();
 
-        // 7. RAYCASTING (Klick-Erkennung)
+        // 4. EINSTIEG: Antippen, Klicken oder eine Taste ueberspringt die Kamerafahrt (F-05)
+        let suppressClick = false;
+        const skipIntro = (event) => {
+            // der Klick, der die Fahrt abbricht, oeffnet noch kein Fenster
+            suppressClick = menuCam.inIntro && event.type === 'pointerdown';
+            menuCam.skipIntro();
+        };
+        window.addEventListener('pointerdown', skipIntro);
+        window.addEventListener('keydown', skipIntro);
+
+        // 5. RAYCASTING (Klick-Erkennung)
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
         window.addEventListener('click', (event) => {
+            if (suppressClick) { suppressClick = false; return; }
             // Umrechnung der Mauskoordinaten für Three.js (-1 bis +1)
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -341,7 +332,7 @@
             }
         });
 
-        // 8. UI LOGIK (Fenster mit dem passenden Projekt öffnen / schließen)
+        // 6. UI LOGIK (Fenster mit dem passenden Projekt öffnen / schließen)
         function openProject(id) {
             document.querySelectorAll('#project-modal .project').forEach((el) => {
                 el.classList.toggle('active', el.dataset.project === id);
@@ -353,22 +344,23 @@
             document.getElementById('project-modal').classList.remove('active');
         });
 
-        // 9. ANIMATION LOOP (Sorgt dafür, dass das Bild gezeichnet wird)
+        // 7. ANIMATION LOOP (Sorgt dafür, dass das Bild gezeichnet wird)
+        const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
-            controls.update(); // Wichtig für das sanfte Nachziehen der Kamera
-
-            // Das Spielfeld dreht sich ganz langsam, damit die 3D-Form sichtbar wird
-            spikeball.rotation.y = performance.now() * 0.001 * 0.15;
-
+            const dt = Math.min(clock.getDelta(), 0.1);
+            menuCam.update(dt);
+            // Licht geht waehrend der Fahrt an, etwas verzoegert gegenueber der Bewegung
+            studio.setLight(THREE.MathUtils.smoothstep(menuCam.introT, 0.05, 0.7));
             renderer.render(scene, camera);
         }
 
-        // Auf Fenstergrößenänderung reagieren
+        // Auf Fenstergrößenänderung reagieren: neues Seitenverhältnis, neuer Abstand (F-04)
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            updateFrame();
         });
 
         animate();
