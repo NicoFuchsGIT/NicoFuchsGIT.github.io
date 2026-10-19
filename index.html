@@ -118,7 +118,7 @@
     <div id="ui-layer">
         <h1>Nico Fuchs</h1>
         <p>R&D Engineer // Interactive Portfolio</p>
-        <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke und ziehe zum Umsehen. Klicke auf den gelben Ring, das Rack oder die Werkbank!)</p>
+        <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke und ziehe zum Umsehen. Klicke auf den gelben Ring, das Rack, die Werkbank oder die 3D-Drucker!)</p>
     </div>
 
     <!-- Das Fenster, das sich nach dem Klick öffnet -->
@@ -148,6 +148,18 @@
         </p>
         <p style="color: #333; line-height: 1.6; font-family: inherit; margin-top: 10px;">
             <strong>Modell:</strong> Prozedural in Blender gebaut (Python), Holzmaserung und Lochwand als Textur gebacken.
+        </p>
+        </div>
+        <div class="project" data-project="3d-printing">
+        <div class="tag">3D_PRINTING</div>
+        <div class="tag">BLENDER</div>
+        <h2>3D-Druck</h2>
+        <p style="color: #333; line-height: 1.6; font-family: inherit;">
+            Drucktisch mit einem Bambu Lab H2D (FDM, mit AMS 2 Pro für vier Filamente) und einem
+            Formlabs Form 4 (Resin), daneben Form Wash und Form Cure für die Nachbearbeitung.
+        </p>
+        <p style="color: #333; line-height: 1.6; font-family: inherit; margin-top: 10px;">
+            <strong>Modell:</strong> Prozedural in Blender gebaut (Python), Holzmaserung als Textur gebacken.
         </p>
         </div>
         <div class="project" data-project="powerlifting">
@@ -284,6 +296,17 @@
         scene.add(workshop);
 
         loadModel('./models/woodworking/web/workshop.glb', workshop, 'woodworking');
+
+        // 5d. 3D-DRUCK (Bambu Lab H2D mit AMS links, Formlabs Form 4 mit Wash/Cure rechts)
+        // Aus Blender exportiert (models/3d-printing/source/export_glb.py), Draco-komprimiert.
+        // Echte Maße: 1,9 m breit, 1,85 m hoch (mit Wandregal).
+        const printing = new THREE.Group();
+        printing.position.set(3.4, 0, -1.7);
+        printing.rotation.y = -0.5; // zur Raummitte gedreht
+        printing.scale.setScalar(0.6);
+        scene.add(printing);
+
+        loadModel('./models/3d-printing/web/printtable.glb', printing, '3d-printing');
 
         // 6. STEUERUNG (Maus-Bewegung)
         const controls = new OrbitControls(camera, renderer.domElement);
