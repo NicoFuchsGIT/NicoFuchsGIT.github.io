@@ -1,7 +1,34 @@
 import * as THREE from 'three';
 import { createSpikeballTitanRoundnetModel } from './_factory';
 
-export { createSpikeballTitanRoundnetModel as createSpikeballModel };
+/** Instanced cord groups that belong to the net (one draw call each, not named components). */
+const NET_CLUSTERS = ['net-radial-cords', 'rim-wrap-cords'];
+
+/**
+ * Build the model without its net: the net disc mesh, the concentric net rings, the edge binding
+ * and the radial / rim-wrap cords are dropped. The disc's pivot ("root") stays, because every
+ * other part hangs below it.
+ */
+export function createSpikeballModel(...args: Parameters<typeof createSpikeballTitanRoundnetModel>) {
+  const model = createSpikeballTitanRoundnetModel(...args);
+  const { nodes, meshes, colliders, destructionGroups } = runtimeOf(model);
+  const drop = (o: THREE.Object3D | undefined) => o?.parent?.remove(o);
+
+  drop(meshes['root']);
+  delete meshes['root'];
+  delete colliders['root'];
+  for (const id of Object.keys(nodes).filter((id) => id.startsWith('net-'))) {
+    drop(nodes[id]);
+    delete nodes[id];
+    delete meshes[id];
+    delete colliders[id];
+  }
+  delete destructionGroups['net'];
+  const clusters: THREE.Object3D[] = [];
+  model.traverse((o) => { if (NET_CLUSTERS.includes(o.name)) clusters.push(o); });
+  clusters.forEach(drop);
+  return model;
+}
 
 type Runtime = {
   nodes: Record<string, THREE.Object3D>;
