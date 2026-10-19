@@ -12,6 +12,19 @@ blender -b -P models/legend-monolift/source/build_monolift.py
 Writes `monolift.blend` and `render_{iso,front,bar,scan}.png` next to the script's working directory.
 The script asserts the loaded mass is 225 kg (25 kg bar + 25 + 50*N rule from the Barbellscan load protocol, see `N`) and that plates fit between the uprights.
 
+## Web model (`web/monolift.glb`)
+
+Used by `index.html` (GLTFLoader + DRACOLoader). Rebuild from the `.blend`:
+
+```
+blender -b -P models/legend-monolift/source/export_glb.py      # or: python export_glb.py with the bpy wheel
+npx @gltf-transform/cli draco models/legend-monolift/web/monolift-raw.glb models/legend-monolift/web/monolift.glb
+```
+
+The export drops floor, wall, lights and cameras, joins the parts per material (~20 meshes) and writes
+Y-up metres with the lifter side facing +Z. 2.2 MB raw, ~210 KB with Draco. Procedural node materials
+(knurl bump, millimetre paper grid) export as flat colours.
+
 ## Contents
 
 - Legend Monolift (Model 3908 layout): uprights with 25 holes, pegs, J-hooks at +-371 mm, base frame.
