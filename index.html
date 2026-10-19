@@ -118,7 +118,7 @@
     <div id="ui-layer">
         <h1>Nico Fuchs</h1>
         <p>R&D Engineer // Interactive Portfolio</p>
-        <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke und ziehe zum Umsehen. Klicke auf den gelben Ring oder das Rack!)</p>
+        <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke und ziehe zum Umsehen. Klicke auf den gelben Ring, das Rack oder die Werkbank!)</p>
     </div>
 
     <!-- Das Fenster, das sich nach dem Klick öffnet -->
@@ -136,6 +136,18 @@
         </p>
         <p style="color: #333; line-height: 1.6; font-family: inherit; margin-top: 10px;">
             <strong>Hardware:</strong> Komplett selbst konstruierte Sensor-Integration und Signalverarbeitungspipeline.
+        </p>
+        </div>
+        <div class="project" data-project="woodworking">
+        <div class="tag">WOODWORKING</div>
+        <div class="tag">BLENDER</div>
+        <h2>Werkstatt</h2>
+        <p style="color: #333; line-height: 1.6; font-family: inherit;">
+            Werkbank aus Nussbaum mit Aufsatz, Lochwand und Schubladenschrank, daneben eine
+            Tischkreissäge in Schrank-Bauweise. Beide Arbeitsflächen liegen auf 92 cm Höhe.
+        </p>
+        <p style="color: #333; line-height: 1.6; font-family: inherit; margin-top: 10px;">
+            <strong>Modell:</strong> Prozedural in Blender gebaut (Python), Holzmaserung und Lochwand als Textur gebacken.
         </p>
         </div>
         <div class="project" data-project="powerlifting">
@@ -208,7 +220,7 @@
         const envMap = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
         pmrem.dispose();
 
-        // Beide Modelle sind Draco-komprimierte GLBs aus Blender
+        // Alle Modelle sind Draco-komprimierte GLBs aus Blender
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
         const gltfLoader = new GLTFLoader();
@@ -255,12 +267,23 @@
         // Aus Blender exportiert (models/legend-monolift/source/export_glb.py), Draco-komprimiert.
         // Echte Maße: 2,4 m breit, 2,64 m hoch, Hebeseite zeigt nach +Z (zur Kamera).
         const rack = new THREE.Group();
-        rack.position.set(-1.8, 0, -0.8);
+        rack.position.set(-1.5, 0, -0.8);
         rack.rotation.y = 0.35; // leicht zur Raummitte gedreht
         rack.scale.setScalar(0.6);
         scene.add(rack);
 
         loadModel('./models/legend-monolift/web/monolift.glb', rack, 'powerlifting');
+
+        // 5c. WERKSTATT (Tischkreissaege links, Werkbank mit Aufsatz rechts)
+        // Aus Blender exportiert (models/woodworking/source/export_glb.py), Draco-komprimiert.
+        // Echte Maße: 3,75 m breit, 2,1 m hoch.
+        const workshop = new THREE.Group();
+        workshop.position.set(-3.7, 0, -1.9);
+        workshop.rotation.y = 0.55; // zur Raummitte gedreht
+        workshop.scale.setScalar(0.5);
+        scene.add(workshop);
+
+        loadModel('./models/woodworking/web/workshop.glb', workshop, 'woodworking');
 
         // 6. STEUERUNG (Maus-Bewegung)
         const controls = new OrbitControls(camera, renderer.domElement);
