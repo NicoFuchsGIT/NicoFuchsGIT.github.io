@@ -1,0 +1,163 @@
+{
+  "_readme": "Alle Objekte im Studio. Felder und Beispiele: content/README.md",
+  "objects": [
+    {
+      "id": "woodworking",
+      "visible": true,
+      "position": [-4.3, -1.7],
+      "rotation": 35,
+      "scale": 0.5,
+      "model": "models/woodworking/web/workshop.glb",
+      "placeholder": "box",
+      "window": "model+text",
+      "title": { "en": "Workshop", "de": "Werkstatt" },
+      "tags": ["WOODWORKING", "BLENDER"],
+      "text": {
+        "en": [
+          "Walnut workbench with a hutch, pegboard and drawer cabinet, next to a cabinet table saw. Both work surfaces sit at 92 cm.",
+          "Model: built procedurally in Blender (Python), wood grain and pegboard baked into textures."
+        ],
+        "de": [
+          "Werkbank aus Nussbaum mit Aufsatz, Lochwand und Schubladenschrank, daneben eine Tischkreissäge in Schrank-Bauweise. Beide Arbeitsflächen liegen auf 92 cm Höhe.",
+          "Modell: Prozedural in Blender gebaut (Python), Holzmaserung und Lochwand als Textur gebacken."
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": "3d-printing",
+      "visible": true,
+      "position": [3.75, -2.8],
+      "rotation": -20,
+      "scale": 0.6,
+      "model": "models/3d-printing/web/printtable.glb",
+      "placeholder": "box",
+      "window": "text+links",
+      "title": { "en": "3D Printing", "de": "3D-Druck" },
+      "tags": ["3D_PRINTING", "BLENDER"],
+      "text": {
+        "en": [
+          "Print table with a Bambu Lab H2D (FDM, with AMS 2 Pro for four filaments) and a Formlabs Form 4 (resin), plus Form Wash and Form Cure for post-processing.",
+          "Model: built procedurally in Blender (Python), wood grain baked into a texture."
+        ],
+        "de": [
+          "Drucktisch mit einem Bambu Lab H2D (FDM, mit AMS 2 Pro für vier Filamente) und einem Formlabs Form 4 (Resin), daneben Form Wash und Form Cure für die Nachbearbeitung.",
+          "Modell: Prozedural in Blender gebaut (Python), Holzmaserung als Textur gebacken."
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": "powerlifting",
+      "visible": true,
+      "position": [-1.8, -0.7],
+      "rotation": 20,
+      "scale": 0.6,
+      "model": "models/legend-monolift/web/monolift.glb",
+      "placeholder": "box",
+      "window": "text+links",
+      "title": { "en": "Barbellscan", "de": "Barbellscan" },
+      "tags": ["COMPUTER_VISION", "POWERLIFTING"],
+      "text": {
+        "en": [
+          "Camera-based measurement of barbell bending under load. Test setup: Legend Monolift with an Eleiko Powerbar and 225 kg, yellow markers on the bar ends and an ArUco marker as reference."
+        ],
+        "de": [
+          "Messung der Hantelstangen-Durchbiegung unter Last per Kamera. Testaufbau: Legend Monolift mit Eleiko Powerbar und 225 kg, gelbe Marker an den Hantelenden und ein ArUco-Marker als Referenz."
+        ]
+      },
+      "links": [
+        { "label": { "en": "Barbellscan on GitHub", "de": "Barbellscan auf GitHub" }, "url": "https://github.com/NicoFuchsGIT/Barbellscan" }
+      ]
+    },
+    {
+      "id": "nico",
+      "visible": true,
+      "position": [0, 0.4],
+      "rotation": 0,
+      "scale": 1,
+      "model": "",
+      "placeholder": "avatar",
+      "avatar": { "height": 1.1, "skin": "#e0b89a", "hair": "#3b2a20", "top": "#2b2b2e", "bottom": "#4a5160", "shoes": "#f2f2f2" },
+      "window": "pdf",
+      "title": { "en": "Nico Fuchs · CV", "de": "Nico Fuchs · Lebenslauf" },
+      "tags": ["CV"],
+      "text": {
+        "en": ["R&D Engineer: sports engineering, motorsport, data science. The CV follows here as a PDF."],
+        "de": ["R&D Engineer: Sports Engineering, Rennsport, Data Science. Der Lebenslauf folgt hier als PDF."]
+      },
+      "links": []
+    },
+    {
+      "id": "spikeball",
+      "visible": true,
+      "position": [1.5, -0.3],
+      "rotation": 0,
+      "scale": 1.6,
+      "model": "models/spikeball-titan/web/spikeball.glb",
+      "placeholder": "box",
+      "window": "media+text+download",
+      "title": { "en": "Spikeball Impact Localization", "de": "Spikeball Impact Localization" },
+      "tags": ["MACHINE_LEARNING", "NI_DAQ", "SENSORS"],
+      "text": {
+        "en": [
+          "An acoustic localization system for Spikeball. Piezoelectric sensors and machine-learning algorithms compute the exact spot where the ball hits the net.",
+          "Hardware: sensor integration and signal-processing pipeline designed and built from scratch."
+        ],
+        "de": [
+          "Entwicklung eines akustischen Lokalisierungssystems für Spikeball. Durch den Einsatz von piezoelektrischen Sensoren und Machine-Learning-Algorithmen wird der exakte Einschlagort des Balls auf dem Netz berechnet.",
+          "Hardware: Komplett selbst konstruierte Sensor-Integration und Signalverarbeitungspipeline."
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": "suncafe",
+      "visible": true,
+      "position": [2.65, -0.2],
+      "rotation": -15,
+      "scale": 1,
+      "model": "",
+      "placeholder": "suncafe",
+      "window": "text+links",
+      "title": { "en": "SunCafe", "de": "SunCafe" },
+      "tags": ["SUNCAFE"],
+      "text": {
+        "en": ["Placeholder: the SunCafe project description follows."],
+        "de": ["Platzhalter: Die Beschreibung des SunCafe-Projekts folgt."]
+      },
+      "links": []
+    },
+    {
+      "id": "desk",
+      "visible": true,
+      "position": [4.6, -1.5],
+      "rotation": -35,
+      "scale": 1,
+      "model": "",
+      "placeholder": "desk",
+      "window": "text+links",
+      "title": { "en": "Data Science & Motorsport", "de": "Data Science & Motorsport" },
+      "tags": ["PYTHON", "MATLAB", "NI_DAQ", "ML"],
+      "text": {
+        "en": ["Placeholder: text, skill list and repo links follow."],
+        "de": ["Platzhalter: Text, Skill-Liste und Repo-Links folgen."]
+      },
+      "links": []
+    },
+    {
+      "id": "tu-edge",
+      "visible": false,
+      "position": [0, -3.0],
+      "rotation": 0,
+      "scale": 1,
+      "model": "",
+      "placeholder": "car",
+      "window": "text+links",
+      "title": { "en": "TU Edge", "de": "TU Edge" },
+      "tags": ["TU_WIEN_RACING"],
+      "text": { "en": ["Placeholder."], "de": ["Platzhalter."] },
+      "links": []
+    }
+  ]
+}
