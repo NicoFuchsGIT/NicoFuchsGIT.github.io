@@ -158,7 +158,6 @@
         import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-        import { createSpikeballModel, pickableMeshes, partIdFromObject, applyEnvironment } from './models/spikeball-titan/spikeball-model.js';
 
         // 1. SZENE & KAMERA AUFBAUEN
         const scene = new THREE.Scene();
@@ -204,22 +203,53 @@
         floor.receiveShadow = true;
         scene.add(floor);
 
-        // 5. SPIKEBALL-MODELL
-        // Prozedural aus dem Produktfoto rekonstruiert (img2threejs), siehe models/spikeball-titan/.
-        // Echte Szene-Hierarchie: jedes Teil (Ring, Halter, Füße, Logos) ist ein benannter Knoten.
-        // Das Netz ist vorerst entfernt (createSpikeballModel baut das Modell ohne Netz).
-        const spikeball = createSpikeballModel();
-        spikeball.scale.setScalar(1.7); // Modell ist ~0.93 m breit
-        // Bildbasiertes Licht nur fuer das Modell (Boden und Studio-Look der Szene bleiben unveraendert)
+        // Bildbasiertes Licht nur fuer die Modelle (Boden und Studio-Look der Szene bleiben unveraendert)
         const pmrem = new THREE.PMREMGenerator(renderer);
         const envMap = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
         pmrem.dispose();
-        applyEnvironment(spikeball, envMap, 0.5);
+
+        // Beide Modelle sind Draco-komprimierte GLBs aus Blender
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
+        const gltfLoader = new GLTFLoader();
+        gltfLoader.setDRACOLoader(dracoLoader);
+
+        // Alle Meshes der Modelle sind anklickbar (userData.project sagt, welches Fenster aufgeht)
+        const interactableObjects = [];
+
+        // Laedt ein GLB in die Gruppe: Schatten, Umgebungslicht und Klick-Ziel fuer jedes Mesh
+        function loadModel(url, group, project) {
+            gltfLoader.load(url, (gltf) => {
+                gltf.scene.traverse((obj) => {
+                    if (!obj.isMesh) return;
+                    obj.castShadow = true;
+                    obj.receiveShadow = true;
+                    obj.material.envMap = envMap;
+                    obj.material.envMapIntensity = 0.5;
+                    obj.userData.project = project;
+                    interactableObjects.push(obj);
+                });
+                group.add(gltf.scene);
+            });
+        }
+
+        // 5. SPIKEBALL-MODELL (Spikeball Titan Set)
+        // Aus Blender exportiert (models/spikeball-titan/source/export_glb.py), Draco-komprimiert.
+        // Netz aus geknoteter Schnur, ueber den Rahmen bis unter die Unterkante gezogen; ~1 m breit.
+        const spikeball = new THREE.Group();
+        spikeball.scale.setScalar(1.6);
         spikeball.position.x = 1.3;
         scene.add(spikeball);
-
-        // Alle Meshes des Modells sind anklickbar (jedes Teil öffnet das Projekt-Fenster)
-        const interactableObjects = pickableMeshes(spikeball);
+        loadModel('./models/spikeball-titan/web/spikeball.glb', spikeball, 'spikeball');
+        // Unsichtbare Klickflaeche ueber dem Ring, damit auch Klicks durch die Netzmaschen treffen
+        const spikeballHit = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.5, 0.5, 0.22, 32),
+            new THREE.MeshBasicMaterial({ visible: false })
+        );
+        spikeballHit.position.y = 0.11;
+        spikeballHit.userData.project = 'spikeball';
+        spikeball.add(spikeballHit);
+        interactableObjects.push(spikeballHit);
 
         // 5b. POWERLIFTING-RACK (Legend Monolift + Eleiko Powerbar, 225 kg)
         // Aus Blender exportiert (models/legend-monolift/source/export_glb.py), Draco-komprimiert.
@@ -230,22 +260,7 @@
         rack.scale.setScalar(0.6);
         scene.add(rack);
 
-        const dracoLoader = new DRACOLoader();
-        dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
-        const gltfLoader = new GLTFLoader();
-        gltfLoader.setDRACOLoader(dracoLoader);
-        gltfLoader.load('./models/legend-monolift/web/monolift.glb', (gltf) => {
-            gltf.scene.traverse((obj) => {
-                if (!obj.isMesh) return;
-                obj.castShadow = true;
-                obj.receiveShadow = true;
-                obj.material.envMap = envMap;
-                obj.material.envMapIntensity = 0.5;
-                obj.userData.project = 'powerlifting';
-                interactableObjects.push(obj);
-            });
-            rack.add(gltf.scene);
-        });
+        loadModel('./models/legend-monolift/web/monolift.glb', rack, 'powerlifting');
 
         // 6. STEUERUNG (Maus-Bewegung)
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -276,8 +291,6 @@
                 const hitObject = intersects[0].object;
                 if (hitObject.userData.project) {
                     openProject(hitObject.userData.project);
-                } else if (partIdFromObject(spikeball, hitObject) !== null) {
-                    openProject('spikeball');
                 }
             }
         });
