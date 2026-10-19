@@ -10,7 +10,7 @@ blender -b -P models/legend-monolift/source/build_monolift.py
 ```
 
 Writes `monolift.blend` and `render_{iso,front,bar,scan}.png` next to the script's working directory.
-The script asserts the loaded mass is 225 kg (25 kg bar + 4 x 50 kg... see `N` in the script) and that plates fit between the uprights.
+The script asserts the loaded mass is 225 kg (25 kg bar + 25 + 50*N rule from the Barbellscan load protocol, see `N`) and that plates fit between the uprights.
 
 ## Contents
 
