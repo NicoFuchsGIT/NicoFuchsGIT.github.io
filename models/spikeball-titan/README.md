@@ -12,20 +12,28 @@ import { createSpikeballModel, pickableMeshes, partIdFromObject, setExplode, app
 
 const model = createSpikeballModel();   // THREE.Group, ~0.93 m wide, feet on y = 0
 scene.add(model);
-pickableMeshes(model);                  // raycast targets (58 meshes)
+pickableMeshes(model);                  // raycast targets
 partIdFromObject(model, hit.object);    // -> "foot-s", "bracket-wall-n", "rim-band", ...
 setExplode(model, 0..1);                // scales the part layout about the centre
 model.userData.sculptRuntime;           // nodes / meshes / sockets / colliders / destructionGroups
 ```
 
-Textures are loaded from `pbr/` (relative to the page URL). 55 named components, ~41k triangles,
-59 draw calls.
+Textures are loaded from `pbr/` (relative to the page URL). 48 named components / 48 meshes without the net
+(the generated factory alone: 55 components, ~41k triangles, 59 draw calls).
+
+## Net removed
+
+`createSpikeballModel()` (in `source/entry.ts`) builds the model **without the net**: the net disc
+mesh, the concentric `net-ring-*` cords, `net-edge-binding` and the instanced `net-radial-cords` /
+`rim-wrap-cords` are removed after the generated factory runs. The `root` pivot stays (every other
+part hangs below it); `createObjectModel.ts` and the spec are unchanged, so the old net can be
+restored by dropping that wrapper. The renders in `review/` still show the net.
 
 ## What is faithful, what is not
 
 - Faithful: ring + wall proportions, 4 plate brackets and 4 wedge feet at 90 degrees, yellow/black
   split (colours measured from the photo), pose, moulded-plastic response.
-- Stylised: the net is a web of rings and radial cords (the photo has a diamond mesh); lettering
+- Stylised: lettering
   (`Spikeball`, `TITAN`, the S roundel) is built from blocks/ring, not real glyphs.
 - Inferred (not visible in the photo): the far feet and the underside, from 4-fold symmetry.
 - Silhouette IoU is measured against a hole-filled version of the reference (the photographed net

@@ -206,7 +206,8 @@
 
         // 5. SPIKEBALL-MODELL
         // Prozedural aus dem Produktfoto rekonstruiert (img2threejs), siehe models/spikeball-titan/.
-        // Echte Szene-Hierarchie: jedes Teil (Ring, Netz, Halter, Füße, Logos) ist ein benannter Knoten.
+        // Echte Szene-Hierarchie: jedes Teil (Ring, Halter, Füße, Logos) ist ein benannter Knoten.
+        // Das Netz ist vorerst entfernt (createSpikeballModel baut das Modell ohne Netz).
         const spikeball = createSpikeballModel();
         spikeball.scale.setScalar(1.7); // Modell ist ~0.93 m breit
         // Bildbasiertes Licht nur fuer das Modell (Boden und Studio-Look der Szene bleiben unveraendert)
