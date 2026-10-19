@@ -62,8 +62,12 @@
             border: 1px solid rgba(0,0,0,0.05);
         }
 
-        #project-modal .project { display: none; }
-        #project-modal .project.active { display: block; }
+        #project-content p {
+            color: #333;
+            line-height: 1.6;
+            font-family: inherit;
+            margin-top: 10px;
+        }
 
         #project-modal.active {
             display: block;
@@ -122,70 +126,22 @@
     <div id="ui-layer">
         <h1>Nico Fuchs</h1>
         <p>R&D Engineer // Interactive Portfolio</p>
-        <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke auf den gelben Ring, das Rack, die Werkbank oder die 3D-Drucker!)</p>
+        <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke auf ein Objekt!)</p>
     </div>
 
     <!-- Das Fenster, das sich nach dem Klick öffnet -->
     <div id="project-modal">
         <span class="close-btn" id="close-modal">×</span>
-        <div class="project" data-project="spikeball">
-        <div class="tag">MACHINE_LEARNING</div>
-        <div class="tag">NI_DAQ</div>
-        <div class="tag">SENSORIK</div>
-        <h2>Spikeball Impact Localization</h2>
-        <p style="color: #333; line-height: 1.6; font-family: inherit;">
-            Entwicklung eines akustischen Lokalisierungssystems für Spikeball.
-            Durch den Einsatz von piezoelektrischen Sensoren und Machine-Learning-Algorithmen
-            wird der exakte Einschlagort des Balls auf dem Netz berechnet.
-        </p>
-        <p style="color: #333; line-height: 1.6; font-family: inherit; margin-top: 10px;">
-            <strong>Hardware:</strong> Komplett selbst konstruierte Sensor-Integration und Signalverarbeitungspipeline.
-        </p>
-        </div>
-        <div class="project" data-project="woodworking">
-        <div class="tag">WOODWORKING</div>
-        <div class="tag">BLENDER</div>
-        <h2>Werkstatt</h2>
-        <p style="color: #333; line-height: 1.6; font-family: inherit;">
-            Werkbank aus Nussbaum mit Aufsatz, Lochwand und Schubladenschrank, daneben eine
-            Tischkreissäge in Schrank-Bauweise. Beide Arbeitsflächen liegen auf 92 cm Höhe.
-        </p>
-        <p style="color: #333; line-height: 1.6; font-family: inherit; margin-top: 10px;">
-            <strong>Modell:</strong> Prozedural in Blender gebaut (Python), Holzmaserung und Lochwand als Textur gebacken.
-        </p>
-        </div>
-        <div class="project" data-project="3d-printing">
-        <div class="tag">3D_PRINTING</div>
-        <div class="tag">BLENDER</div>
-        <h2>3D-Druck</h2>
-        <p style="color: #333; line-height: 1.6; font-family: inherit;">
-            Drucktisch mit einem Bambu Lab H2D (FDM, mit AMS 2 Pro für vier Filamente) und einem
-            Formlabs Form 4 (Resin), daneben Form Wash und Form Cure für die Nachbearbeitung.
-        </p>
-        <p style="color: #333; line-height: 1.6; font-family: inherit; margin-top: 10px;">
-            <strong>Modell:</strong> Prozedural in Blender gebaut (Python), Holzmaserung als Textur gebacken.
-        </p>
-        </div>
-        <div class="project" data-project="powerlifting">
-        <div class="tag">COMPUTER_VISION</div>
-        <div class="tag">POWERLIFTING</div>
-        <h2>Barbellscan</h2>
-        <p style="color: #333; line-height: 1.6; font-family: inherit;">
-            Messung der Hantelstangen-Durchbiegung unter Last per Kamera. Testaufbau: Legend Monolift
-            mit Eleiko Powerbar und 225 kg, gelbe Marker an den Hantelenden und ein ArUco-Marker als Referenz.
-        </p>
-        <p style="color: #333; line-height: 1.6; font-family: inherit; margin-top: 10px;">
-            <a href="https://github.com/NicoFuchsGIT/Barbellscan" target="_blank" rel="noopener">Barbellscan auf GitHub</a>
-        </p>
-        </div>
+        <div id="project-content"></div>
     </div>
 
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-        import { createStudio, addContactShadow } from './js/studio.js';
+        import { createStudio } from './js/studio.js';
         import { MenuCamera } from './js/menu-camera.js';
+        import { loadContent, createObjects } from './js/objects.js';
 
         // Desktop = Maus mit Hover; alles andere bekommt die Handy-Variante (kein Mitschwenken, günstigere Spiegelung)
         const desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -212,89 +168,21 @@
         const gltfLoader = new GLTFLoader();
         gltfLoader.setDRACOLoader(dracoLoader);
 
-        // Alle Meshes der Modelle sind anklickbar (userData.project sagt, welches Fenster aufgeht)
-        const interactableObjects = [];
-        // Gruppen der Objekte: daraus berechnet die Kamera ihren Bildausschnitt
-        const objectGroups = [];
+        // 3. OBJEKTE: alles aus content/objects.json (js/objects.js)
+        const content = await loadContent('./content/objects.json');
+        const lang = document.documentElement.lang === 'de' ? 'de' : 'en'; // Umschalter kommt mit F-60
+        let objectGroups = []; // vor createObjects, weil das schon beim Bauen updateFrame aufruft
+        const objects = createObjects(scene, renderer, content.objects, gltfLoader, updateFrame);
+        objectGroups = objects.groups;
+        const hitTargets = objects.hitTargets;
 
-        // Rahmen = alle Objekte (im Querformat plus Softboxen); bevor ein Modell da ist, zählt ein Würfel um seine Position
+        // Rahmen = alle Objekte (im Querformat plus Softboxen)
         function updateFrame() {
             const frame = new THREE.Box3();
             const softboxes = camera.aspect >= 1 ? studio.frameObjects : [];
-            for (const group of [...objectGroups, ...softboxes]) {
-                const box = new THREE.Box3().setFromObject(group);
-                if (box.isEmpty()) box.setFromCenterAndSize(group.position, new THREE.Vector3(1, 1.2, 1)).translate(new THREE.Vector3(0, 0.6, 0));
-                frame.union(box);
-            }
+            for (const group of [...objectGroups, ...softboxes]) frame.union(new THREE.Box3().setFromObject(group));
             menuCam.frame(frame);
         }
-
-        // Laedt ein GLB in die Gruppe: Klick-Ziel fuer jedes Mesh, danach Kontaktschatten und neuer Bildausschnitt
-        function loadModel(url, group, project) {
-            objectGroups.push(group);
-            gltfLoader.load(url, (gltf) => {
-                gltf.scene.traverse((obj) => {
-                    if (!obj.isMesh) return;
-                    obj.userData.project = project;
-                    interactableObjects.push(obj);
-                });
-                group.add(gltf.scene);
-                addContactShadow(renderer, scene, gltf.scene);
-                updateFrame();
-            });
-        }
-
-        // 3. SPIKEBALL-MODELL (Spikeball Titan Set)
-        // Aus Blender exportiert (models/spikeball-titan/source/export_glb.py), Draco-komprimiert.
-        // Netz aus geknoteter Schnur, ueber den Rahmen bis unter die Unterkante gezogen; ~1 m breit.
-        const spikeball = new THREE.Group();
-        spikeball.scale.setScalar(1.6);
-        spikeball.position.x = 1.3;
-        scene.add(spikeball);
-        loadModel('./models/spikeball-titan/web/spikeball.glb', spikeball, 'spikeball');
-        // Unsichtbare Klickflaeche ueber dem Ring, damit auch Klicks durch die Netzmaschen treffen
-        const spikeballHit = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.5, 0.5, 0.22, 32),
-            new THREE.MeshBasicMaterial({ visible: false })
-        );
-        spikeballHit.position.y = 0.11;
-        spikeballHit.userData.project = 'spikeball';
-        spikeball.add(spikeballHit);
-        interactableObjects.push(spikeballHit);
-
-        // 3b. POWERLIFTING-RACK (Legend Monolift + Eleiko Powerbar, 225 kg)
-        // Aus Blender exportiert (models/legend-monolift/source/export_glb.py), Draco-komprimiert.
-        // Echte Maße: 2,4 m breit, 2,64 m hoch, Hebeseite zeigt nach +Z (zur Kamera).
-        const rack = new THREE.Group();
-        rack.position.set(-1.5, 0, -0.8);
-        rack.rotation.y = 0.35; // leicht zur Raummitte gedreht
-        rack.scale.setScalar(0.6);
-        scene.add(rack);
-
-        loadModel('./models/legend-monolift/web/monolift.glb', rack, 'powerlifting');
-
-        // 3c. WERKSTATT (Tischkreissaege links, Werkbank mit Aufsatz rechts)
-        // Aus Blender exportiert (models/woodworking/source/export_glb.py), Draco-komprimiert.
-        // Echte Maße: 3,75 m breit, 2,1 m hoch.
-        const workshop = new THREE.Group();
-        workshop.position.set(-3.7, 0, -1.9);
-        workshop.rotation.y = 0.55; // zur Raummitte gedreht
-        workshop.scale.setScalar(0.5);
-        scene.add(workshop);
-
-        loadModel('./models/woodworking/web/workshop.glb', workshop, 'woodworking');
-
-        // 3d. 3D-DRUCK (Bambu Lab H2D mit AMS links, Formlabs Form 4 mit Wash/Cure rechts)
-        // Aus Blender exportiert (models/3d-printing/source/export_glb.py), Draco-komprimiert.
-        // Echte Maße: 1,9 m breit, 1,85 m hoch (mit Wandregal).
-        const printing = new THREE.Group();
-        printing.position.set(3.4, 0, -1.7);
-        printing.rotation.y = -0.5; // zur Raummitte gedreht
-        printing.scale.setScalar(0.6);
-        scene.add(printing);
-
-        loadModel('./models/3d-printing/web/printtable.glb', printing, '3d-printing');
-
         updateFrame();
 
         // 4. EINSTIEG: Antippen, Klicken oder eine Taste ueberspringt die Kamerafahrt (F-05)
@@ -321,22 +209,34 @@
             raycaster.setFromCamera(mouse, camera);
 
             // Prüfen, ob der Strahl unsere interaktiven Objekte trifft
-            const intersects = raycaster.intersectObjects(interactableObjects);
+            const intersects = raycaster.intersectObjects(hitTargets);
 
             if (intersects.length > 0) {
                 // Treffer! Wir öffnen das HTML Modal
-                const hitObject = intersects[0].object;
-                if (hitObject.userData.project) {
-                    openProject(hitObject.userData.project);
-                }
+                openProject(intersects[0].object.userData.id);
             }
         });
 
         // 6. UI LOGIK (Fenster mit dem passenden Projekt öffnen / schließen)
         function openProject(id) {
-            document.querySelectorAll('#project-modal .project').forEach((el) => {
-                el.classList.toggle('active', el.dataset.project === id);
-            });
+            const def = content.objects.find((o) => o.id === id);
+            const el = document.getElementById('project-content');
+            el.replaceChildren();
+            const add = (tag, text, parent = el) => {
+                const node = document.createElement(tag);
+                node.textContent = text;
+                parent.appendChild(node);
+                return node;
+            };
+            for (const tag of def.tags ?? []) add('div', tag).className = 'tag';
+            add('h2', def.title[lang]);
+            for (const text of def.text?.[lang] ?? []) add('p', text);
+            for (const link of def.links ?? []) {
+                const a = add('a', link.label[lang], add('p', ''));
+                a.href = link.url;
+                a.target = '_blank';
+                a.rel = 'noopener';
+            }
             document.getElementById('project-modal').classList.add('active');
         }
 
