@@ -11,6 +11,7 @@
       "placeholder": "box",
       "window": "model+text",
       "title": { "en": "Workshop", "de": "Werkstatt" },
+      "label": { "en": "Workshop", "de": "Werkstatt" },
       "tags": ["WOODWORKING", "BLENDER"],
       "text": {
         "en": [
@@ -34,6 +35,7 @@
       "placeholder": "box",
       "window": "text+links",
       "title": { "en": "3D Printing", "de": "3D-Druck" },
+      "label": { "en": "3D Printing", "de": "3D-Druck" },
       "tags": ["3D_PRINTING", "BLENDER"],
       "text": {
         "en": [
@@ -57,6 +59,7 @@
       "placeholder": "box",
       "window": "text+links",
       "title": { "en": "Barbellscan", "de": "Barbellscan" },
+      "label": { "en": "Powerlifting", "de": "Powerlifting" },
       "tags": ["COMPUTER_VISION", "POWERLIFTING"],
       "text": {
         "en": [
@@ -81,6 +84,7 @@
       "avatar": { "height": 1.1, "skin": "#e0b89a", "hair": "#3b2a20", "top": "#2b2b2e", "bottom": "#4a5160", "shoes": "#f2f2f2" },
       "window": "pdf",
       "title": { "en": "Nico Fuchs · CV", "de": "Nico Fuchs · Lebenslauf" },
+      "label": { "en": "Nico · CV", "de": "Nico · CV" },
       "tags": ["CV"],
       "text": {
         "en": ["R&D Engineer: sports engineering, motorsport, data science. The CV follows here as a PDF."],
@@ -98,6 +102,7 @@
       "placeholder": "box",
       "window": "media+text+download",
       "title": { "en": "Spikeball Impact Localization", "de": "Spikeball Impact Localization" },
+      "label": { "en": "Spikeball", "de": "Spikeball" },
       "tags": ["MACHINE_LEARNING", "NI_DAQ", "SENSORS"],
       "text": {
         "en": [
@@ -121,6 +126,7 @@
       "placeholder": "suncafe",
       "window": "text+links",
       "title": { "en": "SunCafe", "de": "SunCafe" },
+      "label": { "en": "SunCafe", "de": "SunCafe" },
       "tags": ["SUNCAFE"],
       "text": {
         "en": ["Placeholder: the SunCafe project description follows."],
@@ -138,6 +144,7 @@
       "placeholder": "desk",
       "window": "text+links",
       "title": { "en": "Data Science & Motorsport", "de": "Data Science & Motorsport" },
+      "label": { "en": "Data Science", "de": "Data Science" },
       "tags": ["PYTHON", "MATLAB", "NI_DAQ", "ML"],
       "text": {
         "en": ["Placeholder: text, skill list and repo links follow."],
@@ -155,6 +162,7 @@
       "placeholder": "car",
       "window": "text+links",
       "title": { "en": "TU Edge", "de": "TU Edge" },
+      "label": { "en": "TU Edge", "de": "TU Edge" },
       "tags": ["TU_WIEN_RACING"],
       "text": { "en": ["Placeholder."], "de": ["Platzhalter."] },
       "links": []

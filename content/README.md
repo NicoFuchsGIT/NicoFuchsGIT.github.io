@@ -16,7 +16,8 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 | `placeholder` | Form, solange kein Modell da ist: `avatar`, `suncafe`, `desk`, `car` oder `box` |
 | `avatar` | Nur bei `avatar`: `height` in Metern und Farben für `skin`, `hair`, `top`, `bottom`, `shoes` |
 | `window` | Fenstertyp: `pdf`, `model+text`, `media+text+download` oder `text+links` |
-| `title` | `{ "en": "…", "de": "…" }` |
+| `title` | Überschrift im Fenster: `{ "en": "…", "de": "…" }` |
+| `label` | Kurzer Name im Label über dem Objekt, `{ "en": "…", "de": "…" }`. Fehlt er, steht dort der `title` |
 | `tags` | Liste kurzer Schlagworte, z. B. `["PYTHON", "ML"]` |
 | `text` | `{ "en": ["Absatz 1", "Absatz 2"], "de": [...] }` |
 | `links` | `[{ "label": { "en": "…", "de": "…" }, "url": "https://…" }]` |
@@ -34,6 +35,7 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
   "placeholder": "box",
   "window": "text+links",
   "title": { "en": "My Project", "de": "Mein Projekt" },
+  "label": { "en": "Project", "de": "Projekt" },
   "tags": ["PYTHON"],
   "text": { "en": ["Short description."], "de": ["Kurze Beschreibung."] },
   "links": [{ "label": { "en": "Code on GitHub", "de": "Code auf GitHub" }, "url": "https://github.com/NicoFuchsGIT" }]
@@ -42,3 +44,8 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 
 Einträge werden mit Komma getrennt. Nach dem Speichern die Seite neu laden. Zeigt das Studio danach nichts mehr an,
 ist die JSON meist ungültig (fehlendes Komma oder Anführungszeichen); ein JSON-Validator im Browser findet den Fehler.
+
+## Direktlinks
+
+Jedes Fenster hat eine eigene Adresse aus der `id`, z. B. `https://nicofuchsgit.github.io/#spikeball`. Wer den Link
+öffnet, sieht das Studio mit dem Fenster schon offen.
