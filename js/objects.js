@@ -12,9 +12,11 @@ export async function loadContent(url) {
 
 // Baut alle sichtbaren Objekte. `onChange` wird aufgerufen, wenn sich die Größe eines Objekts ändert
 // (Modell nachgeladen), damit die Kamera ihren Bildausschnitt anpassen kann.
+// `items`: pro Objekt { id, def, group, hit, box, glow } – `box` ist die Weltbox, `glow` der gelbe Schein (F-20).
 export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
     const groups = [];
     const hitTargets = [];
+    const items = [];
 
     for (const def of defs) {
         if (def.visible === false) continue; // F-15
@@ -34,11 +36,15 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
         group.add(hit);
         hitTargets.push(hit);
 
+        const item = { id: def.id, def, group, hit, box: new THREE.Box3(), glow: null };
+        items.push(item);
+
         let content = null;
         let shadow = null;
         const show = (next) => {
             if (content) group.remove(content);
             if (shadow) scene.remove(shadow);
+            if (item.glow) { scene.remove(item.glow); item.glow.geometry.dispose(); }
             content = next;
             // Box im lokalen Raum der Gruppe: Inhalt hat hier noch keinen Parent, Welt = lokal
             content.updateMatrixWorld(true);
@@ -46,7 +52,11 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
             box.getSize(hit.scale);
             box.getCenter(hit.position);
             group.add(content);
+            group.updateMatrixWorld(true); // Weltlage für Schatten, Schein und Label
             shadow = addContactShadow(renderer, scene, content);
+            item.box.setFromObject(content);
+            item.glow = glow(item.box);
+            scene.add(item.glow);
             onChange();
         };
 
@@ -56,7 +66,36 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
                 (err) => console.warn(`${def.id}: Modell nicht geladen, Platzhalter bleibt`, err));
         }
     }
-    return { groups, hitTargets };
+    return { groups, hitTargets, items };
+}
+
+// Gelber Lichtschein auf dem Boden unter dem Objekt (F-20, N-09). Liegt direkt in der Szene, nicht in der
+// Objektgruppe, damit er den Bildausschnitt nicht verändert. Sichtbarkeit über `material.opacity`.
+let glowTexture = null;
+function glow(box) {
+    if (!glowTexture) {
+        const c = document.createElement('canvas');
+        c.width = c.height = 128;
+        const g = c.getContext('2d');
+        const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+        grad.addColorStop(0, 'rgba(245,196,0,1)');
+        grad.addColorStop(0.45, 'rgba(245,196,0,0.55)');
+        grad.addColorStop(1, 'rgba(245,196,0,0)');
+        g.fillStyle = grad;
+        g.fillRect(0, 0, 128, 128);
+        glowTexture = new THREE.CanvasTexture(c);
+        glowTexture.colorSpace = THREE.SRGBColorSpace;
+    }
+    const w = (box.max.x - box.min.x) * 1.2 + 0.9;
+    const d = (box.max.z - box.min.z) * 1.2 + 0.9;
+    const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2),
+        new THREE.MeshBasicMaterial({ map: glowTexture, transparent: true, opacity: 0, depthWrite: false, toneMapped: false })
+    );
+    m.position.set((box.min.x + box.max.x) / 2, 0.004, (box.min.z + box.max.z) / 2);
+    m.renderOrder = 2; // über dem Kontaktschatten
+    m.visible = false;
+    return m;
 }
 
 // ---------------------------------------------------------------------------------------------

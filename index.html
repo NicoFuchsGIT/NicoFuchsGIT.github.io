@@ -81,12 +81,81 @@
 
         .close-btn {
             position: absolute;
-            top: 15px;
-            right: 20px;
+            top: 8px;
+            right: 8px;
+            width: 44px;
+            height: 44px;
+            border: 0;
+            background: none;
             font-size: 1.5rem;
             cursor: pointer;
             color: #999;
             transition: color 0.2s;
+        }
+
+        /* Klick daneben schließt das Fenster (F-23) */
+        #modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 9;
+            display: none;
+            background: rgba(20, 20, 24, 0.08);
+        }
+        #modal-backdrop.active { display: block; }
+
+        /* Labels über den Objekten (F-20 bis F-22, F-25): Buttons, mindestens 44 × 44 px */
+        #labels {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .obj-label {
+            position: absolute;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 0;
+            border: 0;
+            border-radius: 22px;
+            background: none;
+            cursor: pointer;
+            pointer-events: auto;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .obj-label span {
+            padding: 8px 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            color: #111;
+            font: 600 0.72rem/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .obj-label span::before {
+            content: "";
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            margin-right: 7px;
+            border-radius: 50%;
+            background: #c9c9ce;
+            vertical-align: 1px;
+            transition: background 0.2s;
+        }
+        .obj-label.active span::before { background: #f5c400; }
+        .obj-label.shown { opacity: 1; }
+        .obj-label:focus-visible { outline: none; }
+        .obj-label:focus-visible span {
+            outline: 3px solid #f5c400;
+            outline-offset: 2px;
         }
 
         .close-btn:hover {
@@ -129,9 +198,13 @@
         <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke auf ein Objekt!)</p>
     </div>
 
+    <!-- Labels über den Objekten, werden in js/labels.js erzeugt -->
+    <div id="labels"></div>
+
     <!-- Das Fenster, das sich nach dem Klick öffnet -->
-    <div id="project-modal">
-        <span class="close-btn" id="close-modal">×</span>
+    <div id="modal-backdrop"></div>
+    <div id="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-title">
+        <button type="button" class="close-btn" id="close-modal" aria-label="Schließen">×</button>
         <div id="project-content"></div>
     </div>
 
@@ -142,6 +215,7 @@
         import { createStudio } from './js/studio.js';
         import { MenuCamera } from './js/menu-camera.js';
         import { loadContent, createObjects } from './js/objects.js';
+        import { Labels } from './js/labels.js';
 
         // Desktop = Maus mit Hover; alles andere bekommt die Handy-Variante (kein Mitschwenken, günstigere Spiegelung)
         const desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -175,6 +249,10 @@
         const objects = createObjects(scene, renderer, content.objects, gltfLoader, updateFrame);
         objectGroups = objects.groups;
         const hitTargets = objects.hitTargets;
+        const labels = new Labels(document.getElementById('labels'), objects.items, lang, {
+            alwaysVisible: !desktop, // F-21
+            onOpen: (id) => openProject(id),
+        });
 
         // Rahmen = alle Objekte (im Querformat plus Softboxen)
         function updateFrame() {
@@ -189,37 +267,64 @@
         let suppressClick = false;
         const skipIntro = (event) => {
             // der Klick, der die Fahrt abbricht, oeffnet noch kein Fenster
-            suppressClick = menuCam.inIntro && event.type === 'pointerdown';
+            suppressClick = menuCam.inIntro && event.type === 'pointerdown' && event.target === renderer.domElement;
             menuCam.skipIntro();
         };
         window.addEventListener('pointerdown', skipIntro);
         window.addEventListener('keydown', skipIntro);
 
-        // 5. RAYCASTING (Klick-Erkennung)
+        // 5. RAYCASTING: Hover am Desktop (F-20), Klick bzw. Antippen öffnet direkt (F-21)
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
+        const modal = document.getElementById('project-modal');
+        const backdrop = document.getElementById('modal-backdrop');
 
-        window.addEventListener('click', (event) => {
-            if (suppressClick) { suppressClick = false; return; }
+        function pick(event) {
             // Umrechnung der Mauskoordinaten für Three.js (-1 bis +1)
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-            // Strahl von der Kamera durch die Mausposition schießen
             raycaster.setFromCamera(mouse, camera);
+            return raycaster.intersectObjects(hitTargets)[0]?.object.userData.id ?? null;
+        }
 
-            // Prüfen, ob der Strahl unsere interaktiven Objekte trifft
-            const intersects = raycaster.intersectObjects(hitTargets);
-
-            if (intersects.length > 0) {
-                // Treffer! Wir öffnen das HTML Modal
-                openProject(intersects[0].object.userData.id);
-            }
+        renderer.domElement.addEventListener('pointermove', (event) => {
+            if (event.pointerType !== 'mouse') return;
+            labels.sceneHover = pick(event);
+            renderer.domElement.style.cursor = labels.sceneHover ? 'pointer' : '';
+        });
+        renderer.domElement.addEventListener('pointerleave', () => {
+            labels.sceneHover = null;
+            renderer.domElement.style.cursor = '';
+        });
+        renderer.domElement.addEventListener('click', (event) => {
+            if (suppressClick) { suppressClick = false; return; }
+            const id = pick(event);
+            if (id) openProject(id);
         });
 
-        // 6. UI LOGIK (Fenster mit dem passenden Projekt öffnen / schließen)
+        // 6. FENSTER: öffnen, schließen, eigene URL pro Fenster (F-23, F-24)
+        // Öffnen legt einen History-Eintrag `#id` an, damit Zurück (Geste oder Button) das Fenster schließt.
+        const byId = (id) => content.objects.find((o) => o.id === id && o.visible !== false);
+        let returnFocus = null;
+
         function openProject(id) {
-            const def = content.objects.find((o) => o.id === id);
+            if (!byId(id)) return;
+            if (location.hash !== '#' + id) history.pushState({ object: id }, '', '#' + id);
+            showProject(id);
+        }
+
+        function closeProject() {
+            if (!modal.classList.contains('active')) return;
+            // selbst angelegter Eintrag: zurückgehen; Deep-Link von außen: nur den Hash entfernen
+            if (history.state?.object) history.back();
+            else {
+                history.replaceState(null, '', location.pathname + location.search);
+                hideProject();
+            }
+        }
+
+        function showProject(id) {
+            const def = byId(id);
             const el = document.getElementById('project-content');
             el.replaceChildren();
             const add = (tag, text, parent = el) => {
@@ -229,7 +334,7 @@
                 return node;
             };
             for (const tag of def.tags ?? []) add('div', tag).className = 'tag';
-            add('h2', def.title[lang]);
+            add('h2', def.title[lang]).id = 'project-title';
             for (const text of def.text?.[lang] ?? []) add('p', text);
             for (const link of def.links ?? []) {
                 const a = add('a', link.label[lang], add('p', ''));
@@ -237,11 +342,44 @@
                 a.target = '_blank';
                 a.rel = 'noopener';
             }
-            document.getElementById('project-modal').classList.add('active');
+            if (!modal.classList.contains('active')) returnFocus = document.activeElement;
+            menuCam.skipIntro();
+            modal.classList.add('active');
+            backdrop.classList.add('active');
+            labels.sceneHover = null;
+            document.getElementById('close-modal').focus();
         }
 
-        document.getElementById('close-modal').addEventListener('click', () => {
-            document.getElementById('project-modal').classList.remove('active');
+        function hideProject() {
+            modal.classList.remove('active');
+            backdrop.classList.remove('active');
+            if (returnFocus?.isConnected) returnFocus.focus();
+            returnFocus = null;
+        }
+
+        // Hash bestimmt, welches Fenster offen ist: Zurück, Vor, Deep-Link, Hash von Hand geändert
+        function syncFromHash() {
+            let id = '';
+            try { id = decodeURIComponent(location.hash.slice(1)); } catch { /* kaputter Hash: kein Fenster */ }
+            if (byId(id)) showProject(id);
+            else if (modal.classList.contains('active')) hideProject();
+        }
+        window.addEventListener('popstate', syncFromHash);
+        window.addEventListener('hashchange', syncFromHash);
+        syncFromHash();
+
+        document.getElementById('close-modal').addEventListener('click', closeProject);
+        backdrop.addEventListener('click', closeProject);
+        window.addEventListener('keydown', (event) => {
+            if (!modal.classList.contains('active')) return;
+            if (event.key === 'Escape') closeProject();
+            // Fokusfalle (N-07): Tab bleibt im Fenster
+            if (event.key === 'Tab') {
+                const focusable = [...modal.querySelectorAll('button, a[href]')];
+                const first = focusable[0], last = focusable[focusable.length - 1];
+                if (event.shiftKey && document.activeElement === first) { last.focus(); event.preventDefault(); }
+                else if (!event.shiftKey && document.activeElement === last) { first.focus(); event.preventDefault(); }
+            }
         });
 
         // 7. ANIMATION LOOP (Sorgt dafür, dass das Bild gezeichnet wird)
@@ -251,7 +389,19 @@
             const dt = Math.min(clock.getDelta(), 0.1);
             menuCam.update(dt);
             // Licht geht waehrend der Fahrt an, etwas verzoegert gegenueber der Bewegung
-            studio.setLight(THREE.MathUtils.smoothstep(menuCam.introT, 0.05, 0.7));
+            const light = THREE.MathUtils.smoothstep(menuCam.introT, 0.05, 0.7);
+            studio.setLight(light);
+
+            // Schein unter dem hervorgehobenen Objekt ein- bzw. ausblenden
+            const active = modal.classList.contains('active') ? null : labels.active;
+            for (const item of objects.items) {
+                if (!item.glow) continue;
+                const m = item.glow.material;
+                m.opacity += ((item.id === active ? 0.9 : 0) - m.opacity) * (1 - Math.exp(-12 * dt));
+                item.glow.visible = m.opacity > 0.01;
+            }
+            labels.container.style.opacity = light;
+            labels.update(camera, window.innerWidth, window.innerHeight);
             renderer.render(scene, camera);
         }
 
