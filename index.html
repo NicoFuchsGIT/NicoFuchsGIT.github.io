@@ -44,24 +44,39 @@
             color: #666;
         }
 
-        /* Das versteckte Modal (Fenster), das beim Klick aufgeht */
+        /* Fenster (F-36): Desktop als Karte über dem Studio, Handy als Vollbild-Sheet von unten */
         #project-modal {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
+            display: none; /* Standardmäßig versteckt */
+            flex-direction: column;
+            width: 80%;
+            max-width: 640px;
+            max-height: 86vh;
+            background: rgba(255, 255, 255, 0.96);
             border-radius: 8px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            width: 80%;
-            max-width: 600px;
-            display: none; /* Standardmäßig versteckt */
             z-index: 10;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(0,0,0,0.05);
         }
+        #project-modal.wide { max-width: 920px; }
 
+        #project-content {
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 40px;
+        }
+        #project-content h2 { margin: 0 0 4px; }
+        #project-content h3 {
+            margin: 24px 0 8px;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #666;
+        }
         #project-content p {
             color: #333;
             line-height: 1.6;
@@ -70,7 +85,7 @@
         }
 
         #project-modal.active {
-            display: block;
+            display: flex;
             animation: fadeIn 0.3s ease;
         }
 
@@ -79,10 +94,92 @@
             to { opacity: 1; transform: translate(-50%, -50%); }
         }
 
+        @media (hover: none), (pointer: coarse) {
+            #project-modal, #project-modal.wide {
+                position: fixed;
+                top: 0;
+                left: 0;
+                transform: none;
+                width: 100%;
+                max-width: none;
+                height: 100%;
+                max-height: none;
+                border-radius: 0;
+                border: 0;
+                background: #fff;
+            }
+            #project-modal.active { animation: sheetIn 0.3s ease; }
+            #project-content { padding: 56px 20px calc(32px + env(safe-area-inset-bottom)); }
+        }
+        @keyframes sheetIn {
+            from { transform: translateY(100%); }
+            to { transform: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #project-modal.active { animation: none; }
+        }
+
+        /* Buttons, Skills, Ladeanzeige, Medien im Fenster */
+        .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 18px;
+            border-radius: 22px;
+            border: 1px solid #d6d6db;
+            color: #111;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .btn:hover { border-color: #111; }
+        .btn.primary { background: #111; border-color: #111; color: #fff; }
+        .btn.primary:hover { background: #333; }
+        .btn:focus-visible { outline: 3px solid #f5c400; outline-offset: 2px; }
+        .skills { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
+        .skills li { padding: 6px 12px; border-radius: 14px; background: #f0f0f2; font-size: 0.85rem; }
+
+        .loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #666;
+            font-size: 0.9rem;
+            background: #f4f4f6;
+        }
+        .loading.failed { color: #a33; }
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #d6d6db;
+            border-top-color: #f5c400;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .pdf { position: relative; margin-top: 20px; height: max(320px, calc(86vh - 300px)); border-radius: 6px; overflow: hidden; background: #f4f4f6; }
+        .pdf iframe { width: 100%; height: 100%; border: 0; }
+        .pdf.preview { height: auto; min-height: 200px; max-width: 360px; border: 1px solid #e4e4e8; }
+        .pdf.preview img { display: block; width: 100%; height: auto; }
+
+        .impact-demo { margin: 20px 0 0; }
+        .impact-demo canvas { display: block; width: min(100%, 340px); aspect-ratio: 1; margin: 0 auto; }
+        .impact-demo figcaption { margin-top: 8px; color: #666; font-size: 0.85rem; text-align: center; }
+
+        .model-view { position: relative; margin-top: 20px; height: min(55vh, 460px); border-radius: 6px; overflow: hidden; background: #f4f4f6; touch-action: none; }
+        .model-view canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+        .model-view .hint { position: absolute; left: 12px; bottom: 8px; margin: 0; font-size: 0.75rem; color: #888; pointer-events: none; }
+
         .close-btn {
             position: absolute;
             top: 8px;
             right: 8px;
+            z-index: 1;
             width: 44px;
             height: 44px;
             border: 0;
@@ -158,6 +255,12 @@
             outline-offset: 2px;
         }
 
+        .close-btn:focus-visible {
+            outline: 3px solid #f5c400;
+            outline-offset: -4px;
+            border-radius: 50%;
+        }
+
         .close-btn:hover {
             color: #000;
         }
@@ -216,6 +319,7 @@
         import { MenuCamera } from './js/menu-camera.js';
         import { loadContent, createObjects } from './js/objects.js';
         import { Labels } from './js/labels.js';
+        import { renderWindow } from './js/windows.js';
 
         // Desktop = Maus mit Hover; alles andere bekommt die Handy-Variante (kein Mitschwenken, günstigere Spiegelung)
         const desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -323,25 +427,16 @@
             }
         }
 
+        let cleanupWindow = null;
+        let shownId = null;
         function showProject(id) {
+            if (id === shownId) return; // hashchange und popstate kommen oft beide
+            shownId = id;
             const def = byId(id);
-            const el = document.getElementById('project-content');
-            el.replaceChildren();
-            const add = (tag, text, parent = el) => {
-                const node = document.createElement(tag);
-                node.textContent = text;
-                parent.appendChild(node);
-                return node;
-            };
-            for (const tag of def.tags ?? []) add('div', tag).className = 'tag';
-            add('h2', def.title[lang]).id = 'project-title';
-            for (const text of def.text?.[lang] ?? []) add('p', text);
-            for (const link of def.links ?? []) {
-                const a = add('a', link.label[lang], add('p', ''));
-                a.href = link.url;
-                a.target = '_blank';
-                a.rel = 'noopener';
-            }
+            cleanupWindow?.();
+            // Fensterinhalt je nach Typ (js/windows.js); Schweres lädt erst jetzt (F-35)
+            cleanupWindow = renderWindow(def, document.getElementById('project-content'), { lang, mobile: !desktop, reducedMotion, gltfLoader });
+            modal.classList.toggle('wide', def.window === 'pdf' || def.window === 'model+text');
             if (!modal.classList.contains('active')) returnFocus = document.activeElement;
             menuCam.skipIntro();
             modal.classList.add('active');
@@ -351,6 +446,10 @@
         }
 
         function hideProject() {
+            cleanupWindow?.();
+            cleanupWindow = null;
+            shownId = null;
+            document.getElementById('project-content').replaceChildren();
             modal.classList.remove('active');
             backdrop.classList.remove('active');
             if (returnFocus?.isConnected) returnFocus.focus();
@@ -387,6 +486,8 @@
         function animate() {
             requestAnimationFrame(animate);
             const dt = Math.min(clock.getDelta(), 0.1);
+            // Handy: Das Sheet deckt das Studio ganz ab, also nicht weiter zeichnen
+            if (!desktop && modal.classList.contains('active')) return;
             menuCam.update(dt);
             // Licht geht waehrend der Fahrt an, etwas verzoegert gegenueber der Bewegung
             const light = THREE.MathUtils.smoothstep(menuCam.introT, 0.05, 0.7);

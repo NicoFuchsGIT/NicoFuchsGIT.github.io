@@ -83,12 +83,14 @@
       "placeholder": "avatar",
       "avatar": { "height": 1.1, "skin": "#e0b89a", "hair": "#3b2a20", "top": "#2b2b2e", "bottom": "#4a5160", "shoes": "#f2f2f2" },
       "window": "pdf",
+      "pdf": { "en": "assets/cv/cv-en.pdf" },
+      "preview": { "en": "assets/cv/cv-en-preview.jpg" },
       "title": { "en": "Nico Fuchs · CV", "de": "Nico Fuchs · Lebenslauf" },
       "label": { "en": "Nico · CV", "de": "Nico · CV" },
       "tags": ["CV"],
       "text": {
-        "en": ["R&D Engineer: sports engineering, motorsport, data science. The CV follows here as a PDF."],
-        "de": ["R&D Engineer: Sports Engineering, Rennsport, Data Science. Der Lebenslauf folgt hier als PDF."]
+        "en": ["R&D Engineer: sports engineering, motorsport, data science. CV as PDF (placeholder until the real one is in)."],
+        "de": ["R&D Engineer: Sports Engineering, Rennsport, Data Science. Lebenslauf als PDF (Platzhalter, bis das echte CV da ist)."]
       },
       "links": []
     },
@@ -101,6 +103,7 @@
       "model": "models/spikeball-titan/web/spikeball.glb",
       "placeholder": "box",
       "window": "media+text+download",
+      "download": { "label": { "en": "Download paper (PDF, English)", "de": "Paper herunterladen (PDF, Englisch)" }, "url": "assets/spikeball/paper.pdf" },
       "title": { "en": "Spikeball Impact Localization", "de": "Spikeball Impact Localization" },
       "label": { "en": "Spikeball", "de": "Spikeball" },
       "tags": ["MACHINE_LEARNING", "NI_DAQ", "SENSORS"],
@@ -132,7 +135,9 @@
         "en": ["Placeholder: the SunCafe project description follows."],
         "de": ["Platzhalter: Die Beschreibung des SunCafe-Projekts folgt."]
       },
-      "links": []
+      "links": [
+        { "label": { "en": "SunCafe live", "de": "SunCafe live" }, "url": "https://suncafe-nu.vercel.app/" }
+      ]
     },
     {
       "id": "desk",
@@ -143,6 +148,7 @@
       "model": "",
       "placeholder": "desk",
       "window": "text+links",
+      "skills": ["Python", "MATLAB", "NI DAQ", "Machine Learning"],
       "title": { "en": "Data Science & Motorsport", "de": "Data Science & Motorsport" },
       "label": { "en": "Data Science", "de": "Data Science" },
       "tags": ["PYTHON", "MATLAB", "NI_DAQ", "ML"],
@@ -150,7 +156,9 @@
         "en": ["Placeholder: text, skill list and repo links follow."],
         "de": ["Platzhalter: Text, Skill-Liste und Repo-Links folgen."]
       },
-      "links": []
+      "links": [
+        { "label": { "en": "GitHub profile", "de": "GitHub-Profil" }, "url": "https://github.com/NicoFuchsGIT" }
+      ]
     },
     {
       "id": "tu-edge",
