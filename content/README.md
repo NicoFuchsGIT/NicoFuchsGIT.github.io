@@ -15,12 +15,29 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 | `model` | Pfad zu einer `.glb`-Datei (Draco-komprimiert). Leer = Platzhalter. Lädt das Modell nicht, bleibt der Platzhalter stehen |
 | `placeholder` | Form, solange kein Modell da ist: `avatar`, `suncafe`, `desk`, `car` oder `box` |
 | `avatar` | Nur bei `avatar`: `height` in Metern und Farben für `skin`, `hair`, `top`, `bottom`, `shoes` |
-| `window` | Fenstertyp: `pdf`, `model+text`, `media+text+download` oder `text+links` |
+| `window` | Fenstertyp, siehe unten: `pdf`, `model+text`, `media+text+download` oder `text+links` |
 | `title` | Überschrift im Fenster: `{ "en": "…", "de": "…" }` |
 | `label` | Kurzer Name im Label über dem Objekt, `{ "en": "…", "de": "…" }`. Fehlt er, steht dort der `title` |
 | `tags` | Liste kurzer Schlagworte, z. B. `["PYTHON", "ML"]` |
 | `text` | `{ "en": ["Absatz 1", "Absatz 2"], "de": [...] }` |
 | `links` | `[{ "label": { "en": "…", "de": "…" }, "url": "https://…" }]` |
+| `pdf` | Nur bei `pdf`: `{ "en": "assets/cv/cv-en.pdf", "de": "…" }`. Fehlt `de`, wird EN gezeigt |
+| `preview` | Nur bei `pdf`: Vorschaubild fürs Handy, gleiche Form wie `pdf` |
+| `download` | Nur bei `media+text+download`: `{ "label": { "en": "…", "de": "…" }, "url": "assets/…pdf" }` |
+| `windowModel` | Nur bei `model+text`: eigenes Modell fürs Fenster. Fehlt es, wird `model` gezeigt |
+| `skills` | Nur bei `text+links` (optional): Liste wie `["Python", "MATLAB"]`, erscheint als Skill-Liste |
+
+## Fenstertypen
+
+| Typ | Inhalt |
+|---|---|
+| `pdf` | Text und PDF. Desktop: eingebettet mit Download-Button. Handy: Vorschaubild mit „Öffnen“ und „Download“ |
+| `media+text+download` | Text, Visualisierung des Einschlags (Spikeball) und Download-Button |
+| `model+text` | Drehbares und zoombares 3D-Modell, darunter der Text |
+| `text+links` | Text, optional Skill-Liste, Links als Buttons |
+
+PDFs, Bilder und Modelle laden erst, wenn das Fenster aufgeht. Am Desktop erscheint das Fenster als Karte über dem
+Studio, am Handy als Vollbild-Sheet.
 
 ## Beispiel: neues Objekt
 
