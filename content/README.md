@@ -79,7 +79,6 @@ Kontaktangaben in Impressum und Datenschutz.
 | `wip` | `true` zeigt den Hinweis „Website im Aufbau“ unter dem Namen. Für den Launch auf `false` setzen |
 | `contact.email` | E-Mail-Adresse, z. B. `"name@example.com"` |
 | `contact.linkedin` | Volle LinkedIn-URL, z. B. `"https://www.linkedin.com/in/…/"` |
-| `contact.instagram` | Instagram-Handle (`"nico"` oder `"@nico"`) oder volle URL |
 
 Ein leeres Feld bleibt im Kontaktmenü als „folgt“ sichtbar, ist aber nicht anklickbar.
 

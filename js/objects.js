@@ -62,7 +62,7 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
 
         show(placeholder(def));
         if (def.model) {
-            gltfLoader.load(def.model, (gltf) => show(gltf.scene), undefined,
+            gltfLoader.load(def.model, (gltf) => show(onPedestal(gltf.scene, def.pedestal)), undefined,
                 (err) => console.warn(`${def.id}: Modell nicht geladen, Platzhalter bleibt`, err));
         }
     }
@@ -115,6 +115,19 @@ function placeholder(def) {
         case 'car': return car();
         default: return box();
     }
+}
+
+// Modell auf einen weißen Sockel stellen (`pedestal`: Höhe in Metern vor `scale`), z. B. einen Monitor,
+// der sonst auf dem Boden stünde. Der Sockel ist etwas größer als die Standfläche des Modells.
+function onPedestal(model, height) {
+    if (!height) return model;
+    const g = new THREE.Group();
+    model.updateMatrixWorld(true);
+    const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
+    g.add(mesh(new THREE.BoxGeometry(Math.max(size.x + 0.1, 0.4), height, Math.max(size.z + 0.1, 0.4)), mat(LIGHT, 0.6), 0, height / 2, 0));
+    model.position.y += height;
+    g.add(model);
+    return g;
 }
 
 function mesh(geometry, material, x = 0, y = 0, z = 0) {

@@ -20,8 +20,7 @@ setLang(initialLang());
 try {
     const site = await (await fetch('content/site.json')).json();
     const links = contactLinks(site.contact);
-    const ig = site.contact?.instagram ?? '';
-    const shown = { email: site.contact?.email, instagram: ig.startsWith('http') ? ig : '@' + ig.replace(/^@/, '') };
+    const shown = { email: site.contact?.email, linkedin: site.contact?.linkedin?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') };
     for (const a of document.querySelectorAll('a[data-contact]')) {
         const key = a.dataset.contact;
         if (!links[key]) continue; // bleibt „folgt“

@@ -1,13 +1,13 @@
 # assets
 
-Dateien für die Fenster (PRD Abschnitt 8). Alles hier ist noch Platzhalter und wird durch die echte Datei mit **gleichem
-Namen** ersetzt, dann muss `content/objects.json` nicht angepasst werden.
+Dateien für die Fenster (PRD Abschnitt 8). Eine neue Version einfach mit **gleichem Namen** ablegen, dann muss
+`content/objects.json` nicht angepasst werden.
 
-| Datei | Für | Ersetzen durch |
+| Datei | Für | Hinweis |
 |---|---|---|
-| `cv/cv-en.pdf` | CV-Fenster (Nico) | Echtes CV auf Englisch. Für eine deutsche Version `cv/cv-de.pdf` ablegen und bei `nico` unter `pdf` als `"de"` eintragen |
-| `cv/cv-en-preview.jpg` | CV-Vorschau am Handy | Erste Seite des CVs als Bild, z. B. `pdftoppm -jpeg -r 60 -singlefile cv/cv-en.pdf cv/cv-en-preview` |
-| `spikeball/paper.pdf` | Spikeball-Fenster | Das Paper (nur Englisch) |
+| `cv/cv-en.pdf` | CV-Fenster (Nico) | CV auf Englisch, aus `CV_Fuchs_Praktikum.docx` **ohne Telefonnummer**. Bei jeder neuen Version die Nummer vorher entfernen. Für eine deutsche Version `cv/cv-de.pdf` ablegen und bei `nico` unter `pdf` als `"de"` eintragen |
+| `cv/cv-en-preview.jpg` | CV-Vorschau am Handy | Erste Seite als Bild: `pdftoppm -jpeg -r 90 -singlefile cv/cv-en.pdf cv/cv-en-preview` |
+| `spikeball/paper.pdf` | Spikeball-Fenster | Projektbericht (nur Englisch). Die Matrikelnummern auf dem Deckblatt sind geschwärzt |
 
 ## Website allgemein
 

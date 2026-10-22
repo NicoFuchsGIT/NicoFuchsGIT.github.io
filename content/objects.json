@@ -89,8 +89,8 @@
       "label": { "en": "Nico · CV", "de": "Nico · CV" },
       "tags": ["CV"],
       "text": {
-        "en": ["R&D Engineer: sports engineering, motorsport, data science. CV as PDF (placeholder until the real one is in)."],
-        "de": ["R&D Engineer: Sports Engineering, Rennsport, Data Science. Lebenslauf als PDF (Platzhalter, bis das echte CV da ist)."]
+        "en": ["Sports engineering student at UAS Technikum Wien and member of TU Wien Racing (chassis & composites). Full CV as PDF."],
+        "de": ["Student Sports Engineering an der FH Technikum Wien und Mitglied bei TU Wien Racing (Chassis & Composites). Der ganze Lebenslauf als PDF."]
       },
       "links": []
     },
@@ -124,19 +124,27 @@
       "visible": true,
       "position": [2.65, -0.2],
       "rotation": -15,
-      "scale": 1,
-      "model": "",
+      "scale": 1.4,
+      "model": "models/suncafe-monitor/suncafe_monitor.glb",
+      "pedestal": 0.35,
       "placeholder": "suncafe",
       "window": "text+links",
       "title": { "en": "SunCafe", "de": "SunCafe" },
       "label": { "en": "SunCafe", "de": "SunCafe" },
-      "tags": ["SUNCAFE"],
+      "tags": ["JAVASCRIPT", "MAPLIBRE", "PYTHON", "VERCEL"],
       "text": {
-        "en": ["Placeholder: the SunCafe project description follows."],
-        "de": ["Platzhalter: Die Beschreibung des SunCafe-Projekts folgt."]
+        "en": [
+          "A web app that estimates whether nearby cafés are in the sun or in the shade, up to 48 hours ahead, including building shadows and opening hours. Built with JavaScript, MapLibre GL and SunCalc.",
+          "A Python pipeline generates terrain and building horizon masks (180 sectors) from open data and runs automatically on GitHub Actions; the backend runs serverless on Vercel. Unit tests (Node, pytest), ESLint and CI on every push."
+        ],
+        "de": [
+          "Eine Web-App, die für Cafés in der Nähe abschätzt, ob sie in der Sonne oder im Schatten liegen, bis zu 48 Stunden im Voraus, inklusive Gebäudeschatten und Öffnungszeiten. Gebaut mit JavaScript, MapLibre GL und SunCalc.",
+          "Eine Python-Pipeline erzeugt aus offenen Daten Horizont-Masken für Gelände und Gebäude (180 Sektoren) und läuft automatisch über GitHub Actions; das Backend läuft serverless auf Vercel. Unit-Tests (Node, pytest), ESLint und CI bei jedem Push."
+        ]
       },
       "links": [
-        { "label": { "en": "SunCafe live", "de": "SunCafe live" }, "url": "https://suncafe-nu.vercel.app/" }
+        { "label": { "en": "Open SunCafe", "de": "SunCafe öffnen" }, "url": "https://suncafe-nu.vercel.app/", "primary": true },
+        { "label": { "en": "Code on GitHub", "de": "Code auf GitHub" }, "url": "https://github.com/NicoFuchsGIT/SunCafe" }
       ]
     },
     {

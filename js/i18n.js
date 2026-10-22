@@ -19,13 +19,13 @@ export function saveLang(lang) {
 
 export const UI = {
     en: {
-        cv: 'CV', contact: 'Contact', email: 'Email', linkedin: 'LinkedIn', instagram: 'Instagram',
+        cv: 'CV', contact: 'Contact', email: 'Email', linkedin: 'LinkedIn',
         comingSoon: 'coming soon', language: 'Language', close: 'Close',
         imprint: 'Imprint', privacy: 'Privacy', back: 'Back to the studio',
         wip: 'Website work in progress', wipNote: 'Some content is still a placeholder.',
     },
     de: {
-        cv: 'CV', contact: 'Kontakt', email: 'E-Mail', linkedin: 'LinkedIn', instagram: 'Instagram',
+        cv: 'CV', contact: 'Kontakt', email: 'E-Mail', linkedin: 'LinkedIn',
         comingSoon: 'folgt', language: 'Sprache', close: 'Schließen',
         imprint: 'Impressum', privacy: 'Datenschutz', back: 'Zurück ins Studio',
         wip: 'Website im Aufbau', wipNote: 'Manche Inhalte sind noch Platzhalter.',
@@ -41,10 +41,8 @@ export function applyUI(root, lang) {
 
 // Kontakt-Links aus content/site.json. Leere Felder bleiben als „folgt“ sichtbar, aber ohne Ziel.
 export function contactLinks(contact = {}) {
-    const ig = contact.instagram?.replace(/^@/, '');
     return {
         email: contact.email ? 'mailto:' + contact.email : '',
         linkedin: contact.linkedin ?? '',
-        instagram: ig ? (ig.startsWith('http') ? ig : 'https://www.instagram.com/' + ig + '/') : '',
     };
 }
