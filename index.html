@@ -1,13 +1,34 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Immer hell, auch im System-Dunkelmodus (F-06) -->
     <meta name="color-scheme" content="light only">
-    <title>Nico Fuchs | 3D Portfolio</title>
+    <title>Nico Fuchs – R&amp;D Engineer | Portfolio</title>
+    <meta name="description" content="Nico Fuchs, R&amp;D Engineer in Sports Engineering, Motorsport and Data Science. CV and projects in an interactive 3D studio.">
+    <link rel="canonical" href="https://nicofuchsgit.github.io/">
+    <meta name="theme-color" content="#f8f8fa">
+    <!-- Link-Vorschau (F-72) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nicofuchsgit.github.io/">
+    <meta property="og:title" content="Nico Fuchs – R&amp;D Engineer">
+    <meta property="og:description" content="CV and projects in an interactive 3D studio: sports engineering, motorsport, data science.">
+    <meta property="og:image" content="https://nicofuchsgit.github.io/assets/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="A white photo studio with Nico Fuchs' projects as 3D objects">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Nico Fuchs – R&amp;D Engineer">
+    <meta name="twitter:description" content="CV and projects in an interactive 3D studio.">
+    <meta name="twitter:image" content="https://nicofuchsgit.github.io/assets/og-image.jpg">
+    <!-- Favicon (F-75) -->
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
     <style>
         :root { color-scheme: light only; }
+        [hidden] { display: none !important; }
 
         body {
             margin: 0;
@@ -22,13 +43,145 @@
             display: block;
         }
 
-        /* Das UI Overlay (Fadenkreuz / Info) */
+        /* Name und Titel oben links (F-40) */
         #ui-layer {
             position: absolute;
             top: 20px;
             left: 20px;
+            max-width: calc(100% - 40px);
             pointer-events: none; /* Klicks gehen durch diesen Text durch ins 3D */
             color: #333;
+        }
+        .wip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 6px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ececf0;
+            font-size: 0.75rem;
+            color: #333;
+        }
+        .wip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #f5c400; flex: none; }
+        .wip strong { font-weight: 600; }
+        .wip span { color: #777; }
+        .wip[hidden] { display: none; }
+
+        /* Dauerhafte Bedienelemente oben rechts (F-41): CV, Kontakt, LinkedIn, Sprache */
+        #toolbar {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tb {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 0 16px;
+            box-sizing: border-box;
+            border: 1px solid #e2e2e6;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            color: #111;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .tb:hover { border-color: #111; }
+        .tb.primary { background: #111; border-color: #111; color: #fff; }
+        .tb.primary:hover { background: #333; }
+        .tb.icon { padding: 0; font-size: 0.95rem; }
+        .tb[aria-disabled="true"] { color: #aaa; cursor: default; }
+        .tb[aria-disabled="true"]:hover { border-color: #e2e2e6; }
+        .tb:focus-visible, .lang button:focus-visible, .menu a:focus-visible, #legal a:focus-visible {
+            outline: 3px solid #f5c400;
+            outline-offset: 2px;
+        }
+        .contact { position: relative; }
+        .menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 210px;
+            margin: 0;
+            padding: 6px;
+            list-style: none;
+            background: #fff;
+            border: 1px solid #e2e2e6;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        }
+        .menu[hidden] { display: none; }
+        .menu a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            min-height: 44px;
+            padding: 0 12px;
+            border-radius: 8px;
+            color: #111;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .menu a:hover { background: #f4f4f6; }
+        .menu small { color: #999; font-weight: 400; }
+        .menu a[aria-disabled="true"] { color: #999; cursor: default; }
+        .menu a[aria-disabled="true"]:hover { background: none; }
+        .lang {
+            display: flex;
+            padding: 3px;
+            border: 1px solid #e2e2e6;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.92);
+        }
+        .lang button {
+            min-width: 40px;
+            height: 36px;
+            border: 0;
+            border-radius: 18px;
+            background: none;
+            color: #666;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .lang button[aria-pressed="true"] { background: #111; color: #fff; }
+
+        /* Kleine Links auf Impressum und Datenschutz (F-43) */
+        #legal {
+            position: fixed;
+            left: 20px;
+            bottom: 12px;
+            z-index: 5;
+            display: flex;
+            gap: 4px;
+            font-size: 0.75rem;
+        }
+        #legal a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 6px; color: #777; text-decoration: none; }
+        #legal a:hover { color: #111; text-decoration: underline; }
+
+        /* Schmale Handys: Leiste unten, gut mit dem Daumen erreichbar; Kontaktmenü klappt nach oben */
+        @media (max-width: 640px) {
+            #ui-layer { top: 16px; left: 16px; max-width: calc(100% - 32px); }
+            h1 { font-size: 1.2rem !important; }
+            .wip span { display: none; }
+            #toolbar { top: auto; right: auto; left: 50%; bottom: calc(40px + env(safe-area-inset-bottom)); transform: translateX(-50%); }
+            .menu { top: auto; bottom: calc(100% + 8px); right: auto; left: 50%; transform: translateX(-50%); }
+            #legal { left: 50%; bottom: calc(4px + env(safe-area-inset-bottom)); transform: translateX(-50%); }
         }
 
         h1 {
@@ -137,6 +290,7 @@
         .btn.primary { background: #111; border-color: #111; color: #fff; }
         .btn.primary:hover { background: #333; }
         .btn:focus-visible { outline: 3px solid #f5c400; outline-offset: 2px; }
+        .btn .only { margin-left: 10px; padding: 3px 8px; border-radius: 10px; background: #f5c400; color: #111; font-size: 0.7rem; }
         .skills { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
         .skills li { padding: 6px 12px; border-radius: 14px; background: #f0f0f2; font-size: 0.85rem; }
 
@@ -279,12 +433,12 @@
     </style>
 
     <!-- Import Maps für modernes JavaScript (erlaubt das Laden von Three.js ohne Server/Bundler) -->
-    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <!-- three.js liegt im Repo (vendor/), damit keine Requests an Dritte gehen (N-05, F-71) -->
     <script type="importmap">
       {
         "imports": {
-          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+          "three": "./vendor/three@0.160.0/build/three.module.min.js",
+          "three/addons/": "./vendor/three@0.160.0/examples/jsm/"
         }
       }
     </script>
@@ -295,11 +449,36 @@
     <div id="canvas-container"></div>
 
     <!-- UI Overlay (Immer sichtbar) -->
-    <div id="ui-layer">
-        <h1>Nico Fuchs</h1>
-        <p>R&D Engineer // Interactive Portfolio</p>
-        <p style="margin-top: 15px; color: #ff3366; font-weight: bold;">(Klicke auf ein Objekt!)</p>
-    </div>
+    <header id="ui-layer">
+        <h1 id="site-name">Nico Fuchs</h1>
+        <p id="site-title">R&amp;D Engineer · Sports Engineering, Motorsport, Data Science</p>
+        <!-- Hinweis „im Aufbau“, abschaltbar mit "wip": false in content/site.json -->
+        <div class="wip" id="wip"><strong data-i18n="wip">Website work in progress</strong><span data-i18n="wipNote">Some content is still a placeholder.</span></div>
+    </header>
+
+    <!-- CV, Kontakt, LinkedIn, Sprache (F-41) -->
+    <nav id="toolbar" aria-label="Site">
+        <button type="button" class="tb primary" id="cv-btn" data-i18n="cv">CV</button>
+        <div class="contact">
+            <button type="button" class="tb" id="contact-btn" aria-expanded="false" aria-controls="contact-menu" data-i18n="contact">Contact</button>
+            <ul class="menu" id="contact-menu" hidden>
+                <li><a data-contact="email"><span data-i18n="email">Email</span><small data-i18n="comingSoon">coming soon</small></a></li>
+                <li><a data-contact="linkedin" target="_blank" rel="noopener"><span data-i18n="linkedin">LinkedIn</span><small data-i18n="comingSoon">coming soon</small></a></li>
+                <li><a data-contact="instagram" target="_blank" rel="noopener"><span data-i18n="instagram">Instagram</span><small data-i18n="comingSoon">coming soon</small></a></li>
+            </ul>
+        </div>
+        <a class="tb icon" id="linkedin-btn" data-contact="linkedin" target="_blank" rel="noopener" aria-label="LinkedIn">in</a>
+        <div class="lang" role="group" aria-label="Language" data-i18n-aria="language">
+            <button type="button" data-lang="en" aria-pressed="true" lang="en">EN</button>
+            <button type="button" data-lang="de" aria-pressed="false" lang="de">DE</button>
+        </div>
+    </nav>
+
+    <!-- Impressum und Datenschutz (F-43, F-70, F-71) -->
+    <footer id="legal">
+        <a href="impressum.html" data-i18n="imprint">Imprint</a>
+        <a href="datenschutz.html" data-i18n="privacy">Privacy</a>
+    </footer>
 
     <!-- Labels über den Objekten, werden in js/labels.js erzeugt -->
     <div id="labels"></div>
@@ -307,7 +486,7 @@
     <!-- Das Fenster, das sich nach dem Klick öffnet -->
     <div id="modal-backdrop"></div>
     <div id="project-modal" role="dialog" aria-modal="true" aria-labelledby="project-title">
-        <button type="button" class="close-btn" id="close-modal" aria-label="Schließen">×</button>
+        <button type="button" class="close-btn" id="close-modal" aria-label="Close" data-i18n-aria="close">×</button>
         <div id="project-content"></div>
     </div>
 
@@ -320,6 +499,7 @@
         import { loadContent, createObjects } from './js/objects.js';
         import { Labels } from './js/labels.js';
         import { renderWindow } from './js/windows.js';
+        import { initialLang, saveLang, applyUI, contactLinks } from './js/i18n.js';
 
         // Desktop = Maus mit Hover; alles andere bekommt die Handy-Variante (kein Mitschwenken, günstigere Spiegelung)
         const desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -342,13 +522,16 @@
 
         // Alle Modelle sind Draco-komprimierte GLBs aus Blender
         const dracoLoader = new DRACOLoader();
-        dracoLoader.setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
+        dracoLoader.setDecoderPath('./vendor/three@0.160.0/examples/jsm/libs/draco/gltf/');
         const gltfLoader = new GLTFLoader();
         gltfLoader.setDRACOLoader(dracoLoader);
 
         // 3. OBJEKTE: alles aus content/objects.json (js/objects.js)
-        const content = await loadContent('./content/objects.json');
-        const lang = document.documentElement.lang === 'de' ? 'de' : 'en'; // Umschalter kommt mit F-60
+        const [content, site] = await Promise.all([
+            loadContent('./content/objects.json'),
+            loadContent('./content/site.json').catch(() => ({})), // ohne site.json bleiben die Texte aus dem HTML
+        ]);
+        let lang = initialLang(); // F-60, F-62
         let objectGroups = []; // vor createObjects, weil das schon beim Bauen updateFrame aufruft
         const objects = createObjects(scene, renderer, content.objects, gltfLoader, updateFrame);
         objectGroups = objects.groups;
@@ -357,6 +540,51 @@
             alwaysVisible: !desktop, // F-21
             onOpen: (id) => openProject(id),
         });
+
+        // SPRACHE UND BEDIENELEMENTE (F-40 bis F-43, F-60, F-61)
+        function setLang(next) {
+            lang = next;
+            document.documentElement.lang = lang;
+            applyUI(document, lang);
+            if (site.name) document.getElementById('site-name').textContent = site.name;
+            if (site.title?.[lang]) document.getElementById('site-title').textContent = site.title[lang];
+            for (const b of document.querySelectorAll('.lang button')) b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
+            labels.setLang(lang);
+        }
+        for (const b of document.querySelectorAll('.lang button')) {
+            b.addEventListener('click', () => { saveLang(b.dataset.lang); setLang(b.dataset.lang); });
+        }
+        document.getElementById('wip').hidden = site.wip === false;
+
+        // Kontakt-Links: leere Felder in site.json bleiben sichtbar, sind aber als „folgt“ deaktiviert
+        const contact = contactLinks(site.contact);
+        for (const a of document.querySelectorAll('[data-contact]')) {
+            const url = contact[a.dataset.contact];
+            if (url) a.href = url;
+            else a.setAttribute('aria-disabled', 'true');
+            a.querySelector('small')?.toggleAttribute('hidden', Boolean(url));
+            a.addEventListener('click', (event) => { if (!url) event.preventDefault(); });
+        }
+        const contactBtn = document.getElementById('contact-btn');
+        const contactMenu = document.getElementById('contact-menu');
+        function toggleContact(open = contactMenu.hidden) {
+            contactMenu.hidden = !open;
+            contactBtn.setAttribute('aria-expanded', String(open));
+        }
+        contactBtn.addEventListener('click', () => toggleContact());
+        document.addEventListener('pointerdown', (event) => {
+            if (!contactMenu.hidden && !event.target.closest('.contact')) toggleContact(false);
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !contactMenu.hidden) { toggleContact(false); contactBtn.focus(); }
+        });
+
+        // CV öffnet das PDF-Fenster (F-41, F-30): das erste sichtbare Objekt vom Typ `pdf`
+        const cvObject = content.objects.find((o) => o.window === 'pdf' && o.visible !== false);
+        const cvBtn = document.getElementById('cv-btn');
+        if (cvObject) cvBtn.addEventListener('click', () => openProject(cvObject.id));
+        else cvBtn.hidden = true;
+        setLang(lang);
 
         // Rahmen = alle Objekte (im Querformat plus Softboxen)
         function updateFrame() {

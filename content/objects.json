@@ -103,7 +103,7 @@
       "model": "models/spikeball-titan/web/spikeball.glb",
       "placeholder": "box",
       "window": "media+text+download",
-      "download": { "label": { "en": "Download paper (PDF, English)", "de": "Paper herunterladen (PDF, Englisch)" }, "url": "assets/spikeball/paper.pdf" },
+      "download": { "label": { "en": "Download paper (PDF)", "de": "Paper herunterladen (PDF)" }, "url": "assets/spikeball/paper.pdf", "lang": "en" },
       "title": { "en": "Spikeball Impact Localization", "de": "Spikeball Impact Localization" },
       "label": { "en": "Spikeball", "de": "Spikeball" },
       "tags": ["MACHINE_LEARNING", "NI_DAQ", "SENSORS"],
