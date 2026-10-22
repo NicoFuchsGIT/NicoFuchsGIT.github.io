@@ -8,13 +8,13 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 const T = {
     de: {
         loading: 'Lädt …', error: 'Konnte nicht geladen werden.', download: 'Download', open: 'Öffnen',
-        cvDownload: 'CV herunterladen (PDF)', skills: 'Skills', modelHint: 'Ziehen zum Drehen, Scrollen bzw. zwei Finger zum Zoomen',
+        cvDownload: 'Ganzes CV herunterladen (PDF)', skills: 'Skills', modelHint: 'Ziehen zum Drehen, Scrollen bzw. zwei Finger zum Zoomen',
         demoCaption: 'Schema: Der Ball trifft das Netz, die Sensoren am Rahmen hören den Einschlag, das System markiert den Punkt.',
         enOnly: 'English only',
     },
     en: {
         loading: 'Loading …', error: 'Could not be loaded.', download: 'Download', open: 'Open',
-        cvDownload: 'Download CV (PDF)', skills: 'Skills', modelHint: 'Drag to rotate, scroll or pinch to zoom',
+        cvDownload: 'Download full CV (PDF)', skills: 'Skills', modelHint: 'Drag to rotate, scroll or pinch to zoom',
         demoCaption: 'Schematic: the ball hits the net, the sensors on the frame pick up the impact, the system marks the spot.',
         enOnly: 'English only',
     },
@@ -96,12 +96,15 @@ function loader(parent, t) {
 }
 
 // F-30: CV als PDF. Desktop: eingebettet. Handy (Einbettung unzuverlässig): Vorschaubild plus Öffnen und Download.
-// Gibt es keine Version in der Sprache, gilt EN.
+// Gibt es keine Version in der Sprache, gilt EN. Angezeigt wird `pdf`; der Download-Button nimmt `download.url`,
+// falls angegeben (z. B. das ganze CV mit Projekten), sonst dasselbe PDF.
 function pdfView(def, root, ctx, t) {
     const pick = (field) => field?.[ctx.lang] || field?.en;
     const url = pick(def.pdf);
     if (!url) return;
     const docLang = def.pdf[ctx.lang] ? ctx.lang : 'en';
+    const full = def.download?.url;
+    const fileUrl = (typeof full === 'string' ? full : pick(full)) || url;
     const frame = el('div', root);
     frame.className = 'pdf' + (ctx.mobile ? ' preview' : '');
     const load = loader(frame, t);
@@ -111,14 +114,14 @@ function pdfView(def, root, ctx, t) {
         img.onload = load.done;
         img.onerror = load.fail;
         img.src = pick(def.preview) ?? '';
-        buttons(root, [{ label: t.open, url, primary: true, lang: docLang }, { label: t.download, url, download: true }], ctx.lang);
+        buttons(root, [{ label: t.open, url, primary: true, lang: docLang }, { label: t.download, url: fileUrl, download: true }], ctx.lang);
     } else {
         const iframe = el('iframe', frame);
         iframe.title = def.title[ctx.lang];
         iframe.onload = load.done;
         iframe.src = url;
         setTimeout(load.done, 4000); // manche Browser melden bei PDFs kein `load`
-        buttons(root, [{ label: t.cvDownload, url, download: true, primary: true, lang: docLang }], ctx.lang);
+        buttons(root, [{ label: t.cvDownload, url: fileUrl, download: true, primary: true, lang: docLang }], ctx.lang);
     }
 }
 

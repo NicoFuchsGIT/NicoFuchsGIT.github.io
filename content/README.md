@@ -23,6 +23,7 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 | `text` | `{ "en": ["Absatz 1", "Absatz 2"], "de": [...] }` |
 | `links` | `[{ "label": { "en": "…", "de": "…" }, "url": "https://…" }]` |
 | `pdf` | Nur bei `pdf`: `{ "en": "assets/cv/cv-en.pdf", "de": "…" }`. Fehlt `de`, wird EN gezeigt |
+| `download` (bei `pdf`) | Optional: `{ "url": { "en": "assets/cv/cv-en.pdf" } }`. Datei für den Download-Button, wenn sie sich vom angezeigten `pdf` unterscheidet (angezeigt wird die Kurzfassung, heruntergeladen das ganze CV) |
 | `preview` | Nur bei `pdf`: Vorschaubild fürs Handy, gleiche Form wie `pdf` |
 | `download` | Nur bei `media+text+download`: `{ "label": { "en": "…", "de": "…" }, "url": "assets/…pdf", "lang": "en" }`. `lang` = Sprache der Datei, optional |
 | `windowModel` | Nur bei `model+text`: eigenes Modell fürs Fenster. Fehlt es, wird `model` gezeigt |
