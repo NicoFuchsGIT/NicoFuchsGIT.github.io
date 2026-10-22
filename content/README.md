@@ -23,7 +23,7 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 | `links` | `[{ "label": { "en": "…", "de": "…" }, "url": "https://…" }]` |
 | `pdf` | Nur bei `pdf`: `{ "en": "assets/cv/cv-en.pdf", "de": "…" }`. Fehlt `de`, wird EN gezeigt |
 | `preview` | Nur bei `pdf`: Vorschaubild fürs Handy, gleiche Form wie `pdf` |
-| `download` | Nur bei `media+text+download`: `{ "label": { "en": "…", "de": "…" }, "url": "assets/…pdf" }` |
+| `download` | Nur bei `media+text+download`: `{ "label": { "en": "…", "de": "…" }, "url": "assets/…pdf", "lang": "en" }`. `lang` = Sprache der Datei, optional |
 | `windowModel` | Nur bei `model+text`: eigenes Modell fürs Fenster. Fehlt es, wird `model` gezeigt |
 | `skills` | Nur bei `text+links` (optional): Liste wie `["Python", "MATLAB"]`, erscheint als Skill-Liste |
 
@@ -66,3 +66,26 @@ ist die JSON meist ungültig (fehlendes Komma oder Anführungszeichen); ein JSON
 
 Jedes Fenster hat eine eigene Adresse aus der `id`, z. B. `https://nicofuchsgit.github.io/#spikeball`. Wer den Link
 öffnet, sieht das Studio mit dem Fenster schon offen.
+
+## site.json: Name, Titel, Kontakt
+
+`content/site.json` füllt die Bedienelemente (Name und Titel oben links, Kontaktmenü, LinkedIn-Button) und die
+Kontaktangaben in Impressum und Datenschutz.
+
+| Feld | Bedeutung |
+|---|---|
+| `name` | Name oben links |
+| `title` | Titel darunter, `{ "en": "…", "de": "…" }` |
+| `wip` | `true` zeigt den Hinweis „Website im Aufbau“ unter dem Namen. Für den Launch auf `false` setzen |
+| `contact.email` | E-Mail-Adresse, z. B. `"name@example.com"` |
+| `contact.linkedin` | Volle LinkedIn-URL, z. B. `"https://www.linkedin.com/in/…/"` |
+| `contact.instagram` | Instagram-Handle (`"nico"` oder `"@nico"`) oder volle URL |
+
+Ein leeres Feld bleibt im Kontaktmenü als „folgt“ sichtbar, ist aber nicht anklickbar.
+
+## Sprache
+
+Standard ist Englisch, beim ersten Besuch mit deutscher Browsersprache Deutsch. Der Umschalter oben rechts merkt sich die
+Wahl im Browser. Alle Texte in `objects.json` brauchen deshalb `en` und `de`. Ein Download nur auf Englisch bekommt
+`"lang": "en"` und wird in der deutschen Ansicht als „English only“ markiert; beim CV passiert das automatisch, solange es
+kein `pdf.de` gibt.

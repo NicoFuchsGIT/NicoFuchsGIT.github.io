@@ -21,7 +21,6 @@ export class Labels {
             el.className = 'obj-label';
             // Button = Tap-Fläche (44 px), die Pille darin ist kleiner
             const pill = document.createElement('span');
-            pill.textContent = item.def.label?.[lang] ?? item.def.title?.[lang] ?? item.id;
             el.appendChild(pill);
             el.dataset.id = item.id;
             el.addEventListener('click', () => onOpen?.(item.id));
@@ -32,6 +31,16 @@ export class Labels {
             el.addEventListener('blur', () => { if (this.focused === item.id) this.focused = null; });
             container.appendChild(el);
             this.entries.push({ item, el, pill, w: 0, h: 0 });
+        }
+        this.setLang(lang);
+    }
+
+    // Sprachwechsel (F-60): Texte tauschen, Breite beim nächsten update neu messen
+    setLang(lang) {
+        for (const e of this.entries) {
+            const def = e.item.def;
+            e.pill.textContent = def.label?.[lang] ?? def.title?.[lang] ?? e.item.id;
+            e.w = 0;
         }
     }
 

@@ -1,0 +1,26 @@
+/* Einfache Textseiten (Impressum, Datenschutz): hell, gleiche Schrift und Akzentfarbe wie das Studio */
+:root { color-scheme: light only; }
+[hidden] { display: none !important; }
+body {
+    margin: 0;
+    background: #f8f8fa;
+    color: #222;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+}
+main { max-width: 680px; margin: 0 auto; padding: 32px 20px 64px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 32px; }
+.back { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: #111; font-weight: 600; text-decoration: none; }
+.back:hover { text-decoration: underline; }
+h1 { margin: 0 0 24px; font-size: 1.6rem; }
+h2 { margin: 32px 0 8px; font-size: 1.05rem; }
+a { color: #111; }
+section[lang]:not([hidden]) + section[lang]:not([hidden]) { margin-top: 56px; padding-top: 32px; border-top: 1px solid #e2e2e6; }
+.lang { display: flex; padding: 3px; border: 1px solid #e2e2e6; border-radius: 22px; background: #fff; }
+.lang button {
+    min-width: 40px; height: 36px; border: 0; border-radius: 18px; background: none; color: #666;
+    font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+}
+.lang button[aria-pressed="true"] { background: #111; color: #fff; }
+.back:focus-visible, .lang button:focus-visible, a:focus-visible { outline: 3px solid #f5c400; outline-offset: 2px; }
+.muted { color: #888; }
