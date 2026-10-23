@@ -11,7 +11,7 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 | `visible` | `false` blendet das Objekt aus (z. B. TU Edge, bis es so weit ist) |
 | `position` | `[x, z]` in Metern. x: links (−) / rechts (+), z: hinten (−) / vorne (+). Nico steht bei `[0, 0.4]` |
 | `rotation` | Drehung um die Hochachse in Grad. Positiv dreht nach rechts, links stehende Objekte also zur Mitte |
-| `scale` | Größe, `1` = Originalmaße des Modells |
+| `scale` | Größe, `1` = Originalmaße des Modells. Alle Modelle sind in echten Metern gebaut, deshalb überall `1` lassen, damit die Größen zueinander passen |
 | `model` | Pfad zu einer `.glb`-Datei (Draco-komprimiert). Leer = Platzhalter. Lädt das Modell nicht, bleibt der Platzhalter stehen |
 | `table` | Optional: Höhe einer Schreibtischplatte in Metern (vor `scale`), auf die das Modell gestellt wird, mit Tastatur und Maus, z. B. der SunCafe-Monitor |
 | `placeholder` | Form, solange kein Modell da ist: `avatar`, `suncafe`, `car` oder `box` |

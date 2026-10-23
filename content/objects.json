@@ -4,9 +4,9 @@
     {
       "id": "woodworking",
       "visible": true,
-      "position": [-4.3, -1.7],
-      "rotation": 35,
-      "scale": 0.5,
+      "position": [-7.1, -1.2],
+      "rotation": 20,
+      "scale": 1,
       "model": "models/woodworking/web/workshop.glb",
       "placeholder": "box",
       "window": "model+text",
@@ -28,9 +28,9 @@
     {
       "id": "3d-printing",
       "visible": true,
-      "position": [3.75, -2.8],
-      "rotation": -20,
-      "scale": 0.6,
+      "position": [7.3, -1.2],
+      "rotation": -30,
+      "scale": 1,
       "model": "models/3d-printing/web/printtable.glb",
       "placeholder": "box",
       "window": "text+links",
@@ -52,9 +52,9 @@
     {
       "id": "powerlifting",
       "visible": true,
-      "position": [-1.8, -0.7],
-      "rotation": 20,
-      "scale": 0.6,
+      "position": [-3.25, -0.8],
+      "rotation": 10,
+      "scale": 1,
       "model": "models/legend-monolift/web/monolift.glb",
       "placeholder": "box",
       "window": "text+links",
@@ -81,7 +81,7 @@
       "scale": 1,
       "model": "",
       "placeholder": "avatar",
-      "avatar": { "height": 1.1, "skin": "#e0b89a", "hair": "#3b2a20", "top": "#2b2b2e", "bottom": "#4a5160", "shoes": "#f2f2f2" },
+      "avatar": { "height": 1.8, "skin": "#e0b89a", "hair": "#3b2a20", "top": "#2b2b2e", "bottom": "#4a5160", "shoes": "#f2f2f2" },
       "window": "pdf",
       "pdf": { "en": "assets/cv/cv-en-short.pdf" },
       "download": { "url": { "en": "assets/cv/cv-en.pdf" } },
@@ -98,9 +98,9 @@
     {
       "id": "spikeball",
       "visible": true,
-      "position": [1.5, -0.3],
+      "position": [4.4, 0.5],
       "rotation": 0,
-      "scale": 1.6,
+      "scale": 1,
       "model": "models/spikeball-titan/web/spikeball.glb",
       "placeholder": "box",
       "window": "media+text+download",
@@ -123,11 +123,11 @@
     {
       "id": "suncafe",
       "visible": true,
-      "position": [4.3, -1.0],
-      "rotation": -35,
-      "scale": 1.4,
+      "position": [5.0, -1.2],
+      "rotation": -15,
+      "scale": 1,
       "model": "models/suncafe-monitor/suncafe_monitor.glb",
-      "table": 0.53,
+      "table": 0.75,
       "placeholder": "suncafe",
       "window": "text+links",
       "title": { "en": "SunCafe", "de": "SunCafe" },
@@ -149,18 +149,47 @@
       ]
     },
     {
-      "id": "tu-edge",
-      "visible": false,
-      "position": [0, -3.0],
-      "rotation": 0,
+      "id": "formula-student",
+      "visible": true,
+      "position": [2.1, -1.2],
+      "rotation": -35,
       "scale": 1,
-      "model": "",
+      "model": "models/formula-student/web/formula_student.glb",
       "placeholder": "car",
       "window": "text+links",
-      "title": { "en": "TU Edge", "de": "TU Edge" },
-      "label": { "en": "TU Edge", "de": "TU Edge" },
-      "tags": ["TU_WIEN_RACING"],
-      "text": { "en": ["Placeholder."], "de": ["Platzhalter."] },
+      "title": { "en": "Formula Student", "de": "Formula Student" },
+      "label": { "en": "Formula Student", "de": "Formula Student" },
+      "tags": ["TU_WIEN_RACING", "CHASSIS", "COMPOSITES"],
+      "text": {
+        "en": [
+          "Member of TU Wien Racing, working on chassis and composites.",
+          "The model is an electric Formula Student car loosely based on the team's EDGE cars, built procedurally in Blender with Python: carbon monocoque, double wishbones with pushrods, front and rear wings with NACA profiles. Dimensions are estimates of a typical FS car, not design data.",
+          "Placeholder: more about my work in the team follows."
+        ],
+        "de": [
+          "Mitglied bei TU Wien Racing, im Bereich Chassis und Composites.",
+          "Das Modell ist ein elektrischer Formula-Student-Rennwagen, frei angelehnt an die EDGE-Fahrzeuge des Teams, prozedural in Blender mit Python gebaut: Carbon-Monocoque, Doppelquerlenker mit Pushrods, Front- und Heckflügel mit NACA-Profilen. Die Maße sind Schätzwerte eines typischen FS-Autos, keine Konstruktionsdaten.",
+          "Platzhalter: Mehr zu meiner Arbeit im Team folgt."
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": "wall-hanger",
+      "visible": true,
+      "position": [-0.9, -2.0],
+      "rotation": 0,
+      "scale": 1,
+      "model": "models/wall-hanger/web/wall_hanger.glb",
+      "placeholder": "box",
+      "window": "text+links",
+      "title": { "en": "Wall hanger", "de": "Wandhänger" },
+      "label": { "en": "Wall hanger", "de": "Wandhänger" },
+      "tags": ["BLENDER"],
+      "text": {
+        "en": ["Oak coat rail with five hooks, a backpack and motorcycle trousers, modelled in Blender.", "Placeholder: text follows."],
+        "de": ["Garderobenleiste aus Eiche mit fünf Haken, Rucksack und Motorradhose, in Blender modelliert.", "Platzhalter: Text folgt."]
+      },
       "links": []
     }
   ]

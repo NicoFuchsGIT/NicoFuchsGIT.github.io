@@ -123,7 +123,7 @@ function onTable(model, height) {
     const g = new THREE.Group();
     model.updateMatrixWorld(true);
     const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
-    const w = Math.max(size.x + 0.4, 1.0), d = Math.max(size.z + 0.3, 0.5), t = 0.03;
+    const w = Math.max(size.x + 0.5, 1.2), d = Math.max(size.z + 0.35, 0.65), t = 0.03;
     const steel = mat(DARK, 0.5, 0.4);
     g.add(mesh(new THREE.BoxGeometry(w, t, d), mat(0xd8c3a0, 0.6), 0, height - t / 2, 0));
     for (const x of [-1, 1]) for (const z of [-1, 1]) {

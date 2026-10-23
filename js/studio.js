@@ -35,7 +35,7 @@ export function createStudio(renderer, scene, { mobile = false } = {}) {
     scene.add(cove(), band);
     scene.add(floor(mobile, [band]));
     // Die Softboxen rahmen das Bild links und rechts; im Querformat nimmt die Kamera sie mit in den Bildausschnitt
-    const softboxes = [softbox(-5.4, 0.3), softbox(5.4, 0.3)];
+    const softboxes = [softbox(-9.9, 0.3), softbox(9.9, 0.3)];
     scene.add(...softboxes);
 
     // Licht an/aus für die Einstiegsfahrt (F-05): 0 = dunkel, 1 = Studio hell
