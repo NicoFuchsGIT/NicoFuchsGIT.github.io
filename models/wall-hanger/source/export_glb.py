@@ -1,14 +1,14 @@
 """Export wall_hanger.blend as a web model (wall_hanger-raw.glb) for the Three.js studio.
 Run: blender -b models/wall-hanger/wall_hanger.blend -P models/wall-hanger/source/export_glb.py
 
-The studio's back wall curves into the floor (cove), so the hanger gets its own freestanding wall panel
-(1.6 x 2.1 m, the original 5 m wall cut down, with two feet at the back). Drops floor, lights and camera,
+The wall itself comes from the studio (`wall` in content/objects.json), so the export drops the wall and
+the skirting board together with floor, lights and camera,
 clears the parents (Rucksack, Motorradhose), decimates the dense cloth meshes (201k -> ~40k triangles, trousers alone ~106k)
 and joins the parts per material. The oak grain is baked into a texture; the noise bump maps of the
 fabrics are dropped (glTF has no procedural textures). Output: ../web/wall_hanger-raw.glb (compress with
-gltf-transform, see README), Y-up metres, origin on the floor at the centre of the panel's front face.
+gltf-transform, see README), Y-up metres, origin on the floor below the rail, on the wall surface (the parts hang towards +Z).
 """
-import bpy, math, os, bmesh
+import bpy, math, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 if not bpy.data.filepath:
@@ -16,7 +16,6 @@ if not bpy.data.filepath:
 OUT = os.path.join(HERE, "..", "web", "wall_hanger-raw.glb")
 ctx = bpy.context
 scene = ctx.scene
-PANEL_W, PANEL_H = 1.6, 2.1
 KEEP_TRIS = 2500           # pro Material: bis hierhin bleibt alles, darueber bleiben 6 % des Rests
 
 def select_only(obs):
@@ -37,26 +36,9 @@ for ob in bpy.data.objects:
 for ob in [o for o in bpy.data.objects if o.type == 'EMPTY']:
     bpy.data.objects.remove(ob)
 
-# --- Wand auf eine freistehende Platte kuerzen, Fuesse dahinter -------------
-for name, h in (("Wand", PANEL_H), ("Sockelleiste", None)):
-    ob = bpy.data.objects[name]
-    for v in ob.data.vertices:
-        v.co.x = math.copysign(PANEL_W / 2, v.co.x)
-        if h and v.co.z > 0.5:
-            v.co.z = h
-feet = bpy.data.materials.new("Fuss")
-feet.use_nodes = True
-feet.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.03, 0.03, 0.035, 1)
-feet.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.5
-for x in (-PANEL_W / 2 + 0.12, PANEL_W / 2 - 0.12):
-    bm = bmesh.new()
-    bmesh.ops.create_cube(bm, size=1.0)
-    me = bpy.data.meshes.new("Fuss"); bm.to_mesh(me); bm.free()
-    me.materials.append(feet)
-    ob = bpy.data.objects.new("Fuss", me)
-    ob.scale = (0.06, 0.45, 0.05)
-    ob.location = (x, 0.1 + 0.225, 0.025)
-    scene.collection.objects.link(ob)
+# --- Wand und Sockelleiste raus: der Haenger kommt an die Wand im Studio (objects.json `wall`) ---
+for name in ("Wand", "Sockelleiste"):
+    bpy.data.objects.remove(bpy.data.objects[name])
 
 # --- Modifier und Kurven einbacken -------------------------------------------
 parts = [ob for ob in bpy.data.objects if ob.type in ('MESH', 'CURVE', 'FONT')]

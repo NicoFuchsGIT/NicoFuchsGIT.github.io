@@ -61,7 +61,7 @@ export class MenuCamera {
             cam.updateMatrixWorld();
             return corners.every((c) => {
                 p.copy(c).applyMatrix4(cam.matrixWorldInverse);
-                if (p.z > -cam.near) return false;
+                if (p.z > -0.1) return false;
                 p.applyMatrix4(cam.projectionMatrix);
                 return Math.abs(p.x) <= this.margin && Math.abs(p.y) <= this.margin;
             });
@@ -114,6 +114,17 @@ export class MenuCamera {
         const pitch = this.pitchFor(this.cur.target, this.cur.distance) + THREE.MathUtils.lerp(deg(7), 0, k) + this.cur.pitch * k;
         const yaw = this.cur.yaw * k;
         this.place(this.camera, this.cur.target, distance, pitch, yaw);
+
+        // Tiefenbereich an den Abstand koppeln: mit fester Near-Plane von 0,1 m reicht die Tiefenauflösung
+        // auf 15 bis 25 m nicht mehr, nahe beieinander liegende Flächen (Monitorbild, Rückwand am Rack)
+        // flackern, auf Handys mit 16-Bit-Tiefenpuffer besonders stark.
+        // Höchstens 3 m: der Boden am unteren Bildrand liegt bei 1,9 m Kamerahöhe gut 4 m vor der Kamera.
+        const near = THREE.MathUtils.clamp(distance * 0.2, 0.1, 3), far = distance * 3 + 30;
+        if (this.camera.near !== near || this.camera.far !== far) {
+            this.camera.near = near;
+            this.camera.far = far;
+            this.camera.updateProjectionMatrix();
+        }
     }
 }
 
