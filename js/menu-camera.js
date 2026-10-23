@@ -7,7 +7,7 @@ const deg = THREE.MathUtils.degToRad;
 
 export class MenuCamera {
     constructor(camera, {
-        pitch = deg(9),        // Blick leicht von oben
+        eyeHeight = 1.9,       // Kamerahöhe in Metern: knapp über Augenhöhe der 1,80 m großen Figur
         swayYaw = deg(2.5),    // Mitschwenken links/rechts
         swayPitch = deg(1.2),  // Mitschwenken oben/unten
         margin = 0.9,          // Anteil des Bildes (NDC), den der Rahmen höchstens füllt
@@ -16,7 +16,7 @@ export class MenuCamera {
         intro = true,
     } = {}) {
         this.camera = camera;
-        this.pitch = pitch;
+        this.eyeHeight = eyeHeight;
         this.swayYaw = swayYaw;
         this.swayPitch = swayPitch;
         this.margin = margin;
@@ -57,7 +57,7 @@ export class MenuCamera {
         const corners = boxCorners(this.box);
         const p = new THREE.Vector3();
         const fits = (d) => {
-            this.place(cam, target, d, this.pitch, 0);
+            this.place(cam, target, d, this.pitchFor(target, d), 0);
             cam.updateMatrixWorld();
             return corners.every((c) => {
                 p.copy(c).applyMatrix4(cam.matrixWorldInverse);
@@ -78,7 +78,12 @@ export class MenuCamera {
             this.cur.distance = hi;
             this.fitted = true;
         }
-        this.place(cam, this.cur.target, this.cur.distance, this.pitch, 0);
+        this.place(cam, this.cur.target, this.cur.distance, this.pitchFor(this.cur.target, this.cur.distance), 0);
+    }
+
+    // Neigung, bei der die Kamera im Abstand `distance` genau auf `eyeHeight` steht
+    pitchFor(target, distance) {
+        return Math.asin(THREE.MathUtils.clamp((this.eyeHeight - target.y) / distance, -1, 1));
     }
 
     // Kamera auf einer Kugel um das Ziel platzieren
@@ -106,7 +111,7 @@ export class MenuCamera {
 
         // Einstieg: von weiter hinten und etwas höher hereinfahren
         const distance = this.cur.distance * THREE.MathUtils.lerp(1.55, 1, k);
-        const pitch = this.pitch + THREE.MathUtils.lerp(deg(7), 0, k) + this.cur.pitch * k;
+        const pitch = this.pitchFor(this.cur.target, this.cur.distance) + THREE.MathUtils.lerp(deg(7), 0, k) + this.cur.pitch * k;
         const yaw = this.cur.yaw * k;
         this.place(this.camera, this.cur.target, distance, pitch, yaw);
     }
