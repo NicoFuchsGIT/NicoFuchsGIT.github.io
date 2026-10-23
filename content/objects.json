@@ -13,15 +13,13 @@
       "window": "model+text",
       "title": { "en": "Workshop", "de": "Werkstatt" },
       "label": { "en": "Workshop", "de": "Werkstatt" },
-      "tags": ["WOODWORKING", "BLENDER"],
+      "tags": ["WOODWORKING"],
       "text": {
         "en": [
-          "Walnut workbench with a hutch, pegboard and drawer cabinet, next to a cabinet table saw. Both work surfaces sit at 92 cm.",
-          "Model: built procedurally in Blender (Python), wood grain and pegboard baked into textures."
+          "Placeholder: text follows."
         ],
         "de": [
-          "Werkbank aus Nussbaum mit Aufsatz, Lochwand und Schubladenschrank, daneben eine Tischkreissäge in Schrank-Bauweise. Beide Arbeitsflächen liegen auf 92 cm Höhe.",
-          "Modell: Prozedural in Blender gebaut (Python), Holzmaserung und Lochwand als Textur gebacken."
+          "Platzhalter: Text folgt."
         ]
       },
       "links": []
@@ -43,14 +41,12 @@
         "en": [
           "Responsible for the 3D printing room at TU Wien Racing: keeping the printers running, planning print jobs and getting printed parts ready for the car.",
           "Prototyping of the Formula Student steering wheel in several iterations, and making inserts for the monocoque.",
-          "Printers I have worked with – FDM: Anycubic Kobra 2 Max, Original Prusa i3 MK3, Bambu Lab P1S, Bambu Lab A1. SLA: Elegoo Mars Pro.",
-          "The print table in the studio shows a Bambu Lab H2D and a Formlabs Form 4 with Form Wash and Form Cure, built procedurally in Blender."
+          "Printers I have worked with – FDM: Anycubic Kobra 2 Max, Original Prusa i3 MK3, Bambu Lab P1S, Bambu Lab A1. SLA: Elegoo Mars Pro."
         ],
         "de": [
           "Verantwortlich für den 3D-Druckraum bei TU Wien Racing: Drucker am Laufen halten, Druckaufträge planen und gedruckte Teile fürs Auto fertig machen.",
           "Prototyping des Formula-Student-Lenkrads in mehreren Iterationen und Erstellung von Inserts für das Monocoque.",
-          "Drucker, mit denen ich gearbeitet habe – FDM: Anycubic Kobra 2 Max, Original Prusa i3 MK3, Bambu Lab P1S, Bambu Lab A1. SLA: Elegoo Mars Pro.",
-          "Der Drucktisch im Studio zeigt einen Bambu Lab H2D und einen Formlabs Form 4 mit Form Wash und Form Cure, prozedural in Blender gebaut."
+          "Drucker, mit denen ich gearbeitet habe – FDM: Anycubic Kobra 2 Max, Original Prusa i3 MK3, Bambu Lab P1S, Bambu Lab A1. SLA: Elegoo Mars Pro."
         ]
       },
       "links": []
@@ -176,14 +172,12 @@
         "en": [
           "Member of TU Wien Racing in Chassis & Composite Manufacturing and responsible for the team's 3D printing. Formula Student means designing, building and racing a complete electric race car within one season, together with a few dozen students.",
           "Steering wheel: co-developed and manufactured the steering wheel, from 3D-printed prototypes to check grip, ergonomics and fit in the cockpit to the finished part in the car.",
-          "Carbon: hands-on manufacturing of the carbon-fibre chassis and several other carbon parts, from cutting and laying up the plies to finishing the parts.",
-          "The model in the studio is an electric FS car loosely based on the team's EDGE cars, built procedurally in Blender with Python."
+          "Carbon: hands-on manufacturing of the carbon-fibre chassis and several other carbon parts, from cutting and laying up the plies to finishing the parts."
         ],
         "de": [
           "Mitglied bei TU Wien Racing in Chassis & Composite Manufacturing und verantwortlich für den 3D-Druck im Team. Formula Student heißt: in einer Saison mit ein paar Dutzend Studierenden einen kompletten elektrischen Rennwagen konstruieren, bauen und damit Rennen fahren.",
           "Lenkrad: Mitentwicklung und Fertigung des Lenkrads, von 3D-gedruckten Prototypen für Griff, Ergonomie und Passung im Cockpit bis zum fertigen Teil im Auto.",
-          "Carbon: Fertigung des Carbon-Chassis und einiger weiterer Carbonteile, vom Zuschnitt und Ablegen der Lagen bis zur Nachbearbeitung.",
-          "Das Modell im Studio ist ein elektrischer FS-Rennwagen, frei angelehnt an die EDGE-Fahrzeuge des Teams, prozedural in Blender mit Python gebaut."
+          "Carbon: Fertigung des Carbon-Chassis und einiger weiterer Carbonteile, vom Zuschnitt und Ablegen der Lagen bis zur Nachbearbeitung."
         ]
       },
       "links": []
