@@ -38,15 +38,19 @@
       "window": "text+links",
       "title": { "en": "3D Printing", "de": "3D-Druck" },
       "label": { "en": "3D Printing", "de": "3D-Druck" },
-      "tags": ["3D_PRINTING", "BLENDER"],
+      "tags": ["3D_PRINTING", "FDM", "SLA", "PROTOTYPING"],
       "text": {
         "en": [
-          "Print table with a Bambu Lab H2D (FDM, with AMS 2 Pro for four filaments) and a Formlabs Form 4 (resin), plus Form Wash and Form Cure for post-processing.",
-          "Model: built procedurally in Blender (Python), wood grain baked into a texture."
+          "Responsible for the 3D printing room at TU Wien Racing: keeping the printers running, planning print jobs and getting printed parts ready for the car.",
+          "Prototyping of the Formula Student steering wheel in several iterations, and making inserts for the monocoque.",
+          "Printers I have worked with – FDM: Anycubic Kobra 2 Max, Original Prusa i3 MK3, Bambu Lab P1S, Bambu Lab A1. SLA: Elegoo Mars Pro.",
+          "The print table in the studio shows a Bambu Lab H2D and a Formlabs Form 4 with Form Wash and Form Cure, built procedurally in Blender."
         ],
         "de": [
-          "Drucktisch mit einem Bambu Lab H2D (FDM, mit AMS 2 Pro für vier Filamente) und einem Formlabs Form 4 (Resin), daneben Form Wash und Form Cure für die Nachbearbeitung.",
-          "Modell: Prozedural in Blender gebaut (Python), Holzmaserung als Textur gebacken."
+          "Verantwortlich für den 3D-Druckraum bei TU Wien Racing: Drucker am Laufen halten, Druckaufträge planen und gedruckte Teile fürs Auto fertig machen.",
+          "Prototyping des Formula-Student-Lenkrads in mehreren Iterationen und Erstellung von Inserts für das Monocoque.",
+          "Drucker, mit denen ich gearbeitet habe – FDM: Anycubic Kobra 2 Max, Original Prusa i3 MK3, Bambu Lab P1S, Bambu Lab A1. SLA: Elegoo Mars Pro.",
+          "Der Drucktisch im Studio zeigt einen Bambu Lab H2D und einen Formlabs Form 4 mit Form Wash und Form Cure, prozedural in Blender gebaut."
         ]
       },
       "links": []
@@ -61,15 +65,19 @@
       "decals": ["Millimetre_paper", "Marker_panel", "ArUco_id0"],
       "placeholder": "box",
       "window": "text+links",
-      "title": { "en": "Barbellscan", "de": "Barbellscan" },
+      "title": { "en": "Barbellscan – Powerlifting", "de": "Barbellscan – Powerlifting" },
       "label": { "en": "Powerlifting", "de": "Powerlifting" },
-      "tags": ["COMPUTER_VISION", "POWERLIFTING"],
+      "tags": ["PYTHON", "OPENCV", "COMPUTER_VISION", "POWERLIFTING"],
       "text": {
         "en": [
-          "Camera-based measurement of barbell bending under load. Test setup: Legend Monolift with an Eleiko Powerbar and 225 kg, yellow markers on the bar ends and an ArUco marker as reference."
+          "Load testing of 13 different powerlifting barbells (power, squat and deadlift bars) up to 425 kg, in collaboration with Intelligentstrength. How much do the bars prescribed by different federations bend under heavy loads, and do they return to their original shape?",
+          "An automated scanning algorithm in Python and OpenCV measures the deflection from photos: yellow markers on the sleeve ends and the bar centre are tracked with subpixel accuracy against an ArUco reference. Nine load steps from 20 to 425 kg, five runs per bar. On 700 synthetic test images with known bending, the maximum error is 0.1 mm.",
+          "Seminar paper “Standardisation vs. Flexibility: A Quantitative Analysis of Barbell Deflection Under Heavy Loads Across Federation Regulations”, publication planned for winter 2026/27."
         ],
         "de": [
-          "Messung der Hantelstangen-Durchbiegung unter Last per Kamera. Testaufbau: Legend Monolift mit Eleiko Powerbar und 225 kg, gelbe Marker an den Hantelenden und ein ArUco-Marker als Referenz."
+          "Belastungstest von 13 verschiedenen Powerlifting-Langhanteln (Power-, Squat- und Deadlift-Bars) bis 425 kg, in Zusammenarbeit mit Intelligentstrength. Wie stark biegen sich die Stangen, die verschiedene Verbände vorschreiben, unter hoher Last durch, und kehren sie in ihre Ausgangsform zurück?",
+          "Ein automatisierter Scan-Algorithmus in Python und OpenCV misst die Durchbiegung aus Fotos: Gelbe Marker an den Hantelenden und in der Stangenmitte werden subpixelgenau gegen eine ArUco-Referenz verfolgt. Neun Laststufen von 20 bis 425 kg, fünf Durchgänge pro Stange. Auf 700 synthetischen Testbildern mit bekannter Biegung liegt der Fehler bei höchstens 0,1 mm.",
+          "Seminararbeit „Standardisation vs. Flexibility: A Quantitative Analysis of Barbell Deflection Under Heavy Loads Across Federation Regulations“, Veröffentlichung geplant für Winter 2026/27."
         ]
       },
       "links": [
@@ -161,19 +169,21 @@
       "model": "models/formula-student/web/formula_student.glb",
       "placeholder": "car",
       "window": "text+links",
-      "title": { "en": "Formula Student", "de": "Formula Student" },
+      "title": { "en": "Formula Student – TU Wien Racing", "de": "Formula Student – TU Wien Racing" },
       "label": { "en": "Formula Student", "de": "Formula Student" },
-      "tags": ["TU_WIEN_RACING", "CHASSIS", "COMPOSITES"],
+      "tags": ["TU_WIEN_RACING", "COMPOSITES", "CARBON", "3D_PRINTING"],
       "text": {
         "en": [
-          "Member of TU Wien Racing, working on chassis and composites.",
-          "The model is an electric Formula Student car loosely based on the team's EDGE cars, built procedurally in Blender with Python: carbon monocoque, double wishbones with pushrods, front and rear wings with NACA profiles. Dimensions are estimates of a typical FS car, not design data.",
-          "Placeholder: more about my work in the team follows."
+          "Member of TU Wien Racing in Chassis & Composite Manufacturing and responsible for the team's 3D printing. Formula Student means designing, building and racing a complete electric race car within one season, together with a few dozen students.",
+          "Steering wheel: co-developed and manufactured the steering wheel, from 3D-printed prototypes to check grip, ergonomics and fit in the cockpit to the finished part in the car.",
+          "Carbon: hands-on manufacturing of the carbon-fibre chassis and several other carbon parts, from cutting and laying up the plies to finishing the parts.",
+          "The model in the studio is an electric FS car loosely based on the team's EDGE cars, built procedurally in Blender with Python."
         ],
         "de": [
-          "Mitglied bei TU Wien Racing, im Bereich Chassis und Composites.",
-          "Das Modell ist ein elektrischer Formula-Student-Rennwagen, frei angelehnt an die EDGE-Fahrzeuge des Teams, prozedural in Blender mit Python gebaut: Carbon-Monocoque, Doppelquerlenker mit Pushrods, Front- und Heckflügel mit NACA-Profilen. Die Maße sind Schätzwerte eines typischen FS-Autos, keine Konstruktionsdaten.",
-          "Platzhalter: Mehr zu meiner Arbeit im Team folgt."
+          "Mitglied bei TU Wien Racing in Chassis & Composite Manufacturing und verantwortlich für den 3D-Druck im Team. Formula Student heißt: in einer Saison mit ein paar Dutzend Studierenden einen kompletten elektrischen Rennwagen konstruieren, bauen und damit Rennen fahren.",
+          "Lenkrad: Mitentwicklung und Fertigung des Lenkrads, von 3D-gedruckten Prototypen für Griff, Ergonomie und Passung im Cockpit bis zum fertigen Teil im Auto.",
+          "Carbon: Fertigung des Carbon-Chassis und einiger weiterer Carbonteile, vom Zuschnitt und Ablegen der Lagen bis zur Nachbearbeitung.",
+          "Das Modell im Studio ist ein elektrischer FS-Rennwagen, frei angelehnt an die EDGE-Fahrzeuge des Teams, prozedural in Blender mit Python gebaut."
         ]
       },
       "links": []
