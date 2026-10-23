@@ -9,6 +9,7 @@ Dateien für die Fenster (PRD Abschnitt 8). Eine neue Version einfach mit **glei
 | `cv/cv-en-short.pdf` | Anzeige im CV-Fenster | Nur Seite 1 von `cv-en.pdf` (ohne Projekte, die stehen im Studio). Neu erzeugen: `python3 -c "import pymupdf; d=pymupdf.open('cv/cv-en.pdf'); d.select([0]); d.save('cv/cv-en-short.pdf')"` |
 | `cv/cv-en-preview.jpg` | CV-Vorschau am Handy | Erste Seite als Bild: `pdftoppm -jpeg -r 90 -singlefile cv/cv-en.pdf cv/cv-en-preview` |
 | `spikeball/paper.pdf` | Spikeball-Fenster | Projektbericht (nur Englisch). Die Matrikelnummern auf dem Deckblatt sind geschwärzt |
+| `martini/arouca-backpack.pdf` | Fenster „Performance Apparel“ (Wandhänger) | Präsentation zum Martini-Rucksack (nur Englisch). Die Matrikelnummern auf der Titelfolie sind geschwärzt. Die Case Study zur Motorradhose liegt bewusst **nicht** hier, nur als Text im Fenster |
 
 ## Website allgemein
 
