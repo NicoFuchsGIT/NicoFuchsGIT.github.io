@@ -100,7 +100,7 @@ function render(lang) {
             button(actions, { text: label(def.download.label, lang), url: pick(def.download.url, lang), download: true, fileLang: def.download.lang }, lang, t);
         }
         for (const link of def.links ?? []) {
-            button(actions, { text: label(link.label, lang), url: link.url, primary: link.primary, download: link.download }, lang, t);
+            button(actions, { text: label(link.label, lang), url: link.url, primary: link.primary, download: link.download, fileLang: link.lang }, lang, t);
         }
         if (!noStudio) button(actions, { text: t.view3d, url: './#' + encodeURIComponent(def.id) }, lang, t);
         if (!actions.children.length) actions.remove();

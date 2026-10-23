@@ -188,14 +188,24 @@
       "model": "models/wall-hanger/web/wall_hanger.glb",
       "placeholder": "box",
       "window": "text+links",
-      "title": { "en": "Wall hanger", "de": "Wandhänger" },
-      "label": { "en": "Wall hanger", "de": "Wandhänger" },
-      "tags": ["BLENDER"],
+      "title": { "en": "Performance Apparel", "de": "Performance Apparel" },
+      "label": { "en": "Performance Apparel", "de": "Performance Apparel" },
+      "tags": ["MATERIALS", "TEXTILES", "PRODUCT_DEVELOPMENT"],
       "text": {
-        "en": ["Oak coat rail with five hooks, a backpack and motorcycle trousers, modelled in Blender.", "Placeholder: text follows."],
-        "de": ["Garderobenleiste aus Eiche mit fünf Haken, Rucksack und Motorradhose, in Blender modelliert.", "Platzhalter: Text folgt."]
+        "en": [
+          "Two team projects from the course Materials & Technology for Performance Apparel at UAS Technikum Wien, together with Kilian Chalmers and Andreas Fischer.",
+          "Backpack: improvement concepts for the Martini Sportswear Arouca ski touring backpack, based on a market analysis. ALUULA Graflyte instead of a nylon-polyester blend (30–49 % lighter, more abrasion- and tear-resistant, recyclable mono-material), a slimmer and taller shape for better load distribution along the spine, and racing-harness-style straps for stability. The combined concept scored 9.3 out of 10 in the weighted evaluation (original: 5.7), with proposed performance tests (durability, EMG, IMU swing test).",
+          "Motorcycle trousers: case study comparing city jeans, off-road and touring trousers (Bogotto Streton, Rev'it Territory 2, Macna Ultimax) by use, fibre composition, fabric structure (aramid lining, Cordura ripstop, laminated PU membrane, CE protectors) and sustainability (PFC-free DWR, PTFE-free membrane)."
+        ],
+        "de": [
+          "Zwei Teamprojekte aus der Lehrveranstaltung Materials & Technology for Performance Apparel an der FH Technikum Wien, gemeinsam mit Kilian Chalmers und Andreas Fischer.",
+          "Rucksack: Verbesserungskonzepte für den Skitourenrucksack Arouca von Martini Sportswear, aufbauend auf einer Marktanalyse. ALUULA Graflyte statt Nylon-Polyester-Mischgewebe (30–49 % leichter, abrieb- und reißfester, recycelbares Monomaterial), eine schmalere, höhere Form für bessere Lastverteilung entlang der Wirbelsäule und Gurte im Stil von Rennsport-Gurten für mehr Stabilität. Das kombinierte Konzept erreichte in der gewichteten Bewertung 9,3 von 10 Punkten (Original: 5,7), dazu vorgeschlagene Performance-Tests (Haltbarkeit, EMG, IMU-Schwingtest).",
+          "Motorradhose: Case Study zu Stadt-Jeans, Offroad- und Tourenhose (Bogotto Streton, Rev'it Territory 2, Macna Ultimax), verglichen nach Einsatz, Faserzusammensetzung, Gewebestruktur (Aramid-Futter, Cordura-Ripstop, laminierte PU-Membran, CE-Protektoren) und Nachhaltigkeit (PFC-freie DWR, PTFE-freie Membran)."
+        ]
       },
-      "links": []
+      "links": [
+        { "label": { "en": "Backpack presentation (PDF)", "de": "Rucksack-Präsentation (PDF)" }, "url": "assets/martini/arouca-backpack.pdf", "lang": "en", "primary": true }
+      ]
     }
   ]
 }
