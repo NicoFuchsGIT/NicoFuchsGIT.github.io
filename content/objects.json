@@ -11,15 +11,20 @@
       "model": "models/woodworking/web/workshop.glb",
       "placeholder": "box",
       "window": "model+text",
-      "title": { "en": "Workshop", "de": "Werkstatt" },
-      "label": { "en": "Workshop", "de": "Werkstatt" },
-      "tags": ["WOODWORKING"],
+      "windowModel": "models/bed/web/bed.glb",
+      "title": { "en": "Woodworking", "de": "Holzbearbeitung" },
+      "label": { "en": "Woodworking", "de": "Holzbearbeitung" },
+      "tags": ["WOODWORKING", "JOINERY", "FURNITURE"],
       "text": {
         "en": [
-          "Placeholder: text follows."
+          "Love for craftsmanship: I like building things with my own hands, from the first sketch to the last coat of finish. Woodworking is my counterbalance to the screen, and it trains the same things as engineering – careful planning, precise measuring and a feel for how a material behaves.",
+          "Project: a solid wood platform bed with headboard, designed and built myself. The slatted base is joined to three longitudinal rails with cross lap joints: slat and rail are each notched to half depth, so they interlock, sit flush and cannot slide.",
+          "The headboard is made of horizontal boards with a strong grain and has a shelf on top; the slats and legs are stained dark."
         ],
         "de": [
-          "Platzhalter: Text folgt."
+          "Liebe zum Handwerk: Ich baue gern Dinge mit den eigenen Händen, von der ersten Skizze bis zum letzten Schliff. Holzbearbeitung ist mein Ausgleich zum Bildschirm und trainiert dasselbe wie das Ingenieurwesen – sorgfältig planen, genau messen und ein Gefühl dafür, wie sich ein Material verhält.",
+          "Projekt: ein Massivholzbett mit Kopfteil, selbst entworfen und gebaut. Der Lattenrost ist mit drei Längsträgern überblattet: Latte und Träger sind jeweils zur Hälfte ausgeklinkt, greifen ineinander, liegen bündig und können nicht verrutschen.",
+          "Das Kopfteil besteht aus waagrechten Brettern mit kräftiger Maserung und hat oben eine Ablage; Latten und Füße sind dunkel gebeizt."
         ]
       },
       "links": []
