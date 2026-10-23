@@ -174,6 +174,13 @@
         #legal a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 6px; color: #777; text-decoration: none; }
         #legal a:hover { color: #111; text-decoration: underline; }
 
+        /* Ohne JavaScript (F-52) */
+        .noscript { position: absolute; inset: 0; z-index: 20; padding: 32px 20px; background: #f8f8fa; color: #222; line-height: 1.6; }
+        .noscript p { font-family: inherit; }
+        .noscript ul { padding-left: 20px; }
+        .noscript a { color: #111; }
+        .noscript .small { font-size: 0.85rem; }
+
         /* Schmale Handys: Leiste unten, gut mit dem Daumen erreichbar; Kontaktmenü klappt nach oben */
         @media (max-width: 640px) {
             #ui-layer { top: 16px; left: 16px; max-width: calc(100% - 32px); }
@@ -433,6 +440,29 @@
     </style>
 
     <!-- Import Maps für modernes JavaScript (erlaubt das Laden von Three.js ohne Server/Bundler) -->
+    <!-- Fallback (F-51): Ohne WebGL, ohne Import-Maps (z. B. Safari vor 16.4) oder wenn die Szene mit einem Fehler
+         abbricht bzw. nach 20 s nicht steht, geht es zur Listenansicht. Das Modul setzt `studioReady`, sobald es läuft. -->
+    <script>
+        (function () {
+            function toList(reason) {
+                if (window.studioReady) return;
+                window.studioReady = true; // nur einmal umleiten
+                location.replace('list.html?fallback=' + reason + location.hash);
+            }
+            var gl = false;
+            try {
+                var c = document.createElement('canvas');
+                gl = !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+            } catch (e) { /* kein WebGL */ }
+            var importMaps = window.HTMLScriptElement && HTMLScriptElement.supports && HTMLScriptElement.supports('importmap');
+            if (!gl) return toList('webgl');
+            if (!importMaps) return toList('browser');
+            window.addEventListener('error', function () { toList('error'); });
+            window.addEventListener('unhandledrejection', function () { toList('error'); });
+            setTimeout(function () { toList('timeout'); }, 20000);
+        })();
+    </script>
+
     <!-- three.js liegt im Repo (vendor/), damit keine Requests an Dritte gehen (N-05, F-71) -->
     <script type="importmap">
       {
@@ -448,6 +478,22 @@
     <!-- Hier lebt die 3D Szene -->
     <div id="canvas-container"></div>
 
+    <!-- Ohne JavaScript (F-52): das Wichtigste als Text. Kontaktdaten wie in content/site.json -->
+    <noscript>
+        <div class="noscript">
+            <h1>Nico Fuchs</h1>
+            <p>Sports Engineering Student · Motorsport, Composites, Data Science</p>
+            <ul>
+                <li><a href="assets/cv/cv-en.pdf">CV (PDF)</a></li>
+                <li><a href="assets/spikeball/paper.pdf">Spikeball paper (PDF)</a></li>
+                <li><a href="mailto:nico.fuchs5@gmail.com">nico.fuchs5@gmail.com</a></li>
+                <li><a href="https://www.linkedin.com/in/nicofuchs/">LinkedIn</a></li>
+                <li><a href="list.html">All projects / Alle Projekte</a></li>
+            </ul>
+            <p class="small"><a href="impressum.html">Impressum / Imprint</a> · <a href="datenschutz.html">Datenschutz / Privacy</a></p>
+        </div>
+    </noscript>
+
     <!-- UI Overlay (Immer sichtbar) -->
     <header id="ui-layer">
         <h1 id="site-name">Nico Fuchs</h1>
@@ -455,6 +501,14 @@
         <!-- Hinweis „im Aufbau“, abschaltbar mit "wip": false in content/site.json -->
         <div class="wip" id="wip"><strong data-i18n="wip">Website work in progress</strong><span data-i18n="wipNote">Some content is still a placeholder.</span></div>
     </header>
+
+    <!-- Listenansicht ohne 3D (F-42), Impressum und Datenschutz (F-43). Steht vor der Leiste, damit die Liste
+         beim Tabben das erste Ziel ist -->
+    <footer id="legal">
+        <a href="list.html" id="list-link" data-i18n="listView">Skip 3D / list view</a>
+        <a href="impressum.html" data-i18n="imprint">Imprint</a>
+        <a href="datenschutz.html" data-i18n="privacy">Privacy</a>
+    </footer>
 
     <!-- CV, Kontakt, LinkedIn, Sprache (F-41) -->
     <nav id="toolbar" aria-label="Site">
@@ -472,12 +526,6 @@
             <button type="button" data-lang="de" aria-pressed="false" lang="de">DE</button>
         </div>
     </nav>
-
-    <!-- Impressum und Datenschutz (F-43, F-70, F-71) -->
-    <footer id="legal">
-        <a href="impressum.html" data-i18n="imprint">Imprint</a>
-        <a href="datenschutz.html" data-i18n="privacy">Privacy</a>
-    </footer>
 
     <!-- Labels über den Objekten, werden in js/labels.js erzeugt -->
     <div id="labels"></div>
@@ -742,6 +790,7 @@
         });
 
         animate();
+        window.studioReady = true; // Szene läuft, kein Fallback mehr (F-51)
     </script>
 </body>
 </html>
