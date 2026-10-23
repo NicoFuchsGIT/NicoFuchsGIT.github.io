@@ -14,6 +14,8 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 | `scale` | Größe, `1` = Originalmaße des Modells. Alle Modelle sind in echten Metern gebaut, deshalb überall `1` lassen, damit die Größen zueinander passen |
 | `model` | Pfad zu einer `.glb`-Datei (Draco-komprimiert). Leer = Platzhalter. Lädt das Modell nicht, bleibt der Platzhalter stehen |
 | `table` | Optional: Höhe einer Schreibtischplatte in Metern (vor `scale`), auf die das Modell gestellt wird, mit Tastatur und Maus, z. B. der SunCafe-Monitor |
+| `wall` | Optional: `{ "width": 4.1, "height": 2.4 }`, ein Wandstück direkt hinter dem Modell (mit Sockelleiste). Mehrere Wandstücke auf einem Kreisbogen ergeben die Wand links im Studio |
+| `decals` | Optional: Materialnamen dünner Auflagen im Modell (Monitorbild, Papier auf einer Platte), die sonst aus der Ferne flackern |
 | `placeholder` | Form, solange kein Modell da ist: `avatar`, `suncafe`, `car` oder `box` |
 | `avatar` | Nur bei `avatar`: `height` in Metern und Farben für `skin`, `hair`, `top`, `bottom`, `shoes` |
 | `window` | Fenstertyp, siehe unten: `pdf`, `model+text`, `media+text+download` oder `text+links` |

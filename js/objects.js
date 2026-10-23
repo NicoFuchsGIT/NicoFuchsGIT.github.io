@@ -60,9 +60,9 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
             onChange();
         };
 
-        show(placeholder(def));
+        show(onWall(placeholder(def), def.wall));
         if (def.model) {
-            gltfLoader.load(def.model, (gltf) => show(onTable(gltf.scene, def.table)), undefined,
+            gltfLoader.load(def.model, (gltf) => show(onWall(onTable(withDecals(gltf.scene, def.decals), def.table), def.wall)), undefined,
                 (err) => console.warn(`${def.id}: Modell nicht geladen, Platzhalter bleibt`, err));
         }
     }
@@ -135,6 +135,36 @@ function onTable(model, height) {
     const mouse = mesh(new THREE.SphereGeometry(0.03, 16, 8), mat(0xf4f4f6, 0.4), 0.24, height, d / 2 - 0.12);
     mouse.scale.set(0.7, 0.45, 1);
     g.add(mouse);
+    return g;
+}
+
+// Dünne Auflagen (`decals`: Materialnamen), die knapp vor einer anderen Fläche liegen, z. B. ein Monitorbild
+// 0,2 mm vor dem Rahmen: Polygon-Offset zieht sie im Tiefenpuffer nach vorn, damit sie aus der Ferne nicht flackern.
+function withDecals(model, names) {
+    if (!names?.length) return model;
+    model.traverse((o) => {
+        for (const m of o.isMesh ? [o.material].flat() : []) {
+            if (!names.includes(m.name)) continue;
+            m.polygonOffset = true;
+            m.polygonOffsetFactor = -2;
+            m.polygonOffsetUnits = -4;
+        }
+    });
+    return model;
+}
+
+// Wandstück hinter das Modell stellen (`wall`: { width, height } in Metern vor `scale`), mit Sockelleiste.
+// Die Vorderseite liegt knapp hinter der Rückseite des Modells, mittig zum Ursprung. Mehrere Wandstücke
+// nebeneinander auf einem Kreisbogen ergeben eine durchgehende Wand (Anordnung in content/objects.json).
+function onWall(model, wall) {
+    if (!wall) return model;
+    const g = new THREE.Group();
+    model.updateMatrixWorld(true);
+    const back = new THREE.Box3().setFromObject(model).min.z - 0.005;
+    const w = wall.width, h = wall.height ?? 2.4, t = 0.1;
+    g.add(mesh(new THREE.BoxGeometry(w, h, t), mat(0xeeeef0, 0.9), 0, h / 2, back - t / 2));
+    g.add(mesh(new THREE.BoxGeometry(w, 0.08, 0.015), mat(0xd6d6da, 0.7), 0, 0.04, back + 0.0075));
+    g.add(model);
     return g;
 }
 
