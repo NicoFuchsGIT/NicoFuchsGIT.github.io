@@ -125,6 +125,8 @@ const email = document.getElementById('contact-email');
 const linkedin = document.getElementById('contact-linkedin');
 if (contact.email) { email.href = contact.email; email.textContent = site.contact.email; } else email.remove();
 if (contact.linkedin) linkedin.href = contact.linkedin; else linkedin.remove();
+const github = document.getElementById('contact-github');
+if (contact.github) github.href = contact.github; else github.remove();
 document.getElementById('studio-link').hidden = noStudio;
 
 for (const b of document.querySelectorAll('.lang button')) {

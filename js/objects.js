@@ -62,7 +62,7 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
 
         show(placeholder(def));
         if (def.model) {
-            gltfLoader.load(def.model, (gltf) => show(onPedestal(gltf.scene, def.pedestal)), undefined,
+            gltfLoader.load(def.model, (gltf) => show(onTable(gltf.scene, def.table)), undefined,
                 (err) => console.warn(`${def.id}: Modell nicht geladen, Platzhalter bleibt`, err));
         }
     }
@@ -111,22 +111,30 @@ function placeholder(def) {
     switch (def.placeholder) {
         case 'avatar': return avatar(def.avatar);
         case 'suncafe': return sunCafe();
-        case 'desk': return desk();
         case 'car': return car();
         default: return box();
     }
 }
 
-// Modell auf einen weißen Sockel stellen (`pedestal`: Höhe in Metern vor `scale`), z. B. einen Monitor,
-// der sonst auf dem Boden stünde. Der Sockel ist etwas größer als die Standfläche des Modells.
-function onPedestal(model, height) {
+// Modell auf einen Schreibtisch stellen (`table`: Höhe der Tischplatte in Metern vor `scale`), z. B. den
+// SunCafe-Monitor. Platte aus hellem Holz auf vier dunklen Stahlbeinen, Modell hinten, Tastatur und Maus davor.
+function onTable(model, height) {
     if (!height) return model;
     const g = new THREE.Group();
     model.updateMatrixWorld(true);
     const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
-    g.add(mesh(new THREE.BoxGeometry(Math.max(size.x + 0.1, 0.4), height, Math.max(size.z + 0.1, 0.4)), mat(LIGHT, 0.6), 0, height / 2, 0));
-    model.position.y += height;
+    const w = Math.max(size.x + 0.4, 1.0), d = Math.max(size.z + 0.3, 0.5), t = 0.03;
+    const steel = mat(DARK, 0.5, 0.4);
+    g.add(mesh(new THREE.BoxGeometry(w, t, d), mat(0xd8c3a0, 0.6), 0, height - t / 2, 0));
+    for (const x of [-1, 1]) for (const z of [-1, 1]) {
+        g.add(mesh(new THREE.BoxGeometry(0.03, height - t, 0.03), steel, x * (w / 2 - 0.05), (height - t) / 2, z * (d / 2 - 0.05)));
+    }
+    model.position.set(0, height, -d / 2 + size.z / 2 + 0.05);
     g.add(model);
+    g.add(mesh(new THREE.BoxGeometry(0.36, 0.015, 0.12), mat(0xf4f4f6, 0.5), -0.04, height + 0.0075, d / 2 - 0.12));
+    const mouse = mesh(new THREE.SphereGeometry(0.03, 16, 8), mat(0xf4f4f6, 0.4), 0.24, height, d / 2 - 0.12);
+    mouse.scale.set(0.7, 0.45, 1);
+    g.add(mouse);
     return g;
 }
 
@@ -179,20 +187,6 @@ function sunCafe() {
     g.add(mesh(new THREE.CylinderGeometry(0.07, 0.055, 0.12, 24), mat(0xffffff, 0.3), 0.1, 0.76, 0.05));
     const handle = mesh(new THREE.TorusGeometry(0.035, 0.01, 8, 16), mat(0xffffff, 0.3), 0.18, 0.77, 0.05);
     g.add(handle);
-    return g;
-}
-
-// Pult mit Monitor: Tischplatte auf zwei Wangen, Monitor auf Fuß
-function desk() {
-    const g = new THREE.Group();
-    const frame = mat(DARK, 0.5, 0.3);
-    g.add(mesh(new THREE.BoxGeometry(1.2, 0.04, 0.6), mat(LIGHT, 0.5), 0, 0.74, 0));
-    for (const side of [-1, 1]) g.add(mesh(new THREE.BoxGeometry(0.04, 0.72, 0.55), frame, side * 0.56, 0.36, 0));
-    g.add(mesh(new THREE.BoxGeometry(0.2, 0.015, 0.15), frame, 0, 0.77, -0.12));
-    g.add(mesh(new THREE.BoxGeometry(0.04, 0.24, 0.03), frame, 0, 0.89, -0.15));
-    g.add(mesh(new THREE.BoxGeometry(0.72, 0.42, 0.03), frame, 0, 1.15, -0.13));
-    g.add(mesh(new THREE.PlaneGeometry(0.68, 0.38), new THREE.MeshBasicMaterial({ color: 0x3a4250 }), 0, 1.15, -0.114));
-    g.add(mesh(new THREE.BoxGeometry(0.42, 0.015, 0.14), mat(GREY), 0, 0.77, 0.12));
     return g;
 }
 

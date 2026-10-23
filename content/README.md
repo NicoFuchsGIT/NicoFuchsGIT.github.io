@@ -13,8 +13,8 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 | `rotation` | Drehung um die Hochachse in Grad. Positiv dreht nach rechts, links stehende Objekte also zur Mitte |
 | `scale` | Größe, `1` = Originalmaße des Modells |
 | `model` | Pfad zu einer `.glb`-Datei (Draco-komprimiert). Leer = Platzhalter. Lädt das Modell nicht, bleibt der Platzhalter stehen |
-| `pedestal` | Optional: Höhe eines weißen Sockels in Metern (vor `scale`), auf den das Modell gestellt wird, z. B. der SunCafe-Monitor |
-| `placeholder` | Form, solange kein Modell da ist: `avatar`, `suncafe`, `desk`, `car` oder `box` |
+| `table` | Optional: Höhe einer Schreibtischplatte in Metern (vor `scale`), auf die das Modell gestellt wird, mit Tastatur und Maus, z. B. der SunCafe-Monitor |
+| `placeholder` | Form, solange kein Modell da ist: `avatar`, `suncafe`, `car` oder `box` |
 | `avatar` | Nur bei `avatar`: `height` in Metern und Farben für `skin`, `hair`, `top`, `bottom`, `shoes` |
 | `window` | Fenstertyp, siehe unten: `pdf`, `model+text`, `media+text+download` oder `text+links` |
 | `title` | Überschrift im Fenster: `{ "en": "…", "de": "…" }` |
@@ -81,6 +81,7 @@ Kontaktangaben in Impressum und Datenschutz.
 | `wip` | `true` zeigt den Hinweis „Website im Aufbau“ unter dem Namen. Für den Launch auf `false` setzen |
 | `contact.email` | E-Mail-Adresse, z. B. `"name@example.com"` |
 | `contact.linkedin` | Volle LinkedIn-URL, z. B. `"https://www.linkedin.com/in/…/"` |
+| `contact.github` | Volle GitHub-URL, z. B. `"https://github.com/…"` (Icon in der Leiste und in der Liste) |
 
 Ein leeres Feld bleibt im Kontaktmenü als „folgt“ sichtbar, ist aber nicht anklickbar.
 
