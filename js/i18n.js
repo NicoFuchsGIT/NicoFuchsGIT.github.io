@@ -21,13 +21,13 @@ export const UI = {
     en: {
         cv: 'CV', contact: 'Contact', email: 'Email', linkedin: 'LinkedIn',
         comingSoon: 'coming soon', language: 'Language', close: 'Close',
-        imprint: 'Imprint', privacy: 'Privacy', back: 'Back to the studio',
+        imprint: 'Imprint', privacy: 'Privacy', back: 'Back to the studio', listView: 'Skip 3D / list view',
         wip: 'Website work in progress', wipNote: 'Some content is still a placeholder.',
     },
     de: {
         cv: 'CV', contact: 'Kontakt', email: 'E-Mail', linkedin: 'LinkedIn',
         comingSoon: 'folgt', language: 'Sprache', close: 'Schließen',
-        imprint: 'Impressum', privacy: 'Datenschutz', back: 'Zurück ins Studio',
+        imprint: 'Impressum', privacy: 'Datenschutz', back: 'Zurück ins Studio', listView: '3D überspringen / Liste',
         wip: 'Website im Aufbau', wipNote: 'Manche Inhalte sind noch Platzhalter.',
     },
 };

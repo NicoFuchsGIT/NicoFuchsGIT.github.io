@@ -1,0 +1,35 @@
+/* Listenansicht (F-50): Karten pro Objekt, gleiche Buttons und Akzentfarbe wie im Studio */
+main { max-width: 760px; }
+.intro h1 { margin: 0; font-size: 2rem; letter-spacing: 0.02em; text-transform: uppercase; }
+.subtitle { margin: 6px 0 0; color: #555; }
+.wip { display: inline-flex; align-items: center; gap: 8px; margin: 16px 0 0; padding: 6px 12px; border-radius: 14px; background: #fff; border: 1px solid #ececf0; font-size: 0.8rem; }
+.wip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #f5c400; flex: none; }
+.wip span { color: #777; }
+.notice { margin: 28px 0 0; padding: 12px 16px; border-left: 4px solid #f5c400; background: #fff; border-radius: 4px; }
+.notice a { font-weight: 600; }
+
+#list { margin-top: 32px; display: grid; gap: 16px; }
+.item { padding: 24px; background: #fff; border: 1px solid #ececf0; border-radius: 10px; scroll-margin-top: 16px; }
+.item.current { border-color: #f5c400; box-shadow: 0 0 0 2px #f5c400; }
+.top .lang { margin-left: auto; }
+.item h2 { margin: 0 0 8px; font-size: 1.25rem; }
+.item p { margin: 8px 0 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.tag { padding: 3px 8px; border-radius: 4px; background: #111; color: #fff; font-family: monospace; font-size: 0.75rem; }
+.skills { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.skills li { padding: 6px 12px; border-radius: 14px; background: #f0f0f2; font-size: 0.85rem; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.btn {
+    display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 18px; box-sizing: border-box;
+    border: 1px solid #d6d6db; border-radius: 22px; background: #fff; color: #111;
+    font-size: 0.9rem; font-weight: 600; text-decoration: none;
+}
+.btn:hover { border-color: #111; }
+.btn.primary { background: #111; border-color: #111; color: #fff; }
+.btn.primary:hover { background: #333; }
+.btn:focus-visible { outline: 3px solid #f5c400; outline-offset: 2px; }
+.btn .only { padding: 3px 8px; border-radius: 10px; background: #f5c400; color: #111; font-size: 0.7rem; }
+
+.legal { display: flex; gap: 16px; margin-top: 48px; font-size: 0.85rem; }
+.legal a { color: #777; }

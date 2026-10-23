@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light only">
+    <title>Nico Fuchs – CV &amp; Projects</title>
+    <meta name="description" content="Nico Fuchs, sports engineering student at UAS Technikum Wien and member of TU Wien Racing. CV and projects as a simple list.">
+    <link rel="canonical" href="https://nicofuchsgit.github.io/list.html">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/page.css">
+    <link rel="stylesheet" href="css/list.css">
+</head>
+<body>
+<!-- Listenansicht (F-50): dieselben Inhalte wie das Studio, aus content/objects.json, ohne WebGL.
+     Erscheint auch automatisch, wenn das Studio nicht startet (F-51). Ohne JavaScript bleibt der Grundinhalt
+     unten stehen (F-52); Kontaktdaten dort von Hand wie in content/site.json halten. -->
+<main>
+    <div class="top">
+        <a class="back" href="./" id="studio-link">← <span data-list="studio">3D studio</span></a>
+        <div class="lang" role="group" aria-label="Language" data-i18n-aria="language" hidden>
+            <button type="button" data-lang="en" aria-pressed="true" lang="en">EN</button>
+            <button type="button" data-lang="de" aria-pressed="false" lang="de">DE</button>
+        </div>
+    </div>
+
+    <header class="intro">
+        <h1 id="site-name">Nico Fuchs</h1>
+        <p class="subtitle" id="site-title">Sports Engineering Student · Motorsport, Composites, Data Science</p>
+        <p class="wip" id="wip" hidden><strong data-i18n="wip">Website work in progress</strong> <span data-i18n="wipNote">Some content is still a placeholder.</span></p>
+        <div class="actions">
+            <a class="btn" id="contact-email" href="mailto:nico.fuchs5@gmail.com">nico.fuchs5@gmail.com</a>
+            <a class="btn" id="contact-linkedin" href="https://www.linkedin.com/in/nicofuchs/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+    </header>
+
+    <p class="notice" id="fallback-note" role="status" hidden></p>
+
+    <div id="list">
+        <!-- Grundinhalt ohne JavaScript; mit JavaScript ersetzt js/list.js ihn durch die ganze Liste -->
+        <article class="item">
+            <h2>CV</h2>
+            <div class="actions">
+                <a class="btn primary" href="assets/cv/cv-en.pdf">CV (PDF, English)</a>
+            </div>
+        </article>
+        <article class="item">
+            <h2>Spikeball Impact Localization</h2>
+            <div class="actions">
+                <a class="btn" href="assets/spikeball/paper.pdf">Paper (PDF, English)</a>
+            </div>
+        </article>
+    </div>
+
+    <footer class="legal">
+        <a href="impressum.html" data-i18n="imprint">Imprint / Impressum</a>
+        <a href="datenschutz.html" data-i18n="privacy">Privacy / Datenschutz</a>
+    </footer>
+</main>
+<script type="module" src="js/list.js"></script>
+</body>
+</html>

@@ -90,3 +90,16 @@ Standard ist Englisch, beim ersten Besuch mit deutscher Browsersprache Deutsch. 
 Wahl im Browser. Alle Texte in `objects.json` brauchen deshalb `en` und `de`. Ein Download nur auf Englisch bekommt
 `"lang": "en"` und wird in der deutschen Ansicht als „English only“ markiert; beim CV passiert das automatisch, solange es
 kein `pdf.de` gibt.
+
+## Listenansicht und Fallback
+
+`list.html` zeigt dieselben Inhalte als einfache Liste, ohne 3D (Link „3D überspringen / Liste“ unten links im Studio).
+Die Liste baut sich aus `objects.json` und `site.json` auf, es gibt also nichts doppelt zu pflegen. Direktlinks gehen
+auch hier: `list.html#spikeball`.
+
+Das Studio leitet automatisch zur Liste um, wenn der Browser kein WebGL bzw. keine Import-Maps kann, wenn beim Start
+ein Fehler auftritt oder wenn die Szene nach 20 Sekunden noch nicht läuft. Die Liste sagt dann kurz, warum.
+
+**Ohne JavaScript** gibt es nur einen festen Grundinhalt: Name, Titel, E-Mail, LinkedIn und Links zu CV und Paper. Er
+steht von Hand im `<noscript>`-Block von `index.html` und im `#list`-Block von `list.html`. Ändern sich E-Mail,
+LinkedIn oder die Dateinamen von CV bzw. Paper, dort mit anpassen.
