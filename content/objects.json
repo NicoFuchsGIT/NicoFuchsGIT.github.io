@@ -123,11 +123,11 @@
     {
       "id": "suncafe",
       "visible": true,
-      "position": [2.65, -0.2],
-      "rotation": -15,
+      "position": [4.3, -1.0],
+      "rotation": -35,
       "scale": 1.4,
       "model": "models/suncafe-monitor/suncafe_monitor.glb",
-      "pedestal": 0.35,
+      "table": 0.53,
       "placeholder": "suncafe",
       "window": "text+links",
       "title": { "en": "SunCafe", "de": "SunCafe" },
@@ -146,27 +146,6 @@
       "links": [
         { "label": { "en": "Open SunCafe", "de": "SunCafe öffnen" }, "url": "https://suncafe-nu.vercel.app/", "primary": true },
         { "label": { "en": "Code on GitHub", "de": "Code auf GitHub" }, "url": "https://github.com/NicoFuchsGIT/SunCafe" }
-      ]
-    },
-    {
-      "id": "desk",
-      "visible": true,
-      "position": [4.6, -1.5],
-      "rotation": -35,
-      "scale": 1,
-      "model": "",
-      "placeholder": "desk",
-      "window": "text+links",
-      "skills": ["Python", "MATLAB", "NI DAQ", "Machine Learning"],
-      "title": { "en": "Data Science & Motorsport", "de": "Data Science & Motorsport" },
-      "label": { "en": "Data Science", "de": "Data Science" },
-      "tags": ["PYTHON", "MATLAB", "NI_DAQ", "ML"],
-      "text": {
-        "en": ["Placeholder: text, skill list and repo links follow."],
-        "de": ["Platzhalter: Text, Skill-Liste und Repo-Links folgen."]
-      },
-      "links": [
-        { "label": { "en": "GitHub profile", "de": "GitHub-Profil" }, "url": "https://github.com/NicoFuchsGIT" }
       ]
     },
     {
