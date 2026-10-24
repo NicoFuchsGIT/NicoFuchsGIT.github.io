@@ -5,11 +5,11 @@ import { Reflector } from 'three/addons/objects/Reflector.js';
 import { HorizontalBlurShader } from 'three/addons/shaders/HorizontalBlurShader.js';
 import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
 
-const WALL_Z = -4.5;     // Rückwand
+const WALL_Z = -10.5;    // Rückwand, hinter dem Halbkreis der Objekte
 const COVE_R = 2.2;      // Radius der Hohlkehle
 const WALL_H = 40;       // hoch genug, dass auch die weit entfernte Hochformat-Kamera nicht drüber schaut
-const WIDTH = 44;        // breit genug, dass man die Seiten nicht sieht
-const FLOOR_FRONT = 24;  // Boden reicht bis hinter die Kamera
+const WIDTH = 80;        // breit genug, dass man die Seiten auch mit Weitwinkel nicht sieht
+const FLOOR_FRONT = 45;  // Boden reicht bis hinter die Kamera, auch beim Einstieg im Hochformat
 
 // Hintergrund hinter der Hohlkehle, passend zur oberen Wand.
 // Kein Nebel: Im Hochformat steht die Kamera weit weg, Nebel würde die Objekte ausbleichen.
@@ -34,9 +34,25 @@ export function createStudio(renderer, scene, { mobile = false } = {}) {
     const band = lightBand();
     scene.add(cove(), band);
     scene.add(floor(mobile, [band]));
-    // Die Softboxen rahmen das Bild links und rechts; im Querformat nimmt die Kamera sie mit in den Bildausschnitt
-    const softboxes = [softbox(-9.6, 2.6), softbox(9.6, 2.6)];
+    // Die Softboxen stehen links und rechts knapp außerhalb des Bildes (placeSoftboxes)
+    const softboxes = [softbox(), softbox()];
     scene.add(...softboxes);
+
+    // Softboxen zwischen Kamera und Objekten, gerade so weit außen, dass sie in Ruhe nicht im Bild sind.
+    // Schwenkt die Kamera mit der Maus mit (MenuCamera), kommt die Softbox auf dieser Seite halb ins Bild.
+    // `eye`: Kamera in Ruhe, `target`: Mitte der Objekte.
+    function placeSoftboxes(camera, eye, target) {
+        const view = target.clone().sub(eye).setY(0);
+        const depth = view.length() * 0.55;
+        view.normalize();
+        const side = new THREE.Vector3(-view.z, 0, view.x);
+        const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
+        softboxes.forEach((box, i) => {
+            const s = i ? 1 : -1;
+            box.position.copy(eye).addScaledVector(view, depth).addScaledVector(side, s * (depth * tanH + 0.68)).setY(0);
+            box.userData.head.lookAt(target.x, 0.9, target.z);
+        });
+    }
 
     // Licht an/aus für die Einstiegsfahrt (F-05): 0 = dunkel, 1 = Studio hell
     function setLight(k) {
@@ -46,7 +62,7 @@ export function createStudio(renderer, scene, { mobile = false } = {}) {
     renderer.toneMapping = THREE.LinearToneMapping;
     setLight(1);
 
-    return { setLight, frameObjects: softboxes };
+    return { setLight, placeSoftboxes };
 }
 
 // Hohlkehle: Profil (z, y) vom Boden über einen Viertelkreis in die senkrechte Wand, entlang x gezogen.
@@ -111,7 +127,7 @@ function floor(mobile, hidden) {
 // Lichtband an der Decke: dunkles Gehäuse mit leuchtendem Streifen
 function lightBand() {
     const group = new THREE.Group();
-    group.position.set(0, 4.2, -3.4);
+    group.position.set(0, 3.7, -8); // hinten über der Lücke im Halbkreis, tief genug, dass es im Querformat unter der Kopfzeile bleibt
     const housing = new THREE.Mesh(
         new THREE.BoxGeometry(9, 0.14, 0.6),
         new THREE.MeshStandardMaterial({ color: 0x2a2a2c, roughness: 0.6 })
@@ -123,10 +139,9 @@ function lightBand() {
     return group;
 }
 
-// Softbox auf Dreibein-Stativ, schaut schräg auf die Studiomitte
-function softbox(x, z) {
+// Softbox auf Dreibein-Stativ; der Kopf (`userData.head`) wird auf die Objekte ausgerichtet
+function softbox() {
     const group = new THREE.Group();
-    group.position.set(x, 0, z);
     const metal = new THREE.MeshStandardMaterial({ color: 0x2b2b2e, roughness: 0.4, metalness: 0.6 });
     const headH = 2.05;
 
@@ -146,7 +161,7 @@ function softbox(x, z) {
     const head = new THREE.Group();
     head.position.y = headH;
     group.add(head);
-    head.lookAt(0, 0.9, -1.5); // Weltkoordinaten: Studiomitte
+    group.userData.head = head;
     const shell = new THREE.Mesh(
         new THREE.CylinderGeometry(0.09, 0.62, 0.5, 16, 1, true),
         new THREE.MeshStandardMaterial({ color: 0x1d1d1f, roughness: 0.55, side: THREE.DoubleSide })
