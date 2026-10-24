@@ -9,7 +9,7 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 |---|---|
 | `id` | Eindeutiger Name, klein und ohne Leerzeichen (z. B. `spikeball`) |
 | `visible` | `false` blendet das Objekt aus (z. B. TU Edge, bis es so weit ist) |
-| `position` | `[x, z]` in Metern. x: links (−) / rechts (+), z: hinten (−) / vorne (+). Nico steht bei `[0, 0.4]` |
+| `position` | `[x, z]` in Metern. x: links (−) / rechts (+), z: hinten (−) / vorne (+). Anordnung siehe unten |
 | `rotation` | Drehung um die Hochachse in Grad. Positiv dreht nach rechts, links stehende Objekte also zur Mitte |
 | `scale` | Größe, `1` = Originalmaße des Modells. Alle Modelle sind in echten Metern gebaut, deshalb überall `1` lassen, damit die Größen zueinander passen |
 | `model` | Pfad zu einer `.glb`-Datei (Draco-komprimiert). Leer = Platzhalter. Lädt das Modell nicht, bleibt der Platzhalter stehen |
@@ -42,6 +42,18 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 
 PDFs, Bilder und Modelle laden erst, wenn das Fenster aufgeht. Am Desktop erscheint das Fenster als Karte über dem
 Studio, am Handy als Vollbild-Sheet.
+
+## Anordnung im Studio
+
+Die Objekte stehen im Halbkreis um die Mitte `[0, 0]`, Auto und Nico in der Mitte davor. Links bilden Werkbank,
+Wandhänger und 3D-Druck eine durchgehende Wand: Die Rückseiten der Wandstücke liegen als Sehnen auf einem Kreis mit
+6,5 m Radius, jedes Stück so breit wie sein `wall.width`. Rechts stehen Langhantel, SunCafe und Spikeball frei auf
+demselben Bogen, nach vorne hin niedriger, damit nichts verdeckt wird. Hinten in der Mitte bleibt eine Lücke, vor
+der Nico steht. Jedes Objekt ist zur Mitte gedreht: `rotation = atan2(−x, −z)` in Grad.
+
+Die Kamera (Weitwinkel, 80° horizontal) rückt so weit zurück, dass alle Objekte ganz im Bild sind. Die beiden
+Softboxen stellt das Studio selbst knapp außerhalb des Bildes auf; sie kommen erst ins Bild, wenn die Kamera am
+Desktop mit der Maus mitschwenkt.
 
 ## Beispiel: neues Objekt
 

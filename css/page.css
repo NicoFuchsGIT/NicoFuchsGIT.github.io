@@ -22,5 +22,6 @@ section[lang]:not([hidden]) + section[lang]:not([hidden]) { margin-top: 56px; pa
     font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
 }
 .lang button[aria-pressed="true"] { background: #111; color: #fff; }
-.back:focus-visible, .lang button:focus-visible, a:focus-visible { outline: 3px solid #f5c400; outline-offset: 2px; }
-.muted { color: #888; }
+@media (pointer: coarse) { .lang { padding: 0; } .lang button { min-width: 44px; height: 44px; border-radius: 22px; } }
+.back:focus-visible, .lang button:focus-visible, a:focus-visible { outline: 3px solid #111; outline-offset: 2px; box-shadow: 0 0 0 2px #f5c400; }
+.muted { color: #666; }
