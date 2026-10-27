@@ -48,7 +48,7 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            max-width: calc(100% - 40px);
+            max-width: calc(100% - 380px); /* frei für die Leiste oben rechts */
             pointer-events: none; /* Klicks gehen durch diesen Text durch ins 3D */
             color: #333;
         }
@@ -151,6 +151,48 @@
         }
         #legal a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 6px; color: #666; text-decoration: none; }
         #legal a:hover { color: #111; text-decoration: underline; }
+
+        /* Handy im Hochformat: Hinweis statt Studio (gleiche Abfrage wie `phonePortrait` im Skript) */
+        #rotate-hint { display: none; }
+        @media (orientation: portrait) and (pointer: coarse) and (max-width: 600px) {
+            #rotate-hint {
+                position: fixed;
+                inset: 0;
+                z-index: 30;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 32px 24px calc(32px + env(safe-area-inset-bottom));
+                background: radial-gradient(120% 70% at 50% 100%, #ececf0 0%, #f8f8fa 60%);
+                text-align: center;
+            }
+        }
+        .rotate-card { display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 320px; }
+        .rotate-card p.rotate-name { margin: 0 0 20px; font-family: inherit; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #666; }
+        .rotate-card h2 { margin: 8px 0 0; font-size: 1.15rem; letter-spacing: 0.04em; text-transform: uppercase; color: #111; }
+        .rotate-card p { margin: 0 0 12px; font-family: inherit; color: #555; line-height: 1.5; }
+        .rotate-phone { transform-origin: 32px 32px; animation: turn 2.6s ease-in-out infinite; }
+        @keyframes turn {
+            0%, 25% { transform: none; }
+            50%, 85% { transform: rotate(90deg); }
+            100% { transform: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .rotate-phone { animation: none; transform: rotate(90deg); }
+        }
+
+        /* Handy quer: wenig Höhe, also Kopfzeile, Leiste und Labels kompakt */
+        @media (orientation: landscape) and (max-height: 500px) {
+            #ui-layer { top: 12px; left: 16px; max-width: calc(100% - 340px); }
+            #ui-layer h1 { font-size: 1.05rem; letter-spacing: 0.8px; }
+            #site-title { margin-top: 2px; font-size: 0.68rem; }
+            .wip { margin-top: 6px; padding: 3px 10px; gap: 6px; font-size: 0.68rem; }
+            .wip span { display: none; }
+            #toolbar { top: 10px; right: 12px; gap: 6px; }
+            #legal { left: 10px; bottom: 4px; }
+            #labels .obj-label span { padding: 6px 10px; font-size: 0.62rem; letter-spacing: 0.05em; }
+            #labels .obj-label span::before { width: 6px; height: 6px; margin-right: 5px; }
+        }
 
         /* Ohne JavaScript (F-52) */
         .noscript { position: absolute; inset: 0; z-index: 20; padding: 32px 20px; background: #f8f8fa; color: #222; line-height: 1.6; }
@@ -359,7 +401,7 @@
             border-radius: 22px;
             background: none;
             cursor: pointer;
-            pointer-events: auto;
+            pointer-events: none; /* unsichtbar: Klicks gehen ans Objekt dahinter */
             opacity: 0;
             transition: opacity 0.2s;
         }
@@ -386,7 +428,7 @@
             transition: background 0.2s;
         }
         .obj-label.active span::before { background: #f5c400; }
-        .obj-label.shown { opacity: 1; }
+        .obj-label.shown { opacity: 1; pointer-events: auto; }
         .obj-label:focus-visible { outline: none; }
         .obj-label:focus-visible span {
             outline: 3px solid #111;
@@ -475,6 +517,21 @@
         </div>
     </noscript>
 
+    <!-- Handy im Hochformat: Das Studio öffnet sich nur im Querformat. Die Liste geht immer -->
+    <div id="rotate-hint">
+        <div class="rotate-card">
+            <p class="rotate-name" id="rotate-name">Nico Fuchs</p>
+            <!-- Pfeil oben rechts, außerhalb des Handys in beiden Lagen -->
+            <svg viewBox="0 0 64 64" width="80" height="80" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3">
+                <path d="M40.2 5.2A28 28 0 0 1 58.8 23.8M53.6 21.4l5.2 2.4 2.2-5.4" stroke="#f5c400"/>
+                <g class="rotate-phone" stroke="#111"><rect x="20" y="10" width="24" height="44" rx="4"/><path d="M29 47h6"/></g>
+            </svg>
+            <h2 data-i18n="rotate">Turn your phone sideways</h2>
+            <p data-i18n="rotateNote">The 3D studio only opens in landscape.</p>
+            <a class="tb" href="list.html" data-i18n="listView">Skip 3D / list view</a>
+        </div>
+    </div>
+
     <!-- UI Overlay (Immer sichtbar) -->
     <header id="ui-layer">
         <h1 id="site-name">Nico Fuchs</h1>
@@ -537,8 +594,15 @@
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
 
-        // 2. STUDIO: Hohlkehle, Spiegelboden, Lichtband, Softboxen, Environment-Map (js/studio.js)
-        const studio = createStudio(renderer, scene, { mobile: !desktop });
+        // Inhalte aus content/: Objekte (auch für den Verlauf der Wand) sowie Name und Kontakt
+        const [content, site] = await Promise.all([
+            loadContent('./content/objects.json'),
+            loadContent('./content/site.json').catch(() => ({})), // ohne site.json bleiben die Texte aus dem HTML
+        ]);
+
+        // 2. STUDIO: durchgehende Wand mit Hohlkehle, Spiegelboden, Lichtband, Softboxen, Environment-Map (js/studio.js)
+        const wallSpans = content.objects.filter((o) => o.wall && o.visible !== false).map((o) => o.wall);
+        const studio = createStudio(renderer, scene, { mobile: !desktop, wallSpans });
 
         // Menü-Kamera: fest, minimal mitschwenkend, Einstiegsfahrt mit Licht-an (js/menu-camera.js)
         const menuCam = new MenuCamera(camera, { sway: desktop && !reducedMotion, intro: !reducedMotion });
@@ -550,10 +614,6 @@
         gltfLoader.setDRACOLoader(dracoLoader);
 
         // 3. OBJEKTE: alles aus content/objects.json (js/objects.js)
-        const [content, site] = await Promise.all([
-            loadContent('./content/objects.json'),
-            loadContent('./content/site.json').catch(() => ({})), // ohne site.json bleiben die Texte aus dem HTML
-        ]);
         let lang = initialLang(); // F-60, F-62
         let hitTargets = []; // vor createObjects, weil das schon beim Bauen updateFrame aufruft
         const objects = createObjects(scene, renderer, content.objects, gltfLoader, updateFrame);
@@ -569,7 +629,7 @@
             lang = next;
             document.documentElement.lang = lang;
             applyUI(document, lang);
-            if (site.name) document.getElementById('site-name').textContent = site.name;
+            if (site.name) for (const id of ['site-name', 'rotate-name']) document.getElementById(id).textContent = site.name;
             if (site.title?.[lang]) document.getElementById('site-title').textContent = site.title[lang];
             for (const b of document.querySelectorAll('.lang button')) b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
             labels.setLang(lang);
@@ -619,21 +679,36 @@
         const mouse = new THREE.Vector2();
         const modal = document.getElementById('project-modal');
         const backdrop = document.getElementById('modal-backdrop');
+        const itemById = new Map(objects.items.map((item) => [item.id, item]));
+        // Über so vielen Dreiecken ist der genaue Test zu langsam fürs Hovern (Spikeball-Netz: 380k), dann zählt die Klickbox
+        const MAX_PICK_TRIANGLES = 150000;
 
+        // Erst die Klickboxen (günstig). Liegen mehrere hintereinander, gewinnt das vorderste Modell, das der Strahl
+        // wirklich trifft: Ein Klick auf die Werkbank hinter dem Auto öffnet die Werkbank, nicht das Auto.
         function pick(event) {
             // Umrechnung der Mauskoordinaten für Three.js (-1 bis +1)
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
-            return raycaster.intersectObjects(hitTargets)[0]?.object.userData.id ?? null;
+            const boxes = raycaster.intersectObjects(hitTargets); // nach Abstand sortiert
+            if (boxes.length < 2) return boxes[0]?.object.userData.id ?? null;
+            let best = null;
+            for (const { object, distance } of boxes) {
+                if (best && distance >= best.distance) break; // dahinter kann nichts Näheres mehr kommen
+                const item = itemById.get(object.userData.id);
+                const hit = item.triangles > MAX_PICK_TRIANGLES ? { distance } : raycaster.intersectObject(item.content, true)[0];
+                if (hit && (!best || hit.distance < best.distance)) best = { id: item.id, distance: hit.distance };
+            }
+            return best?.id ?? boxes[0].object.userData.id;
         }
 
+        // Hover höchstens einmal pro Bild auswerten (in animate)
+        let hoverEvent = null;
         renderer.domElement.addEventListener('pointermove', (event) => {
-            if (event.pointerType !== 'mouse') return;
-            labels.sceneHover = pick(event);
-            renderer.domElement.style.cursor = labels.sceneHover ? 'pointer' : '';
+            if (event.pointerType === 'mouse') hoverEvent = event;
         });
         renderer.domElement.addEventListener('pointerleave', () => {
+            hoverEvent = null;
             labels.sceneHover = null;
             renderer.domElement.style.cursor = '';
         });
@@ -724,12 +799,21 @@
         });
 
         // 7. ANIMATION LOOP (Sorgt dafür, dass das Bild gezeichnet wird)
+        // Handy im Hochformat: Der Hinweis „Handy quer halten“ deckt alles ab (CSS #rotate-hint, gleiche Abfrage).
+        // Solange wird nicht gezeichnet, und die Einstiegsfahrt startet erst im Querformat.
+        const phonePortrait = window.matchMedia('(orientation: portrait) and (pointer: coarse) and (max-width: 600px)');
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
             const dt = Math.min(clock.getDelta(), 0.1);
+            if (phonePortrait.matches) return;
             // Handy: Das Sheet deckt das Studio ganz ab, also nicht weiter zeichnen
             if (!desktop && modal.classList.contains('active')) return;
+            if (hoverEvent) {
+                labels.sceneHover = modal.classList.contains('active') ? null : pick(hoverEvent);
+                renderer.domElement.style.cursor = labels.sceneHover ? 'pointer' : '';
+                hoverEvent = null;
+            }
             menuCam.update(dt);
             // Licht geht waehrend der Fahrt an, etwas verzoegert gegenueber der Bewegung
             const light = THREE.MathUtils.smoothstep(menuCam.introT, 0.05, 0.7);

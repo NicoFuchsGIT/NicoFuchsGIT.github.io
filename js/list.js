@@ -35,10 +35,12 @@ const load = async (url) => (await fetch(url)).json();
 // Lässt sich objects.json nicht laden, bleibt der statische Grundinhalt aus list.html stehen
 const [content, site] = await Promise.all([load('content/objects.json').catch(() => null), load('content/site.json').catch(() => ({}))]);
 
-// CV (Fenstertyp `pdf`) zuerst, danach wie im Studio von links nach rechts
+// CV (Fenstertyp `pdf`) zuerst, danach wie im Studio von links nach rechts.
+// Wandobjekte haben keine `position`, nur einen Winkel auf der Wand (Radius 6,4 m wie in js/studio.js).
+const left = (o) => o.wall ? -6.4 * Math.sin((o.wall.angle ?? 0) * Math.PI / 180) : o.position?.[0] ?? 0;
 const items = (content?.objects ?? [])
     .filter((o) => o.visible !== false)
-    .sort((a, b) => (b.window === 'pdf') - (a.window === 'pdf') || (a.position?.[0] ?? 0) - (b.position?.[0] ?? 0));
+    .sort((a, b) => (b.window === 'pdf') - (a.window === 'pdf') || left(a) - left(b));
 
 function el(tag, parent, text, className) {
     const node = document.createElement(tag);

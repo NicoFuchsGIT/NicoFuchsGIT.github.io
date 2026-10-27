@@ -32,7 +32,7 @@ Es gibt bewusst keine Analytics. Erfolg wird deshalb **vor dem Launch geprüft**
 | Ziel | Messbar als |
 |---|---|
 | Schnell | Studio sichtbar und bedienbar in **< 3 s** auf einem Mittelklasse-Handy über 4G (Lighthouse Mobile bzw. DevTools-Drosselung „Fast 4G“, CPU 4×). Initialer Download **< 3 MB**. |
-| Läuft am Handy | Alle Objekte sind im Hoch- und Querformat ohne Scrollen oder Wischen antippbar. Getestet auf iOS Safari und Android Chrome. |
+| Läuft am Handy | Alle Objekte sind im Querformat ohne Scrollen oder Wischen antippbar; im Hochformat erscheint der Hinweis zum Drehen (N-10). Getestet auf iOS Safari und Android Chrome. |
 | Stimmiger Look | Licht, Kontaktschatten und Bodenspiegelung passen zusammen, Nico gibt die Optik frei. |
 | Erreichbar | CV und Kontakt von überall in **≤ 2 Klicks/Taps**. |
 | Pflegbar | Nico kann einen Text ändern oder ein Objekt verschieben, indem er nur `content/objects.json` bearbeitet. |
@@ -135,13 +135,14 @@ Priorität: **M** = Must (ohne das kein Launch), **S** = Should (zum Launch ange
 |---|---|---|
 | N-01 | Ladezeit | Studio < 3 s auf einem Mittelklasse-Handy über 4G. Initialer Download < 3 MB (HTML, JS, Szene, Avatar-Platzhalter). Der Avatar bzw. Scan darf direkt danach nachladen |
 | N-02 | Laufzeit | Flüssig, Ziel 60 fps am Desktop und ≥ 30 fps auf einem Mittelklasse-Handy. Pixel-Ratio am Handy auf maximal 2 begrenzen |
-| N-03 | Handy-Variante | Kein Mitschwenken, günstigere Spiegelung und Schatten, im Hochformat zwei Reihen (Nico vorne mittig), Fenster als Vollbild-Sheet. Kein seitliches Wischen |
+| N-03 | Handy-Variante | Kein Mitschwenken, günstigere Spiegelung und Schatten, Fenster als Vollbild-Sheet. Kein seitliches Wischen |
 | N-04 | Browser | Aktuelle Versionen von Chrome, Safari (inkl. iOS), Firefox und Edge. Ältere Browser bzw. solche ohne WebGL bekommen die Listenansicht |
 | N-05 | Datenschutz | Keine Requests an Dritte: three.js, Addons und Decoder werden selbst gehostet, Fonts lokal oder System-Fonts. Kein Cookie, kein Tracking |
 | N-06 | Technik | Statisch auf GitHub Pages, ohne Build-Schritt und ohne Framework. Three.js (Version aus dem Prototyp oder neuer) per Import-Map aus dem Repo. Modelle als `.glb` mit Draco- oder Meshopt-Kompression |
 | N-07 | Barrierefreiheit | Fenster semantisch als Dialog mit Fokusfalle und `aria`-Labels. Ausreichende Kontraste. `prefers-reduced-motion` wird respektiert. Listenansicht als zugängliche Alternative |
 | N-08 | Pflege | `content/objects.json` mit kurzer README (Felder, Beispiel, wie man ein Objekt hinzufügt bzw. verschiebt). Assets liegen geordnet unter `assets/` |
 | N-09 | Optik | Eine Akzentfarbe: Gelb `#f5c400`, sonst Weiß, Grau, Schwarz |
+| N-10 | Handy-Ausrichtung | Am Handy (Touch, im Hochformat ≤ 600 px breit) öffnet sich das Studio nur im Querformat. Im Hochformat: Hinweis „Handy bitte quer halten“ mit Link zur Liste, das Studio zeichnet solange nicht |
 
 ## 8. Inhalte und Assets (liefert Nico)
 
@@ -191,6 +192,6 @@ Version 1 ist fertig und darf auf `main`, wenn:
 
 1. Alle **M**-Anforderungen erfüllt sind.
 2. N-01 und N-02 gemessen und eingehalten sind (Lighthouse Mobile und echtes Handy).
-3. Die Seite auf iOS Safari, Android Chrome und Desktop Chrome, Safari und Firefox getestet ist, im Hoch- und Querformat.
+3. Die Seite auf iOS Safari, Android Chrome und Desktop Chrome, Safari und Firefox getestet ist, am Handy im Querformat (und der Hinweis im Hochformat).
 4. Echtes CV, echte Kontaktdaten und echtes Impressum drin sind. Andere Inhalte dürfen noch Platzhalter sein.
 5. Nico Look und Texte freigegeben hat.
