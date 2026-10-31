@@ -19,14 +19,16 @@ Used by `index.html` (GLTFLoader + DRACOLoader). Rebuild from the `.blend`:
 
 ```
 blender -b models/3d-printing/printtable.blend -P models/3d-printing/source/export_glb.py
-npx @gltf-transform/cli draco models/3d-printing/web/printtable-raw.glb models/3d-printing/web/printtable.glb
+node models/tools/web-optimize.mjs models/3d-printing/web/printtable-raw.glb models/3d-printing/web/printtable.glb
 ```
 
 The export drops the render set (floor, wall, lights, cameras), applies bevels, solidify and the PTFE tube
 curves, and joins the parts per material (42 meshes). The walnut grain and the PEI plate are baked into
 JPEG textures (2048 px / 512 px) on Smart-UV-projected meshes. Glass doors, the AMS lid and the orange
 covers use transmission in Cycles and are exported as alpha-blended materials. Y-up metres, origin at the
-floor centre of the table. ~34k triangles, 1.6 MB raw, ~0.45 MB with Draco.
+floor centre of the table. ~34k triangles, 1.6 MB raw. The web step (`models/tools`) scales the walnut to
+1024 px and merges the plain colours into palette materials (the transparent ones stay separate): 9 draw
+calls, ~0.22 MB.
 
 ## Contents
 

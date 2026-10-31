@@ -15,6 +15,7 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 | `model` | Pfad zu einer `.glb`-Datei (Draco-komprimiert). Leer = Platzhalter. Lädt das Modell nicht, bleibt der Platzhalter stehen |
 | `table` | Optional: Höhe einer Schreibtischplatte in Metern (vor `scale`), auf die das Modell gestellt wird, mit Tastatur und Maus, z. B. der SunCafe-Monitor |
 | `wall` | Optional: `{ "angle": 64.8, "width": 4.1 }` macht ein Wandobjekt. Es steht mit der Rückseite an der Wand, `angle` sagt wo (siehe unten), `width` ist die Breite seiner Rückseite. `position` und `rotation` gelten dann nicht |
+| `clickBox` | Optional: `true` lässt beim Klicken die ganze Box des Objekts zählen statt nur die sichtbare Fläche, z. B. beim Spikeball, durch dessen Netzlöcher Klicks sonst auf das Objekt dahinter fallen |
 | `decals` | Optional: Materialnamen dünner Auflagen im Modell (Monitorbild, Papier auf einer Platte), die sonst aus der Ferne flackern |
 | `placeholder` | Form, solange kein Modell da ist: `avatar`, `suncafe`, `car` oder `box` |
 | `avatar` | Nur bei `avatar`: `height` in Metern und Farben für `skin`, `hair`, `top`, `bottom`, `shoes` |
