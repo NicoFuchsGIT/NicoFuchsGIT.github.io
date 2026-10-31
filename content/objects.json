@@ -110,6 +110,7 @@
       "rotation": -79.0,
       "scale": 1,
       "model": "models/spikeball-titan/web/spikeball.glb",
+      "clickBox": true,
       "placeholder": "box",
       "window": "media+text+download",
       "download": { "label": { "en": "Download paper (PDF)", "de": "Paper herunterladen (PDF)" }, "url": "assets/spikeball/paper.pdf", "lang": "en" },

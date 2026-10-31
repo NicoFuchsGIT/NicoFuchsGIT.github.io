@@ -680,7 +680,7 @@
         const modal = document.getElementById('project-modal');
         const backdrop = document.getElementById('modal-backdrop');
         const itemById = new Map(objects.items.map((item) => [item.id, item]));
-        // Über so vielen Dreiecken ist der genaue Test zu langsam fürs Hovern (Spikeball-Netz: 380k), dann zählt die Klickbox
+        // Über so vielen Dreiecken ist der genaue Test zu langsam fürs Hovern, dann zählt die Klickbox (wie bei `clickBox`)
         const MAX_PICK_TRIANGLES = 150000;
 
         // Erst die Klickboxen (günstig). Liegen mehrere hintereinander, gewinnt das vorderste Modell, das der Strahl
@@ -696,7 +696,7 @@
             for (const { object, distance } of boxes) {
                 if (best && distance >= best.distance) break; // dahinter kann nichts Näheres mehr kommen
                 const item = itemById.get(object.userData.id);
-                const hit = item.triangles > MAX_PICK_TRIANGLES ? { distance } : raycaster.intersectObject(item.content, true)[0];
+                const hit = item.def.clickBox || item.triangles > MAX_PICK_TRIANGLES ? { distance } : raycaster.intersectObject(item.content, true)[0];
                 if (hit && (!best || hit.distance < best.distance)) best = { id: item.id, distance: hit.distance };
             }
             return best?.id ?? boxes[0].object.userData.id;

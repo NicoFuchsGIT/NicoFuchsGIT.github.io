@@ -6,3 +6,4 @@ models/formula-student/web/formula_student-raw.glb
 models/wall-hanger/web/wall_hanger-raw.glb
 models/bed/web/bed-raw.glb
 *.blend1
+models/tools/node_modules/

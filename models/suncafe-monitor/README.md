@@ -16,4 +16,12 @@ screen.material.emissiveMap = tex;
 
 Click target: `Screen` (open the live site on click). For a live page use a `CSS3DRenderer` iframe at the screen's world transform.
 
-Rebuild: `blender -b -P build_monitor.py`.
+Rebuild:
+
+```
+blender -b -P models/suncafe-monitor/build_monitor.py
+node models/tools/web-optimize.mjs models/suncafe-monitor/suncafe_monitor.glb models/suncafe-monitor/suncafe_monitor.glb --keep Screen_SunCafe
+```
+
+The web step (`models/tools`) merges body, back and stand into one palette material (`Monitor_back`, 3 draw
+calls) and compresses with Draco; `Screen` keeps its name and material.

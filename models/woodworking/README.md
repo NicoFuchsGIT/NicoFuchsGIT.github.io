@@ -18,14 +18,15 @@ Used by `index.html` (GLTFLoader + DRACOLoader). Rebuild from the `.blend`:
 
 ```
 blender -b models/woodworking/workshop.blend -P models/woodworking/source/export_glb.py
-npx @gltf-transform/cli draco models/woodworking/web/workshop-raw.glb models/woodworking/web/workshop.glb
+node models/tools/web-optimize.mjs models/woodworking/web/workshop-raw.glb models/woodworking/web/workshop.glb
 ```
 
 The export drops the render set (floor, walls, lights, cameras), applies bevels and joins the parts per
 material (26 meshes). The procedural materials (wood grain in three directions for both wood tones,
 pegboard holes, measuring tape, cast iron) are baked into JPEG textures (2048 px for the main walnut and
 the pegboard, 1024 px otherwise) on Smart-UV-projected meshes. Y-up metres, origin at the floor centre
-of the whole set. ~29k triangles, 2.6 MB raw, ~1.4 MB with Draco (mostly textures).
+of the whole set. ~29k triangles, 2.6 MB raw. The web step (`models/tools`) scales the 2048 px textures to
+1024 px and merges the plain colours into one palette material: 10 draw calls, ~0.95 MB (mostly textures).
 
 ## Contents
 

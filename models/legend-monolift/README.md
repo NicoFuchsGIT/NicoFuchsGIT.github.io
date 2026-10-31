@@ -18,11 +18,13 @@ Used by `index.html` (GLTFLoader + DRACOLoader). Rebuild from the `.blend`:
 
 ```
 blender -b -P models/legend-monolift/source/export_glb.py      # or: python export_glb.py with the bpy wheel
-npx @gltf-transform/cli draco models/legend-monolift/web/monolift-raw.glb models/legend-monolift/web/monolift.glb
+node models/tools/web-optimize.mjs models/legend-monolift/web/monolift-raw.glb models/legend-monolift/web/monolift.glb \
+  --keep Millimetre_paper,Marker_panel,ArUco_id0
 ```
 
 The export drops floor, wall, lights and cameras, joins the parts per material (~20 meshes) and writes
-Y-up metres with the lifter side facing +Z. 2.2 MB raw, ~210 KB with Draco. Procedural node materials
+Y-up metres with the lifter side facing +Z. 2.2 MB raw. The web step (`models/tools`) merges the plain colours
+into one palette material and keeps the three decals separate: 4 draw calls, ~220 KB. Procedural node materials
 (knurl bump, millimetre paper grid) export as flat colours.
 
 ## Contents
