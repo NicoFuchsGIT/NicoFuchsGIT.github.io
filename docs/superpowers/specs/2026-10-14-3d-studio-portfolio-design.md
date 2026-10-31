@@ -85,7 +85,7 @@ Jedes Objekt bekommt ein Fenster, das zu seinem Inhalt passt, statt einer Einhei
 - **Ziel für Besucher:** Kontakt zuerst, CV gleich dahinter. Buttons „CV“ und „Contact“ sind immer sichtbar, zusätzlich zu den Objekten.
 - **Abkürzung:** dezenter Link „Skip 3D / list view“. Er zeigt dieselbe HTML-Liste wie der Fallback.
 - **Akzentfarbe:** warmes Gelb `#f5c400` als einzige Akzentfarbe, sonst Weiß, Grau, Schwarz.
-- **Geräte:** Handy und Desktop sind **gleich wichtig**. Am Handy ist die Seite einfacher: kein Mitschwenken, Labels immer sichtbar, günstigere Spiegelung und Schatten, im Hochformat zwei Reihen, Fenster als Vollbild-Sheet von unten. Der Desktop hat die volle Version mit Mitschwenken, Hover-Schein, schärferer Spiegelung und Fenstern als Karte über dem Studio.
+- **Geräte:** Handy und Desktop sind **gleich wichtig**. Am Handy ist die Seite einfacher: kein Mitschwenken, Labels immer sichtbar, günstigere Spiegelung und Schatten, Fenster als Vollbild-Sheet von unten. Das Studio öffnet sich am Handy nur im Querformat (siehe Nachtrag 2026-10-27). Der Desktop hat die volle Version mit Mitschwenken, Hover-Schein, schärferer Spiegelung und Fenstern als Karte über dem Studio.
 - **Einstieg:** einmalige, etwa 1,5 s lange Kamerafahrt ins Studio, dabei geht das Licht an. Antippen überspringt sie. Bei „reduzierte Bewegung“ fällt sie weg.
 - **Immer hell**, auch im Dunkelmodus des Systems. **Kein Ton.**
 - **Ladebudget bleibt:** Studio unter ca. 3 s, initialer Download unter ca. 3 MB. Scan bzw. Avatar wird direkt nach dem Studio nachgeladen.
@@ -95,11 +95,24 @@ Jedes Objekt bekommt ein Fenster, das zu seinem Inhalt passt, statt einer Einhei
 - **Inhalte pflegen:** kommentiertes `content/objects.json` plus README, damit Nico Texte und Objekte ohne Programmierkenntnisse ändern kann.
 - **Entwicklung:** auf einem eigenen Branch. Auf `main` und damit live geht es erst, wenn Version 1 auf Handy und Desktop sauber läuft.
 
+### Nachtrag 2026-10-27
+
+- **Stimmige Atmosphäre, links eine durchgehende Wand:** Statt einzelner Wandstücke hinter Werkbank, Wandhänger und
+  3D-Druck gibt es eine Wand aus einem Guss. Sie läuft links aus dem Bild heraus, biegt hinten links in einem
+  Viertelkreis um die Ecke und wird zur Rückwand, mit kleiner Hohlkehle am Boden und ohne sichtbare Kanten. Die
+  Wandobjekte stehen mit der Rückseite daran und werfen einen weichen Schatten auf die Wand.
+- **Alle Modelle gut erreichbar:** Ein Klick öffnet das Modell, das man an der Stelle sieht, auch wenn sich Objekte
+  im Bild überdecken. Unsichtbare Labels fangen keine Klicks mehr ab. Das Auto steht so, dass Wandhänger und
+  3D-Druck frei bleiben.
+- **Handy nur im Querformat:** Im Hochformat ist das Studio zu klein zum Antippen. Dort erscheint der Hinweis
+  „Handy bitte quer halten“ mit Link zur Liste; erst im Querformat startet das Studio samt Einstiegsfahrt. Kopfzeile
+  und Labels sind im Querformat kompakter, damit die Labels nah an ihren Objekten bleiben.
+
 ## Rahmenbedingungen
 
 - Hosting: **GitHub Pages**, statisch. Es gibt bereits ein `index.html` mit einem Three.js-Prototyp (three@0.160.0 per Import-Map von unpkg, helles Studio, Nebel, gelber Ring als Spikeball-Platzhalter, Raycasting-Klick, Modal mit Projekttext).
 - Leistung: Das Studio muss in **wenigen Sekunden** stehen, auch über mobiles Netz. Ziel-Richtwert (meine Festlegung): Erstanzeige des Studios unter ca. 3 s auf einem Mittelklasse-Handy über 4G, initialer Download unter ca. 3 MB.
-- Mobil: Hoch- und Querformat, Touch-Bedienung.
+- Mobil: Touch-Bedienung, das Studio im Querformat (Nachtrag 2026-10-27). Tablets in beiden Lagen.
 
 ## Meine Festlegungen (vom Builder anpassbar, Nico hat ihnen nicht ausdrücklich zugestimmt)
 

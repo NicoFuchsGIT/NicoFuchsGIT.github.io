@@ -9,12 +9,12 @@ Objekt hinzuzufügen, reicht es, diese Datei zu bearbeiten. Die Kamera passt den
 |---|---|
 | `id` | Eindeutiger Name, klein und ohne Leerzeichen (z. B. `spikeball`) |
 | `visible` | `false` blendet das Objekt aus (z. B. TU Edge, bis es so weit ist) |
-| `position` | `[x, z]` in Metern. x: links (−) / rechts (+), z: hinten (−) / vorne (+). Anordnung siehe unten |
-| `rotation` | Drehung um die Hochachse in Grad. Positiv dreht nach rechts, links stehende Objekte also zur Mitte |
+| `position` | `[x, z]` in Metern. x: links (−) / rechts (+), z: hinten (−) / vorne (+). Anordnung siehe unten. Nicht bei Wandobjekten |
+| `rotation` | Drehung um die Hochachse in Grad. Positiv dreht nach rechts, links stehende Objekte also zur Mitte. Nicht bei Wandobjekten |
 | `scale` | Größe, `1` = Originalmaße des Modells. Alle Modelle sind in echten Metern gebaut, deshalb überall `1` lassen, damit die Größen zueinander passen |
 | `model` | Pfad zu einer `.glb`-Datei (Draco-komprimiert). Leer = Platzhalter. Lädt das Modell nicht, bleibt der Platzhalter stehen |
 | `table` | Optional: Höhe einer Schreibtischplatte in Metern (vor `scale`), auf die das Modell gestellt wird, mit Tastatur und Maus, z. B. der SunCafe-Monitor |
-| `wall` | Optional: `{ "width": 4.1, "height": 2.4 }`, ein Wandstück direkt hinter dem Modell (mit Sockelleiste). Mehrere Wandstücke auf einem Kreisbogen ergeben die Wand links im Studio |
+| `wall` | Optional: `{ "angle": 64.8, "width": 4.1 }` macht ein Wandobjekt. Es steht mit der Rückseite an der Wand, `angle` sagt wo (siehe unten), `width` ist die Breite seiner Rückseite. `position` und `rotation` gelten dann nicht |
 | `decals` | Optional: Materialnamen dünner Auflagen im Modell (Monitorbild, Papier auf einer Platte), die sonst aus der Ferne flackern |
 | `placeholder` | Form, solange kein Modell da ist: `avatar`, `suncafe`, `car` oder `box` |
 | `avatar` | Nur bei `avatar`: `height` in Metern und Farben für `skin`, `hair`, `top`, `bottom`, `shoes` |
@@ -45,15 +45,28 @@ Studio, am Handy als Vollbild-Sheet.
 
 ## Anordnung im Studio
 
-Die Objekte stehen im Halbkreis um die Mitte `[0, 0]`, Auto und Nico in der Mitte davor. Links bilden Werkbank,
-Wandhänger und 3D-Druck eine durchgehende Wand: Die Rückseiten der Wandstücke liegen als Sehnen auf einem Kreis mit
-6,5 m Radius, jedes Stück so breit wie sein `wall.width`. Rechts stehen Langhantel, SunCafe und Spikeball frei auf
-demselben Bogen, nach vorne hin niedriger, damit nichts verdeckt wird. Hinten in der Mitte bleibt eine Lücke, vor
-der Nico steht. Jedes Objekt ist zur Mitte gedreht: `rotation = atan2(−x, −z)` in Grad.
+Die Wand ist ein Stück: Links läuft sie gerade nach vorne, hinten links biegt sie in einem Viertelkreis (Radius
+6,4 m um die Mitte `[0, 0]`) um die Ecke und läuft hinten gerade nach rechts weiter. Am Boden geht sie mit einer
+kleinen Hohlkehle in den Boden über.
+
+**Wandobjekte** (Werkbank, Wandhänger, 3D-Druck) stehen auf dem Viertelkreis. `wall.angle` ist der Winkel in Grad:
+`0` = hinten mittig, `90` = ganz links. Das Objekt rückt von selbst mit der Rückseite an die Wand und dreht sich zur
+Mitte. Hinter ihm ist die Wand gerade, so breit wie `wall.width`. Damit nichts überlappt, schließen die Stücke
+aneinander an: Ein Stück reicht vom Winkel aus um `asin(width / 2 / 6,4)` in Grad nach links und rechts (bei 4,1 m
+Breite 18,7°). Das nächste Objekt bekommt also `angle` = Ende des vorigen minus seine eigene halbe Breite in Grad.
+Platz ist zwischen 0° und 90°.
+
+**Freie Objekte** (Auto, Nico, Langhantel, SunCafe, Spikeball) stehen mit `position` und `rotation` im Raum. Rechts
+stehen Langhantel, SunCafe und Spikeball auf einem Bogen, nach vorne hin niedriger, damit nichts verdeckt wird.
+Hinten in der Mitte bleibt eine Lücke, vor der Nico steht. Das Auto steht vorne links vor der Werkbank, aber so, dass
+Wandhänger und 3D-Druck frei bleiben. Dreht man ein Objekt zur Mitte, ist `rotation = atan2(−x, −z)` in Grad.
 
 Die Kamera (Weitwinkel, 80° horizontal) rückt so weit zurück, dass alle Objekte ganz im Bild sind. Die beiden
 Softboxen stellt das Studio selbst knapp außerhalb des Bildes auf; sie kommen erst ins Bild, wenn die Kamera am
 Desktop mit der Maus mitschwenkt.
+
+Wer Objekte verschiebt, sollte danach im Querformat am Handy prüfen, ob alle Labels noch nah an ihrem Objekt stehen.
+Überdecken sich zwei Objekte im Bild, öffnet ein Klick trotzdem das, was man an der Stelle sieht.
 
 ## Beispiel: neues Objekt
 
@@ -105,6 +118,12 @@ Standard ist Englisch, beim ersten Besuch mit deutscher Browsersprache Deutsch. 
 Wahl im Browser. Alle Texte in `objects.json` brauchen deshalb `en` und `de`. Ein Download nur auf Englisch bekommt
 `"lang": "en"` und wird in der deutschen Ansicht als „English only“ markiert; beim CV passiert das automatisch, solange es
 kein `pdf.de` gibt.
+
+## Handy: nur im Querformat
+
+Am Handy öffnet sich das Studio nur im Querformat. Im Hochformat steht stattdessen der Hinweis „Handy bitte quer
+halten“ mit einem Link zur Liste. Als Handy gilt ein Touch-Gerät, das im Hochformat höchstens 600 px breit ist;
+Tablets zeigen das Studio in beiden Lagen.
 
 ## Listenansicht und Fallback
 

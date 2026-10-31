@@ -2,7 +2,7 @@
 // Jedes Objekt steht sofort als schlichter Platzhalter da; ist ein `model` (.glb) angegeben, ersetzt es den
 // Platzhalter, sobald es geladen ist. Schlägt das Laden fehl, bleibt der Platzhalter stehen (Rückfall, F-14).
 import * as THREE from 'three';
-import { addContactShadow } from './studio.js';
+import { addContactShadow, addWallShadow, wallPose } from './studio.js';
 
 export async function loadContent(url) {
     const res = await fetch(url);
@@ -12,7 +12,8 @@ export async function loadContent(url) {
 
 // Baut alle sichtbaren Objekte. `onChange` wird aufgerufen, wenn sich die Größe eines Objekts ändert
 // (Modell nachgeladen), damit die Kamera ihren Bildausschnitt anpassen kann.
-// `items`: pro Objekt { id, def, group, hit, box, glow } – `box` ist die Weltbox, `glow` der gelbe Schein (F-20).
+// `items`: pro Objekt { id, def, group, content, triangles, hit, box, glow } – `content` ist das sichtbare Modell
+// (bzw. der Platzhalter), `box` die Weltbox, `glow` der gelbe Schein (F-20).
 export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
     const groups = [];
     const hitTargets = [];
@@ -22,9 +23,16 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
         if (def.visible === false) continue; // F-15
 
         const group = new THREE.Group();
-        const [x, z] = def.position ?? [0, 0];
-        group.position.set(x, 0, z);
-        group.rotation.y = THREE.MathUtils.degToRad(def.rotation ?? 0);
+        if (def.wall) {
+            // Wandobjekt: steht an der Wand, zur Mitte gedreht; `position` und `rotation` gelten hier nicht
+            const pose = wallPose(def.wall.angle ?? 0, def.wall.width ?? 1);
+            group.position.set(pose.x, 0, pose.z);
+            group.rotation.y = pose.rotation;
+        } else {
+            const [x, z] = def.position ?? [0, 0];
+            group.position.set(x, 0, z);
+            group.rotation.y = THREE.MathUtils.degToRad(def.rotation ?? 0);
+        }
         group.scale.setScalar(def.scale ?? 1);
         group.userData.id = def.id;
         scene.add(group);
@@ -36,16 +44,20 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
         group.add(hit);
         hitTargets.push(hit);
 
-        const item = { id: def.id, def, group, hit, box: new THREE.Box3(), glow: null };
+        const item = { id: def.id, def, group, content: null, triangles: 0, hit, box: new THREE.Box3(), glow: null };
         items.push(item);
 
         let content = null;
         let shadow = null;
+        let wallShadow = null;
         const show = (next) => {
             if (content) group.remove(content);
             if (shadow) scene.remove(shadow);
+            if (wallShadow) group.remove(wallShadow);
             if (item.glow) { scene.remove(item.glow); item.glow.geometry.dispose(); }
-            content = next;
+            content = item.content = def.wall ? toWall(next) : next;
+            item.triangles = 0;
+            content.traverse((o) => { if (o.isMesh) item.triangles += (o.geometry.index ?? o.geometry.attributes.position).count / 3; });
             // Box im lokalen Raum der Gruppe: Inhalt hat hier noch keinen Parent, Welt = lokal
             content.updateMatrixWorld(true);
             const box = new THREE.Box3().setFromObject(content);
@@ -54,15 +66,16 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
             group.add(content);
             group.updateMatrixWorld(true); // Weltlage für Schatten, Schein und Label
             shadow = addContactShadow(renderer, scene, content);
+            if (def.wall) wallShadow = addWallShadow(renderer, scene, content, group, box);
             item.box.setFromObject(content);
             item.glow = glow(item.box);
             scene.add(item.glow);
             onChange();
         };
 
-        show(onWall(placeholder(def), def.wall));
+        show(placeholder(def));
         if (def.model) {
-            gltfLoader.load(def.model, (gltf) => show(onWall(onTable(withDecals(gltf.scene, def.decals), def.table), def.wall)), undefined,
+            gltfLoader.load(def.model, (gltf) => show(onTable(withDecals(gltf.scene, def.decals), def.table)), undefined,
                 (err) => console.warn(`${def.id}: Modell nicht geladen, Platzhalter bleibt`, err));
         }
     }
@@ -153,17 +166,14 @@ function withDecals(model, names) {
     return model;
 }
 
-// Wandstück hinter das Modell stellen (`wall`: { width, height } in Metern vor `scale`), mit Sockelleiste.
-// Die Vorderseite liegt knapp hinter der Rückseite des Modells, mittig zum Ursprung. Mehrere Wandstücke
-// nebeneinander auf einem Kreisbogen ergeben eine durchgehende Wand (Anordnung in content/objects.json).
-function onWall(model, wall) {
-    if (!wall) return model;
+// Wandobjekt an die Wand rücken: Rückseite (kleinstes z) knapp vor die Wand bei z = 0, seitlich mittig.
+// Der Abstand von 1,5 cm hält die Rückseite auch bei 16-Bit-Tiefenpuffer vor dem Wandschatten (addWallShadow).
+function toWall(model) {
     const g = new THREE.Group();
     model.updateMatrixWorld(true);
-    const back = new THREE.Box3().setFromObject(model).min.z - 0.005;
-    const w = wall.width, h = wall.height ?? 2.4, t = 0.1;
-    g.add(mesh(new THREE.BoxGeometry(w, h, t), mat(0xeeeef0, 0.9), 0, h / 2, back - t / 2));
-    g.add(mesh(new THREE.BoxGeometry(w, 0.08, 0.015), mat(0xd6d6da, 0.7), 0, 0.04, back + 0.0075));
+    const box = new THREE.Box3().setFromObject(model);
+    model.position.x -= (box.min.x + box.max.x) / 2;
+    model.position.z -= box.min.z - 0.015;
     g.add(model);
     return g;
 }

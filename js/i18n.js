@@ -23,12 +23,14 @@ export const UI = {
         comingSoon: 'coming soon', language: 'Language', close: 'Close', projects: 'Projects',
         imprint: 'Imprint', privacy: 'Privacy', back: 'Back to the studio', listView: 'Skip 3D / list view',
         wip: 'Website work in progress', wipNote: 'Some content is still a placeholder.',
+        rotate: 'Turn your phone sideways', rotateNote: 'The 3D studio only opens in landscape.',
     },
     de: {
         cv: 'CV', contact: 'Kontakt', email: 'E-Mail', linkedin: 'LinkedIn', github: 'GitHub',
         comingSoon: 'folgt', language: 'Sprache', close: 'Schließen', projects: 'Projekte',
         imprint: 'Impressum', privacy: 'Datenschutz', back: 'Zurück ins Studio', listView: '3D überspringen / Liste',
         wip: 'Website im Aufbau', wipNote: 'Manche Inhalte sind noch Platzhalter.',
+        rotate: 'Handy bitte quer halten', rotateNote: 'Das 3D-Studio öffnet sich nur im Querformat.',
     },
 };
 

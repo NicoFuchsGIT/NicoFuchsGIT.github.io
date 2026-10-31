@@ -4,9 +4,7 @@
     {
       "id": "woodworking",
       "visible": true,
-      "position": [-4.63, -2.18],
-      "rotation": 64.8,
-      "wall": { "width": 4.1, "height": 2.4 },
+      "wall": { "angle": 64.8, "width": 4.1 },
       "scale": 1,
       "model": "models/woodworking/web/workshop.glb",
       "placeholder": "box",
@@ -32,9 +30,7 @@
     {
       "id": "3d-printing",
       "visible": true,
-      "position": [-2.08, -5.49],
-      "rotation": 20.7,
-      "wall": { "width": 2.2, "height": 2.4 },
+      "wall": { "angle": 20.05, "width": 2.2 },
       "scale": 1,
       "model": "models/3d-printing/web/printtable.glb",
       "placeholder": "box",
@@ -164,8 +160,8 @@
     {
       "id": "formula-student",
       "visible": true,
-      "position": [-2.43, 0.43],
-      "rotation": -33.0,
+      "position": [-3.30, 1.20],
+      "rotation": -40.0,
       "scale": 1,
       "model": "models/formula-student/web/formula_student.glb",
       "placeholder": "car",
@@ -190,9 +186,7 @@
     {
       "id": "wall-hanger",
       "visible": true,
-      "position": [-3.93, -4.95],
-      "rotation": 38.4,
-      "wall": { "width": 1.8, "height": 2.4 },
+      "wall": { "angle": 38.03, "width": 1.8 },
       "scale": 1,
       "model": "models/wall-hanger/web/wall_hanger.glb",
       "placeholder": "box",
