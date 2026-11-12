@@ -2,8 +2,6 @@
 // Schweres (PDF, Modell, Bilder) wird erst hier geladen, mit Ladeanzeige im Fenster (F-35).
 // Rückgabe: Aufräumfunktion, die beim Schließen Animationen stoppt und WebGL freigibt.
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const T = {
     de: {
@@ -224,13 +222,25 @@ function impactDemo(figure, ctx, t) {
     return () => cancelAnimationFrame(raf);
 }
 
-// F-32: Drehbares Modell im Fenster, hier sind Drehen und Zoomen erlaubt
+// F-32: Drehbares Modell im Fenster, hier sind Drehen und Zoomen erlaubt.
+// OrbitControls und die Umgebung braucht nur dieses Fenster, also laden sie erst hier (F-35).
 function modelView(url, box, ctx, t) {
     box.className = 'model-view';
     const load = loader(box, t);
     el('p', box, t.modelHint).className = 'hint';
     if (!url) { load.fail(); return null; }
 
+    let disposed = false, cleanup = null;
+    Promise.all([
+        import('three/addons/controls/OrbitControls.js'),
+        import('three/addons/environments/RoomEnvironment.js'),
+    ]).then(([{ OrbitControls }, { RoomEnvironment }]) => {
+        if (!disposed) cleanup = startModelView(url, box, ctx, load, OrbitControls, RoomEnvironment);
+    }, () => { if (!disposed) load.fail(); });
+    return () => { disposed = true; cleanup?.(); };
+}
+
+function startModelView(url, box, ctx, load, OrbitControls, RoomEnvironment) {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -248,12 +258,14 @@ function modelView(url, box, ctx, t) {
     controls.addEventListener('start', () => { controls.autoRotate = false; });
 
     let model = null, raf = 0, disposed = false;
+    let dirty = true; // neu zeichnen, auch wenn sich die Kamera nicht bewegt hat (Größe, Modell geladen)
     const resize = () => {
         const w = box.clientWidth, h = box.clientHeight;
         if (!w || !h) return;
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
+        dirty = true;
     };
     const ro = new ResizeObserver(resize);
     ro.observe(box);
@@ -275,12 +287,16 @@ function modelView(url, box, ctx, t) {
         controls.minDistance = radius * 0.4;
         controls.maxDistance = dist * 2;
         controls.maxPolarAngle = Math.PI * 0.55; // nicht unter den Boden
+        dirty = true;
         load.done();
     }, undefined, () => { if (!disposed) load.fail(); });
 
+    // Nur zeichnen, wenn sich etwas bewegt: `update` meldet, ob die Kamera sich geändert hat (Drehen von selbst,
+    // Ziehen, Ausschwingen). Hat man das Modell einmal angefasst und losgelassen, steht das Bild.
     const loop = () => {
         raf = requestAnimationFrame(loop);
-        controls.update();
+        if (!controls.update() && !dirty) return;
+        dirty = false;
         renderer.render(scene, camera);
     };
     loop();

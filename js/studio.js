@@ -300,6 +300,25 @@ export function addWallShadow(renderer, scene, object, parent, box, { depth = 0.
     return group;
 }
 
+// Materialien fürs Backen: einmal anlegen und behalten. Für jeden Schatten neu angelegt und wieder freigegeben,
+// müsste der Browser die drei Shader jedes Mal neu übersetzen (am Handy spürbar beim Laden).
+let bake = null;
+function bakeMaterials() {
+    if (bake) return bake;
+    const depth = new THREE.MeshDepthMaterial({ side: THREE.DoubleSide });
+    depth.onBeforeCompile = (shader) => {
+        shader.fragmentShader = shader.fragmentShader.replace(
+            'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
+            'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) );'
+        );
+    };
+    const hBlur = new THREE.ShaderMaterial(HorizontalBlurShader);
+    const vBlur = new THREE.ShaderMaterial(VerticalBlurShader);
+    hBlur.depthTest = vBlur.depthTest = false;
+    bake = { depth, hBlur, vBlur };
+    return bake;
+}
+
 // Schatten in `group` backen: Ebene in deren xz-Ebene (w × d), Kamera knapp darunter blickt nach +y,
 // je näher ein Teil der Ebene ist, desto dunkler (bis `height` darüber)
 function bakeShadow(renderer, scene, object, group, w, d, { height, blur, opacity }) {
@@ -323,14 +342,7 @@ function bakeShadow(renderer, scene, object, group, w, d, { height, blur, opacit
     group.add(cam);
     group.updateMatrixWorld(true);
 
-    const depthMaterial = new THREE.MeshDepthMaterial({ side: THREE.DoubleSide });
-    depthMaterial.onBeforeCompile = (shader) => {
-        shader.fragmentShader = shader.fragmentShader.replace(
-            'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
-            'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) );'
-        );
-    };
-
+    const { depth, hBlur, vBlur } = bakeMaterials();
     const meshes = [];
     object.traverse((o) => { if (o.isMesh) { o.layers.enable(SHADOW_LAYER); meshes.push(o); } });
 
@@ -338,7 +350,7 @@ function bakeShadow(renderer, scene, object, group, w, d, { height, blur, opacit
     const clearColor = renderer.getClearColor(new THREE.Color());
     const clearAlpha = renderer.getClearAlpha();
     scene.background = null;
-    scene.overrideMaterial = depthMaterial;
+    scene.overrideMaterial = depth;
     renderer.setClearColor(0x000000, 0);
     renderer.setRenderTarget(target);
     renderer.clear();
@@ -350,9 +362,6 @@ function bakeShadow(renderer, scene, object, group, w, d, { height, blur, opacit
     blurPlane.position.y = height / 2;
     group.add(blurPlane);
     blurPlane.updateMatrixWorld(true);
-    const hBlur = new THREE.ShaderMaterial(HorizontalBlurShader);
-    const vBlur = new THREE.ShaderMaterial(VerticalBlurShader);
-    hBlur.depthTest = vBlur.depthTest = false;
     const pass = (amount) => {
         blurPlane.material = hBlur;
         hBlur.uniforms.tDiffuse.value = target.texture;
@@ -371,7 +380,7 @@ function bakeShadow(renderer, scene, object, group, w, d, { height, blur, opacit
 
     group.remove(blurPlane, cam);
     blurPlane.geometry.dispose();
-    hBlur.dispose(); vBlur.dispose(); depthMaterial.dispose(); targetBlur.dispose();
+    targetBlur.dispose();
     meshes.forEach((o) => o.layers.disable(SHADOW_LAYER));
     renderer.setRenderTarget(prev.target);
     renderer.setClearColor(clearColor, clearAlpha);

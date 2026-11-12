@@ -24,4 +24,4 @@ node models/tools/web-optimize.mjs models/suncafe-monitor/suncafe_monitor.glb mo
 ```
 
 The web step (`models/tools`) merges body, back and stand into one palette material (`Monitor_back`, 3 draw
-calls) and compresses with Draco; `Screen` keeps its name and material.
+calls), stores the screenshot as WebP and compresses with Draco; `Screen` keeps its name and material.
