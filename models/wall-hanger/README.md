@@ -17,4 +17,5 @@ skirting board together with floor, lights and camera. It clears the parents, jo
 material and decimates every material mesh above 2,500 triangles (201k -> ~42k triangles; the trousers
 alone had ~106k). The oak grain is baked into a 512 px JPEG; the noise bump maps of the fabrics are
 dropped. Y-up metres, origin on the floor below the centre of the rail, on the wall surface. ~1.0 MB raw. The
-web step (`models/tools`) merges the plain colours into one palette material: 2 draw calls, ~0.15 MB.
+web step (`models/tools`) merges the plain colours into one palette material and stores the oak as WebP:
+2 draw calls, ~0.14 MB.

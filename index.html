@@ -152,6 +152,57 @@
         #legal a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 6px; color: #666; text-decoration: none; }
         #legal a:hover { color: #111; text-decoration: underline; }
 
+        /* Ladebild (Design-Spec „Ladeanzeige“): steht sofort da, noch bevor three.js und die Modelle geladen sind.
+           Dunkel wie das Studio vor „Licht an“ (F-05), so geht es nahtlos in die Einstiegsfahrt über.
+           `body.loading` nimmt das Skript weg, sobald das erste Bild gezeichnet ist. */
+        #loader {
+            position: fixed;
+            inset: 0;
+            z-index: 8; /* über Studio und Bedienelementen, unter Fenster (Deep-Link), noscript und Dreh-Hinweis */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            background: #141416;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0s 0.4s;
+        }
+        body.loading #loader { opacity: 1; visibility: visible; transition: none; }
+        #loader p { margin: 0; font-family: inherit; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #f2f2f4; }
+        .loader-bar { width: 120px; height: 2px; border-radius: 1px; overflow: hidden; background: #3a3a3e; }
+        .loader-bar span { display: block; height: 100%; background: #f5c400; transform: scaleX(0.08); transform-origin: left; transition: transform 0.4s ease; }
+        /* Dauert das Laden länger (langsames Netz), erscheint nach 3 s der Weg zur Liste */
+        .loader-skip {
+            position: absolute;
+            left: 50%;
+            bottom: calc(12px + env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 12px;
+            color: #a0a0a6;
+            font-size: 0.8rem;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .loader-skip:hover { color: #fff; text-decoration: underline; }
+        .loader-skip:focus-visible { outline: 3px solid #f5c400; outline-offset: 2px; }
+        body.loading .loader-skip { animation: loaderSkip 0.4s 3s both; }
+        @keyframes loaderSkip {
+            from { opacity: 0; visibility: hidden; }
+            to { opacity: 1; visibility: visible; }
+        }
+        /* Bedienelemente erst mit dem Studio: hinter dem Ladebild weder sichtbar noch mit Tab erreichbar */
+        #ui-layer, #toolbar, #legal { transition: opacity 0.6s ease; }
+        body.loading #ui-layer, body.loading #toolbar, body.loading #legal { opacity: 0; visibility: hidden; }
+        body.loading #labels { visibility: hidden; }
+        @media (prefers-reduced-motion: reduce) {
+            #loader, #ui-layer, #toolbar, #legal, .loader-bar span { transition: none; }
+        }
+
         /* Handy im Hochformat: Hinweis statt Studio (gleiche Abfrage wie `phonePortrait` im Skript) */
         #rotate-hint { display: none; }
         @media (orientation: portrait) and (pointer: coarse) and (max-width: 600px) {
@@ -181,17 +232,22 @@
             .rotate-phone { animation: none; transform: rotate(90deg); }
         }
 
-        /* Handy quer: wenig Höhe, also Kopfzeile, Leiste und Labels kompakt */
+        /* Handy quer: wenig Höhe, also alles kompakt, damit die Objekte frei bleiben */
         @media (orientation: landscape) and (max-height: 500px) {
-            #ui-layer { top: 12px; left: 16px; max-width: calc(100% - 340px); }
+            /* Kopfzeile in zwei Zeilen: Name und „im Aufbau“ nebeneinander, darunter der Titel in einer Zeile */
+            #ui-layer { top: 12px; left: 16px; max-width: calc(100% - 290px); display: flex; flex-wrap: wrap; align-items: center; gap: 3px 10px; }
             #ui-layer h1 { font-size: 1.05rem; letter-spacing: 0.8px; }
-            #site-title { margin-top: 2px; font-size: 0.68rem; }
-            .wip { margin-top: 6px; padding: 3px 10px; gap: 6px; font-size: 0.68rem; }
+            #site-title { order: 1; flex-basis: 100%; margin: 0; font-family: inherit; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .wip { margin-top: 0; padding: 3px 9px; gap: 6px; font-size: 0.65rem; }
             .wip span { display: none; }
             #toolbar { top: 10px; right: 12px; gap: 6px; }
+            /* Sprache als ein Knopf: zeigt die jeweils andere Sprache */
+            .lang button[aria-pressed="true"] { display: none; }
             #legal { left: 10px; bottom: 4px; }
-            #labels .obj-label span { padding: 6px 10px; font-size: 0.62rem; letter-spacing: 0.05em; }
-            #labels .obj-label span::before { width: 6px; height: 6px; margin-right: 5px; }
+            /* Labels als kleine Pillen ohne Schatten. Tippfläche 28 px statt 44 px, dafür rücken sie nah an ihr
+               Objekt statt sich zu stapeln; das Objekt darunter ist selbst antippbar */
+            #labels .obj-label { min-width: 0; min-height: 28px; }
+            #labels .obj-label span { padding: 5px 9px; border: 1px solid rgba(0, 0, 0, 0.08); background: rgba(255, 255, 255, 0.9); box-shadow: none; font-size: 0.62rem; letter-spacing: 0.05em; }
         }
 
         /* Ohne JavaScript (F-52) */
@@ -201,8 +257,9 @@
         .noscript a { color: #111; }
         .noscript .small { font-size: 0.85rem; }
 
-        /* Schmale Handys: Leiste unten, gut mit dem Daumen erreichbar */
-        @media (max-width: 640px) {
+        /* Schmale Fenster: Leiste unten, gut mit dem Daumen erreichbar. Nicht am Handy im Querformat (oben), dort
+           läge sie mitten im Studio */
+        @media (max-width: 640px) and (min-height: 501px) {
             #ui-layer { top: 16px; left: 16px; max-width: calc(100% - 32px); }
             h1 { font-size: 1.2rem !important; }
             .wip span { display: none; }
@@ -234,11 +291,10 @@
             width: 80%;
             max-width: 640px;
             max-height: 86vh;
-            background: rgba(255, 255, 255, 0.96);
+            background: #fff; /* deckend, ohne backdrop-filter: Der Weichzeichner über dem 3D-Bild kostet in jedem Bild */
             border-radius: 8px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             z-index: 10;
-            backdrop-filter: blur(10px);
             border: 1px solid rgba(0,0,0,0.05);
         }
         #project-modal.wide { max-width: 920px; }
@@ -285,7 +341,6 @@
                 max-height: none;
                 border-radius: 0;
                 border: 0;
-                background: #fff;
             }
             #project-modal.active { animation: sheetIn 0.3s ease; }
             #project-content { padding: 56px 20px calc(32px + env(safe-area-inset-bottom)); }
@@ -428,6 +483,8 @@
             transition: background 0.2s;
         }
         .obj-label.active span::before { background: #f5c400; }
+        /* Touch: Alle Labels sind immer sichtbar; der Punkt, der am Desktop den Hover anzeigt, entfällt */
+        #labels.always .obj-label span::before { display: none; }
         .obj-label.shown { opacity: 1; pointer-events: auto; }
         .obj-label:focus-visible { outline: none; }
         .obj-label:focus-visible span {
@@ -493,8 +550,28 @@
         }
       }
     </script>
+    <!-- Alles, was das Studio zum Start braucht, gleich parallel laden statt nacheinander (ein Modul findet seine
+         Importe sonst erst, wenn es selbst geladen ist; den Draco-Decoder fordert der Loader erst beim ersten Modell an).
+         Fehlt hier ein Eintrag, lädt die Datei trotzdem, nur später. -->
+    <link rel="modulepreload" href="vendor/three@0.160.0/build/three.module.min.js">
+    <link rel="modulepreload" href="vendor/three@0.160.0/examples/jsm/loaders/GLTFLoader.js">
+    <link rel="modulepreload" href="vendor/three@0.160.0/examples/jsm/loaders/DRACOLoader.js">
+    <link rel="modulepreload" href="vendor/three@0.160.0/examples/jsm/utils/BufferGeometryUtils.js">
+    <link rel="modulepreload" href="vendor/three@0.160.0/examples/jsm/objects/Reflector.js">
+    <link rel="modulepreload" href="vendor/three@0.160.0/examples/jsm/shaders/HorizontalBlurShader.js">
+    <link rel="modulepreload" href="vendor/three@0.160.0/examples/jsm/shaders/VerticalBlurShader.js">
+    <link rel="modulepreload" href="js/studio.js">
+    <link rel="modulepreload" href="js/menu-camera.js">
+    <link rel="modulepreload" href="js/objects.js">
+    <link rel="modulepreload" href="js/labels.js">
+    <link rel="modulepreload" href="js/windows.js">
+    <link rel="modulepreload" href="js/i18n.js">
+    <link rel="preload" href="content/objects.json" as="fetch" crossorigin>
+    <link rel="preload" href="content/site.json" as="fetch" crossorigin>
+    <link rel="preload" href="vendor/three@0.160.0/examples/jsm/libs/draco/gltf/draco_wasm_wrapper.js" as="fetch" crossorigin>
+    <link rel="preload" href="vendor/three@0.160.0/examples/jsm/libs/draco/gltf/draco_decoder.wasm" as="fetch" crossorigin>
 </head>
-<body>
+<body class="loading">
 
     <!-- Hier lebt die 3D Szene -->
     <!-- Nur Bild: Bedienbar ist das Studio über die Labels (#labels) -->
@@ -516,6 +593,13 @@
             <p class="small"><a href="impressum.html">Impressum / Imprint</a> · <a href="datenschutz.html">Datenschutz / Privacy</a></p>
         </div>
     </noscript>
+
+    <!-- Ladebild, bis das Studio steht (CSS #loader, Skript „LADEBILD“) -->
+    <div id="loader" role="status">
+        <p id="loader-name">Nico Fuchs</p>
+        <div class="loader-bar" role="progressbar" aria-label="Loading" data-i18n-aria="loading"><span id="loader-fill"></span></div>
+        <a class="loader-skip" href="list.html" data-i18n="listView">Skip 3D / list view</a>
+    </div>
 
     <!-- Handy im Hochformat: Das Studio öffnet sich nur im Querformat. Die Liste geht immer -->
     <div id="rotate-hint">
@@ -605,18 +689,41 @@
         const studio = createStudio(renderer, scene, { mobile: !desktop, wallSpans });
 
         // Menü-Kamera: fest, minimal mitschwenkend, Einstiegsfahrt mit Licht-an (js/menu-camera.js)
-        const menuCam = new MenuCamera(camera, { sway: desktop && !reducedMotion, intro: !reducedMotion });
+        const swayOn = desktop && !reducedMotion;
+        const menuCam = new MenuCamera(camera, { sway: swayOn, intro: !reducedMotion });
 
         // Alle Modelle sind Draco-komprimierte GLBs aus Blender
         const dracoLoader = new DRACOLoader();
         dracoLoader.setDecoderPath('./vendor/three@0.160.0/examples/jsm/libs/draco/gltf/');
+        dracoLoader.preload(); // Decoder schon jetzt holen, nicht erst wenn das erste Modell da ist
         const gltfLoader = new GLTFLoader();
         gltfLoader.setDRACOLoader(dracoLoader);
+
+        // Gezeichnet wird nur, wenn sich etwas ändert (siehe animate). `invalidate` meldet Änderungen, die weder
+        // Kamerabewegung noch Hover sind: Modell geladen, Fenstergröße, Sprache.
+        let dirty = true;
+        const invalidate = () => { dirty = true; };
+
+        // LADEBILD (#loader): bleibt, bis alle Modelle da sind, höchstens aber 5 s (dann stehen für den Rest noch
+        // Platzhalter da). Erst danach wird gezeichnet, und nach dem ersten Bild geht das Licht an (F-05).
+        const loaderFill = document.getElementById('loader-fill');
+        const setProgress = (k) => { loaderFill.style.transform = `scaleX(${k.toFixed(3)})`; };
+        let loaded = false;  // Modelle da oder Wartezeit um: Das Studio darf zeichnen
+        let started = false; // erstes Bild gezeichnet: Ladebild weg, Einstiegsfahrt läuft
+        const finishLoading = () => { loaded = true; invalidate(); };
+        setTimeout(finishLoading, 5000);
+        setProgress(0.25); // Skripte sind da, jetzt kommen die Modelle
 
         // 3. OBJEKTE: alles aus content/objects.json (js/objects.js)
         let lang = initialLang(); // F-60, F-62
         let hitTargets = []; // vor createObjects, weil das schon beim Bauen updateFrame aufruft
-        const objects = createObjects(scene, renderer, content.objects, gltfLoader, updateFrame);
+        const objects = createObjects(scene, renderer, content.objects, gltfLoader, {
+            onChange: () => { updateFrame(); invalidate(); },
+            onProgress: (done, total) => {
+                setProgress(total ? 0.25 + 0.75 * done / total : 1);
+                if (done === total) finishLoading();
+            },
+        });
         hitTargets = objects.hitTargets;
         const labels = new Labels(document.getElementById('labels'), objects.items, lang, {
             alwaysVisible: !desktop, // F-21
@@ -629,13 +736,19 @@
             lang = next;
             document.documentElement.lang = lang;
             applyUI(document, lang);
-            if (site.name) for (const id of ['site-name', 'rotate-name']) document.getElementById(id).textContent = site.name;
+            if (site.name) for (const id of ['site-name', 'rotate-name', 'loader-name']) document.getElementById(id).textContent = site.name;
             if (site.title?.[lang]) document.getElementById('site-title').textContent = site.title[lang];
             for (const b of document.querySelectorAll('.lang button')) b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
             labels.setLang(lang);
+            invalidate();
         }
         for (const b of document.querySelectorAll('.lang button')) {
-            b.addEventListener('click', () => { saveLang(b.dataset.lang); setLang(b.dataset.lang); });
+            b.addEventListener('click', () => {
+                saveLang(b.dataset.lang);
+                setLang(b.dataset.lang);
+                // Handy quer zeigt nur den Knopf der anderen Sprache (CSS): Der Fokus wandert mit
+                if (!b.getClientRects().length) document.querySelector('.lang button[aria-pressed="false"]').focus();
+            });
         }
         document.getElementById('wip').hidden = site.wip === false;
 
@@ -667,6 +780,7 @@
         // 4. EINSTIEG: Antippen, Klicken oder eine Taste ueberspringt die Kamerafahrt (F-05)
         let suppressClick = false;
         const skipIntro = (event) => {
+            if (!started) return; // hinter dem Ladebild läuft noch keine Fahrt
             // der Klick, der die Fahrt abbricht, oeffnet noch kein Fenster
             suppressClick = menuCam.inIntro && event.type === 'pointerdown' && event.target === renderer.domElement;
             menuCam.skipIntro();
@@ -758,6 +872,7 @@
             backdrop.classList.add('active');
             setBehindInert(true);
             labels.sceneHover = null;
+            menuCam.sway = false; // das Studio hält still, solange das Fenster offen ist (und wird nicht neu gezeichnet)
             document.getElementById('close-modal').focus();
         }
 
@@ -769,6 +884,8 @@
             modal.classList.remove('active');
             backdrop.classList.remove('active');
             setBehindInert(false);
+            menuCam.sway = swayOn;
+            invalidate();
             if (returnFocus?.isConnected) returnFocus.focus();
             returnFocus = null;
         }
@@ -798,38 +915,66 @@
             }
         });
 
-        // 7. ANIMATION LOOP (Sorgt dafür, dass das Bild gezeichnet wird)
+        // 7. ANIMATION LOOP
+        // Gezeichnet wird nur, wenn sich etwas geändert hat: Kamera (Einstiegsfahrt, Mitschwenken, neuer Bildausschnitt),
+        // Schein unter einem Objekt, Hover bzw. Fokus oder `invalidate()`. Steht das Bild, kostet die Seite nichts –
+        // am Handy also immer nach der Einstiegsfahrt, am Desktop, sobald die Maus ruht.
         // Handy im Hochformat: Der Hinweis „Handy quer halten“ deckt alles ab (CSS #rotate-hint, gleiche Abfrage).
         // Solange wird nicht gezeichnet, und die Einstiegsfahrt startet erst im Querformat.
         const phonePortrait = window.matchMedia('(orientation: portrait) and (pointer: coarse) and (max-width: 600px)');
+        phonePortrait.addEventListener('change', invalidate);
+        // zurück im Tab bzw. per Zurück-Taste auf der Seite: einmal frisch zeichnen
+        document.addEventListener('visibilitychange', invalidate);
+        window.addEventListener('pageshow', invalidate);
         const clock = new THREE.Clock();
+        let lastHover = null;
         function animate() {
             requestAnimationFrame(animate);
             const dt = Math.min(clock.getDelta(), 0.1);
             if (phonePortrait.matches) return;
+            const open = modal.classList.contains('active');
             // Handy: Das Sheet deckt das Studio ganz ab, also nicht weiter zeichnen
-            if (!desktop && modal.classList.contains('active')) return;
+            if (!desktop && open) return;
+            if (!loaded) return; // das Ladebild deckt das Studio noch ab
             if (hoverEvent) {
-                labels.sceneHover = modal.classList.contains('active') ? null : pick(hoverEvent);
+                labels.sceneHover = open ? null : pick(hoverEvent);
                 renderer.domElement.style.cursor = labels.sceneHover ? 'pointer' : '';
                 hoverEvent = null;
             }
-            menuCam.update(dt);
+            menuCam.hold = !started;
+            const moved = menuCam.update(dt);
+
+            // Schein unter dem hervorgehobenen Objekt ein- bzw. ausblenden
+            const active = open ? null : labels.active;
+            let glowing = false;
+            for (const item of objects.items) {
+                const m = item.glow?.material;
+                const goal = item.id === active ? 0.9 : 0;
+                if (!m || m.opacity === goal) continue;
+                m.opacity += (goal - m.opacity) * (1 - Math.exp(-12 * dt));
+                if (Math.abs(goal - m.opacity) < 0.01) m.opacity = goal;
+                item.glow.visible = m.opacity > 0;
+                glowing = true;
+            }
+
+            const hover = labels.active;
+            if (!moved && !glowing && !dirty && hover === lastHover) return; // nichts hat sich geändert
+            dirty = false;
+            lastHover = hover;
+
             // Licht geht waehrend der Fahrt an, etwas verzoegert gegenueber der Bewegung
             const light = THREE.MathUtils.smoothstep(menuCam.introT, 0.05, 0.7);
             studio.setLight(light);
-
-            // Schein unter dem hervorgehobenen Objekt ein- bzw. ausblenden
-            const active = modal.classList.contains('active') ? null : labels.active;
-            for (const item of objects.items) {
-                if (!item.glow) continue;
-                const m = item.glow.material;
-                m.opacity += ((item.id === active ? 0.9 : 0) - m.opacity) * (1 - Math.exp(-12 * dt));
-                item.glow.visible = m.opacity > 0.01;
-            }
             labels.container.style.opacity = light;
-            labels.update(camera, window.innerWidth, window.innerHeight);
+            if (!labels.update(camera, window.innerWidth, window.innerHeight)) invalidate(); // noch nicht messbar
             renderer.render(scene, camera);
+
+            // Das erste Bild hat Shader übersetzt und Texturen hochgeladen, verdeckt vom Ladebild. Jetzt Licht an.
+            if (!started) {
+                started = true;
+                document.body.classList.remove('loading');
+                invalidate();
+            }
         }
 
         // Auf Fenstergrößenänderung reagieren: neues Seitenverhältnis, neuer Abstand (F-04)
@@ -838,6 +983,8 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             updateFrame();
+            labels.invalidate();
+            invalidate();
         });
 
         animate();

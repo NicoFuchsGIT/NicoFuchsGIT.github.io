@@ -15,9 +15,11 @@ model, `source/build_bed.py` (bpy only). Dimensions are estimates (mattress 140 
 ```
 blender -b -P models/bed/source/build_bed.py
 npx @gltf-transform/cli draco models/bed/web/bed-raw.glb models/bed/web/bed.glb
+node models/tools/web-optimize.mjs models/bed/web/bed.glb models/bed/web/bed.glb --textures-only
 ```
 
 Writes `bed.blend` and `web/bed-raw.glb`: the wood grain (wave texture in object coordinates, along the
 boards) is baked into 1024 px JPEGs on Smart-UV-projected meshes. Y-up metres, origin on the floor at the
-centre of the slatted base, foot end towards +Z. ~12.5k triangles, ~0.28 MB with Draco.
+centre of the slatted base, foot end towards +Z. ~12.5k triangles, ~0.15 MB with Draco and the textures as
+WebP (second command, see `models/tools`).
 `review/web_preview.png` shows the web model in the window.

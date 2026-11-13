@@ -10,14 +10,18 @@ export async function loadContent(url) {
     return res.json();
 }
 
-// Baut alle sichtbaren Objekte. `onChange` wird aufgerufen, wenn sich die Größe eines Objekts ändert
-// (Modell nachgeladen), damit die Kamera ihren Bildausschnitt anpassen kann.
+// Baut alle sichtbaren Objekte. `onChange` wird aufgerufen, wenn sich ein Objekt ändert (Modell nachgeladen),
+// damit die Kamera ihren Bildausschnitt anpassen und das Studio neu zeichnen kann. `onProgress(fertig, gesamt)`
+// meldet jedes Modell, das geladen oder fehlgeschlagen ist (fürs Ladebild); ohne Modelle einmal mit (0, 0).
 // `items`: pro Objekt { id, def, group, content, triangles, hit, box, glow } – `content` ist das sichtbare Modell
 // (bzw. der Platzhalter), `box` die Weltbox, `glow` der gelbe Schein (F-20).
-export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
+export function createObjects(scene, renderer, defs, gltfLoader, { onChange, onProgress } = {}) {
     const groups = [];
     const hitTargets = [];
     const items = [];
+    const models = defs.filter((def) => def.visible !== false && def.model).length;
+    let settled = 0;
+    const settle = () => onProgress?.(++settled, models);
 
     for (const def of defs) {
         if (def.visible === false) continue; // F-15
@@ -48,38 +52,55 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
         items.push(item);
 
         let content = null;
-        let shadow = null;
-        let wallShadow = null;
+        const localBox = new THREE.Box3(); // Box im Raum der Gruppe
         const show = (next) => {
-            if (content) group.remove(content);
-            if (shadow) scene.remove(shadow);
-            if (wallShadow) group.remove(wallShadow);
-            if (item.glow) { scene.remove(item.glow); item.glow.geometry.dispose(); }
+            if (content) { group.remove(content); dispose(content); } // nur Platzhalter werden ersetzt
+            if (item.glow) { scene.remove(item.glow); item.glow.geometry.dispose(); item.glow.material.dispose(); }
             content = item.content = def.wall ? toWall(next) : next;
             item.triangles = 0;
             content.traverse((o) => { if (o.isMesh) item.triangles += (o.geometry.index ?? o.geometry.attributes.position).count / 3; });
-            // Box im lokalen Raum der Gruppe: Inhalt hat hier noch keinen Parent, Welt = lokal
+            // Inhalt hat hier noch keinen Parent, Welt = lokal
             content.updateMatrixWorld(true);
-            const box = new THREE.Box3().setFromObject(content);
-            box.getSize(hit.scale);
-            box.getCenter(hit.position);
+            localBox.setFromObject(content);
+            localBox.getSize(hit.scale);
+            localBox.getCenter(hit.position);
             group.add(content);
             group.updateMatrixWorld(true); // Weltlage für Schatten, Schein und Label
-            shadow = addContactShadow(renderer, scene, content);
-            if (def.wall) wallShadow = addWallShadow(renderer, scene, content, group, box);
             item.box.setFromObject(content);
             item.glow = glow(item.box);
             scene.add(item.glow);
-            onChange();
+        };
+        // Sobald das Objekt so dasteht, wie es bleibt: Schatten backen und Bescheid geben. Der Platzhalter eines
+        // Objekts mit Modell bekommt keinen Schatten, er steht nur kurz da, meist noch hinter dem Ladebild.
+        const finish = () => {
+            addContactShadow(renderer, scene, content);
+            if (def.wall) addWallShadow(renderer, scene, content, group, localBox);
+            onChange?.();
         };
 
         show(placeholder(def));
-        if (def.model) {
-            gltfLoader.load(def.model, (gltf) => show(onTable(withDecals(gltf.scene, def.decals), def.table)), undefined,
-                (err) => console.warn(`${def.id}: Modell nicht geladen, Platzhalter bleibt`, err));
-        }
+        if (!def.model) { finish(); continue; }
+        onChange?.();
+        gltfLoader.load(def.model, (gltf) => {
+            show(onTable(withDecals(gltf.scene, def.decals), def.table));
+            finish();
+            settle();
+        }, undefined, (err) => {
+            console.warn(`${def.id}: Modell nicht geladen, Platzhalter bleibt`, err);
+            finish();
+            settle();
+        });
     }
+    if (!models) onProgress?.(0, 0);
     return { groups, hitTargets, items };
+}
+
+function dispose(object) {
+    object.traverse((o) => {
+        if (!o.isMesh) return;
+        o.geometry.dispose();
+        for (const m of [o.material].flat()) m.dispose();
+    });
 }
 
 // Gelber Lichtschein auf dem Boden unter dem Objekt (F-20, N-09). Liegt direkt in der Szene, nicht in der

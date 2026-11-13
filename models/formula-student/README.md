@@ -21,6 +21,7 @@ Used by `index.html` (GLTFLoader + DRACOLoader). Rebuild from the `.blend`:
 ```
 blender -b models/formula-student/formula_student.blend -P models/formula-student/source/export_glb.py
 npx @gltf-transform/cli draco models/formula-student/web/formula_student-raw.glb models/formula-student/web/formula_student.glb
+node models/tools/web-optimize.mjs models/formula-student/web/formula_student.glb models/formula-student/web/formula_student.glb --textures-only
 ```
 
 The export drops the render set (cove, lights, cameras) and moves the wings to rule-conform positions:
@@ -28,5 +29,6 @@ front wing 0.10 m back (max. 0.70 m ahead of the front tyres), rear wing 0.35 m 
 behind the rear tyres). Curves and start numbers become meshes, parts are joined per material (16 meshes).
 The livery is baked into a 1024 px JPEG; the carbon weave is too fine for the web and becomes a flat dark
 clear-coated colour. Y-up metres, origin on the floor between the axles, driving direction +X.
-Overall 2.93 x 1.42 x 1.21 m, ~35k triangles, 1.1 MB raw, ~0.17 MB with Draco.
+Overall 2.93 x 1.42 x 1.21 m, ~35k triangles, 1.1 MB raw, ~0.14 MB with Draco and the livery as WebP
+(second command, see `models/tools`).
 `review/web_preview.png` shows the web model in Three.js.

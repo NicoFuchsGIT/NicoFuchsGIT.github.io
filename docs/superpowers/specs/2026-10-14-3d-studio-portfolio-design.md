@@ -108,6 +108,19 @@ Jedes Objekt bekommt ein Fenster, das zu seinem Inhalt passt, statt einer Einhei
   „Handy bitte quer halten“ mit Link zur Liste; erst im Querformat startet das Studio samt Einstiegsfahrt. Kopfzeile
   und Labels sind im Querformat kompakter, damit die Labels nah an ihren Objekten bleiben.
 
+### Nachtrag 2026-11-12
+
+- **Ladebild:** Bis three.js und die Modelle da sind, steht ein dunkles Ladebild mit Nicos Namen und einem schmalen
+  gelben Balken. Es ist so dunkel wie das Studio vor „Licht an“ und geht nahtlos in die Einstiegsfahrt über. Nach
+  höchstens 5 s startet das Studio auch ohne die restlichen Modelle; für die stehen dann noch Platzhalter da.
+- **Gezeichnet wird nur bei Bedarf:** Steht das Bild (am Handy immer nach der Einstiegsfahrt, am Desktop, sobald die
+  Maus ruht), rechnet die Seite nichts mehr. Solange ein Fenster offen ist, hält das Studio dahinter still.
+- **Handy im Querformat aufgeräumt:** Kopfzeile in zwei Zeilen, Sprache als ein Knopf, Labels als kleine Pillen ohne
+  Punkt und Schatten. Ihre Tippfläche ist dort 28 px statt 44 px hoch, damit sie nah an ihrem Objekt bleiben statt
+  sich zu stapeln; das Objekt darunter ist selbst antippbar.
+- **Leichtere Texturen:** Holz, Lackierung und Monitorbild liegen als WebP in den Modellen; Modelle, die man nur aus
+  der Studiokamera sieht, haben 512 px.
+
 ## Rahmenbedingungen
 
 - Hosting: **GitHub Pages**, statisch. Es gibt bereits ein `index.html` mit einem Three.js-Prototyp (three@0.160.0 per Import-Map von unpkg, helles Studio, Nebel, gelber Ring als Spikeball-Platzhalter, Raycasting-Klick, Modal mit Projekttext).

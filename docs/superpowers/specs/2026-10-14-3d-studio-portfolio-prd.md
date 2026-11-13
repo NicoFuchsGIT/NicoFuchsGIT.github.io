@@ -75,7 +75,7 @@ Priorität: **M** = Must (ohne das kein Launch), **S** = Should (zum Launch ange
 |---|---|---|
 | F-20 | Desktop-Hover: gelber Lichtschein unter dem Objekt, Label erscheint, Cursor wird zur Hand | M |
 | F-21 | Handy: Labels sind immer sichtbar, Antippen öffnet direkt | M |
-| F-22 | Jedes Objekt hat zusätzlich ein HTML-Label als Klick- bzw. Tap-Fläche, mindestens 44 × 44 px | M |
+| F-22 | Jedes Objekt hat zusätzlich ein HTML-Label als Klick- bzw. Tap-Fläche, mindestens 44 × 44 px. Ausnahme Handy im Querformat: 28 px hoch, damit die Labels am Objekt bleiben (das Objekt selbst ist antippbar) | M |
 | F-23 | Klick öffnet das Fenster des Objekts, die Kamera bleibt stehen. Schließen per ×, Klick daneben, Esc oder Zurück-Geste bzw. Zurück-Button am Handy | M |
 | F-24 | Jedes Fenster hat eine eigene URL (z. B. `#spikeball`), damit Nico direkt auf ein Projekt verlinken kann | S |
 | F-25 | Tastatur: Mit Tab lassen sich die Objekte durchgehen, Enter öffnet, der Fokus ist sichtbar | S |
@@ -134,7 +134,7 @@ Priorität: **M** = Must (ohne das kein Launch), **S** = Should (zum Launch ange
 | ID | Bereich | Anforderung |
 |---|---|---|
 | N-01 | Ladezeit | Studio < 3 s auf einem Mittelklasse-Handy über 4G. Initialer Download < 3 MB (HTML, JS, Szene, Avatar-Platzhalter). Der Avatar bzw. Scan darf direkt danach nachladen |
-| N-02 | Laufzeit | Flüssig, Ziel 60 fps am Desktop und ≥ 30 fps auf einem Mittelklasse-Handy. Pixel-Ratio am Handy auf maximal 2 begrenzen |
+| N-02 | Laufzeit | Flüssig, Ziel 60 fps am Desktop und ≥ 30 fps auf einem Mittelklasse-Handy. Pixel-Ratio am Handy auf maximal 2 begrenzen. Gezeichnet wird nur, wenn sich das Bild ändert |
 | N-03 | Handy-Variante | Kein Mitschwenken, günstigere Spiegelung und Schatten, Fenster als Vollbild-Sheet. Kein seitliches Wischen |
 | N-04 | Browser | Aktuelle Versionen von Chrome, Safari (inkl. iOS), Firefox und Edge. Ältere Browser bzw. solche ohne WebGL bekommen die Listenansicht |
 | N-05 | Datenschutz | Keine Requests an Dritte: three.js, Addons und Decoder werden selbst gehostet, Fonts lokal oder System-Fonts. Kein Cookie, kein Tracking |

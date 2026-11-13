@@ -31,18 +31,25 @@ export class Labels {
             el.addEventListener('focus', () => { this.focused = el.matches(':focus-visible') ? item.id : null; });
             el.addEventListener('blur', () => { if (this.focused === item.id) this.focused = null; });
             container.appendChild(el);
-            this.entries.push({ item, el, pill, w: 0, h: 0 });
+            this.entries.push({ item, el, pill, w: 0, h: 0, tap: 0 });
         }
         this.setLang(lang);
     }
 
-    // Sprachwechsel (F-60): Texte tauschen, Breite beim nächsten update neu messen
+    // Sprachwechsel (F-60): Texte tauschen
     setLang(lang) {
         for (const e of this.entries) {
             const def = e.item.def;
             e.pill.textContent = def.label?.[lang] ?? def.title?.[lang] ?? e.item.id;
-            e.w = 0;
         }
+        this.invalidate();
+    }
+
+    // Größen der Labels und Lage der Bedienelemente beim nächsten `update` neu messen (neue Sprache, neue
+    // Fenstergröße). Dazwischen bleiben sie gemerkt, damit `update` nicht in jedem Bild das Layout abfragt.
+    invalidate() {
+        for (const e of this.entries) e.w = 0;
+        this.ui = null;
     }
 
     // Objekt, das gerade hervorgehoben ist (Schein unter dem Objekt)
@@ -53,6 +60,7 @@ export class Labels {
     // Labels über die Oberkante des Objekts setzen. Sichtbare Labels, die sich überdecken würden,
     // rücken nach oben (am Handy sind alle gleichzeitig sichtbar); landen sie dabei auf Kopfzeile oder Leiste
     // bzw. über dem Bildrand, rücken sie stattdessen nach unten.
+    // Rückgabe: false, solange ein Label noch nicht messbar war (dann beim nächsten Bild noch einmal aufrufen).
     update(camera, width, height) {
         const p = new THREE.Vector3();
         const active = this.active;
@@ -60,25 +68,27 @@ export class Labels {
             const b = e.item.box;
             p.set((b.min.x + b.max.x) / 2, b.max.y, (b.min.z + b.max.z) / 2).project(camera);
             e.onScreen = p.z < 1 && Math.abs(p.x) <= 1.1 && Math.abs(p.y) <= 1.1;
-            if (!e.w) { e.w = e.pill.offsetWidth; e.h = e.pill.offsetHeight; } // erst messbar, wenn gelayoutet
+            // erst messbar, wenn gelayoutet. `tap`: Höhe der Tippfläche (der Button um die Pille, per CSS)
+            if (!e.w) { e.w = e.pill.offsetWidth; e.h = e.pill.offsetHeight; e.tap = e.el.offsetHeight; }
             // nicht über den Bildrand hinaus
             e.x = THREE.MathUtils.clamp((p.x + 1) / 2 * width, e.w / 2 + 8, Math.max(e.w / 2 + 8, width - e.w / 2 - 8));
             e.y = (1 - p.y) / 2 * height - 4; // Unterkante der Pille
         }
         // Rechtecke wie die Labels: x = Mitte, y = Unterkante
-        const ui = this.avoid.filter((el) => el?.getClientRects().length).map((el) => {
+        this.ui ??= this.avoid.filter((el) => el?.getClientRects().length).map((el) => {
             const r = el.getBoundingClientRect();
             return { x: (r.left + r.right) / 2, y: r.bottom, w: r.width, h: r.height };
         });
         // von unten nach oben: die unteren Labels bleiben, die darüber weichen aus
-        const placed = [...ui];
+        const placed = [...this.ui];
         for (const e of [...this.entries].sort((a, b) => b.y - a.y)) {
             const shown = e.onScreen && (this.alwaysVisible || e.item.id === active);
             let y = e.y;
             if (shown && e.w) {
-                // Abstand 4 px; am Handy (alle Labels sichtbar) so viel, dass sich die 44 px hohen Tippflächen nicht
-                // überlappen. Ausweichen um 1 px mehr, damit Rundungsfehler keine Endlosschleife ergeben.
-                const gap = this.alwaysVisible ? Math.max(4, 44 - e.h) : 4;
+                // Abstand 4 px; am Handy (alle Labels sichtbar) so viel, dass sich die Tippflächen (44 px hoch, am
+                // Handy im Querformat kompakter) nicht überlappen. Ausweichen um 1 px mehr, damit Rundungsfehler
+                // keine Endlosschleife ergeben.
+                const gap = this.alwaysVisible ? Math.max(4, e.tap - e.h) : 4;
                 const hit = (y) => placed.find((r) => Math.abs(r.x - e.x) < (r.w + e.w) / 2 + 4 && y > r.y - r.h - gap && y - e.h - gap < r.y);
                 let up = y;
                 for (let r = hit(up); r; r = hit(up)) up = r.y - r.h - gap - 1;
@@ -90,5 +100,6 @@ export class Labels {
             e.el.classList.toggle('shown', shown);
             e.el.classList.toggle('active', e.item.id === active);
         }
+        return this.entries.every((e) => e.w);
     }
 }

@@ -31,6 +31,8 @@ export class MenuCamera {
         this.sway = sway;
         this.introDuration = introDuration;
         this.introT = intro ? 0 : 1;
+        this.hold = false; // true: Die Einstiegsfahrt wartet noch (Ladebild)
+        this.last = { position: new THREE.Vector3(), quaternion: new THREE.Quaternion() };
 
         this.points = boxCorners(new THREE.Box3(new THREE.Vector3(-1, 0, -1), new THREE.Vector3(1, 1.5, 1)));
         this.goal = { target: new THREE.Vector3(), distance: 10 };
@@ -117,15 +119,22 @@ export class MenuCamera {
         cam.lookAt(target);
     }
 
+    // Rückgabe: true, wenn sich die Kamera in diesem Schritt bewegt hat. Steht sie, muss niemand neu zeichnen.
     update(dt) {
-        if (this.introT < 1) this.introT = Math.min(1, this.introT + dt / this.introDuration);
+        if (this.introT < 1 && !this.hold) this.introT = Math.min(1, this.introT + dt / this.introDuration);
         const k = easeInOut(this.introT);
 
-        // Gedämpft nachziehen: Rahmenänderungen (Modelle laden nach) und Mausposition
+        // Gedämpft nachziehen: Rahmenänderungen (Modelle laden nach) und Mausposition. Kurz vor dem Ziel
+        // einrasten, sonst nähert sich die Kamera ewig an und kommt nie zur Ruhe.
         const damp = (rate) => 1 - Math.exp(-rate * dt);
         this.cur.target.lerp(this.goal.target, damp(5));
+        if (this.cur.target.distanceToSquared(this.goal.target) < 1e-8) this.cur.target.copy(this.goal.target);
         this.cur.distance += (this.goal.distance - this.cur.distance) * damp(5);
-        if (this.sway) this.cur.mouse.lerp(this.mouse, damp(2.5));
+        if (Math.abs(this.goal.distance - this.cur.distance) < 1e-4) this.cur.distance = this.goal.distance;
+        if (this.sway) {
+            this.cur.mouse.lerp(this.mouse, damp(2.5));
+            if (this.cur.mouse.distanceToSquared(this.mouse) < 1e-7) this.cur.mouse.copy(this.mouse);
+        }
         const m = this.cur.mouse.clone().multiplyScalar(k);
 
         // Einstieg: von weiter hinten und etwas höher hereinfahren
@@ -147,6 +156,11 @@ export class MenuCamera {
             this.camera.far = far;
             this.camera.updateProjectionMatrix();
         }
+
+        const moved = !this.camera.position.equals(this.last.position) || !this.camera.quaternion.equals(this.last.quaternion);
+        this.last.position.copy(this.camera.position);
+        this.last.quaternion.copy(this.camera.quaternion);
+        return moved;
     }
 }
 
