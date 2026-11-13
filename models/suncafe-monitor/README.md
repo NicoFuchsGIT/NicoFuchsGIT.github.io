@@ -6,8 +6,8 @@ Parts: `Display`, `Screen`, `Stange` (2x), `Schiene`.
 
 `Screen` is a flat plane with an emissive material (`Screen_SunCafe`), so it stays readable without scene
 lights. It lies 0.5 mm in front of the housing; the material name is listed as `decals` in
-`content/objects.json`. Texture: `screen_suncafe.jpg` (screenshot of https://suncafe-nu.vercel.app/, Vienna,
-"Morgen früh"), stored as WebP in the model.
+`content/objects.json`. Texture: `screen_suncafe.jpg` (screenshot of https://suncafe-nu.vercel.app/, Vienna),
+stored as WebP in the model.
 
 Rebuild (no Blender needed, the model is built in code):
 
