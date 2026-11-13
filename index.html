@@ -37,15 +37,30 @@
             background-color: #f8f8fa;
         }
 
+        /* Das Studio füllt immer den sichtbaren Bereich; die Größe des Bildes setzt das Skript (window.innerHeight) */
         #canvas-container {
-            width: 100vw;
-            height: 100vh;
-            display: block;
+            position: fixed;
+            inset: 0;
+        }
+
+        /* Handy und Tablet: Adressleiste des Browsers wegwischen. Eine Seite kann die Leiste nicht selbst ausblenden,
+           der Browser klappt sie aber ein, sobald man die Seite nach oben schiebt. Dafür ist die Seite hier genau
+           so hoch wie der Bildschirm ohne Leiste (100lvh): Mit Leiste lässt sie sich um deren Höhe scrollen, also
+           nach oben wischen = Leiste weg, nach unten wischen = Leiste wieder da. Ohne einklappbare Leiste (Tablet,
+           In-App-Browser) gibt es nichts zu scrollen. Studio, Kopfzeile, Labels und Leisten sind `position: fixed`
+           und bleiben dabei stehen; das Bild passt sich über `resize` an die neue Höhe an. */
+        @media (pointer: coarse) {
+            body {
+                overflow-x: hidden;
+                overflow-y: auto;
+                min-height: 100vh; /* ältere Browser; am Handy ist das schon die Höhe ohne Leiste */
+                min-height: 100lvh;
+            }
         }
 
         /* Name und Titel oben links (F-40) */
         #ui-layer {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
             max-width: calc(100% - 380px); /* frei für die Leiste oben rechts */
@@ -437,7 +452,7 @@
 
         /* Labels über den Objekten (F-20 bis F-22, F-25): Buttons, mindestens 44 × 44 px */
         #labels {
-            position: absolute;
+            position: fixed;
             inset: 0;
             overflow: hidden;
             pointer-events: none;

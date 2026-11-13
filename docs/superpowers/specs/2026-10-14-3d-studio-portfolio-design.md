@@ -121,6 +121,15 @@ Jedes Objekt bekommt ein Fenster, das zu seinem Inhalt passt, statt einer Einhei
 - **Leichtere Texturen:** Holz, Lackierung und Monitorbild liegen als WebP in den Modellen; Modelle, die man nur aus
   der Studiokamera sieht, haben 512 px.
 
+### Nachtrag 2026-11-13
+
+- **Adressleiste des Browsers am Handy wegwischen:** Im Querformat nimmt die Leiste des Browsers viel Höhe weg. Eine
+  Seite kann sie nicht selbst ausblenden, der Browser klappt sie aber ein, sobald man die Seite nach oben schiebt.
+  Deshalb ist die Seite auf Touch-Geräten genau so hoch wie der Bildschirm ohne Leiste: Nach oben wischen blendet
+  die Leiste aus, nach unten wischen holt sie zurück. Das Studio und alle Bedienelemente bleiben dabei stehen und
+  füllen danach den größeren Bereich. Beim ersten Laden ist die Leiste noch da (das lässt kein Browser anders zu).
+  Seitlich gewischt wird weiterhin nicht.
+
 ## Rahmenbedingungen
 
 - Hosting: **GitHub Pages**, statisch. Es gibt bereits ein `index.html` mit einem Three.js-Prototyp (three@0.160.0 per Import-Map von unpkg, helles Studio, Nebel, gelber Ring als Spikeball-Platzhalter, Raycasting-Klick, Modal mit Projekttext).
