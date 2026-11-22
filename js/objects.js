@@ -2,7 +2,7 @@
 // Jedes Objekt steht sofort als schlichter Platzhalter da; ist ein `model` (.glb) angegeben, ersetzt es den
 // Platzhalter, sobald es geladen ist. Schlägt das Laden fehl, bleibt der Platzhalter stehen (Rückfall, F-14).
 import * as THREE from 'three';
-import { addContactShadow } from './studio.js';
+import { addContactShadow, addWallShadow, wallPose } from './studio.js';
 
 export async function loadContent(url) {
     const res = await fetch(url);
@@ -10,19 +10,33 @@ export async function loadContent(url) {
     return res.json();
 }
 
-// Baut alle sichtbaren Objekte. `onChange` wird aufgerufen, wenn sich die Größe eines Objekts ändert
-// (Modell nachgeladen), damit die Kamera ihren Bildausschnitt anpassen kann.
-export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
+// Baut alle sichtbaren Objekte. `onChange` wird aufgerufen, wenn sich ein Objekt ändert (Modell nachgeladen),
+// damit die Kamera ihren Bildausschnitt anpassen und das Studio neu zeichnen kann. `onProgress(fertig, gesamt)`
+// meldet jedes Modell, das geladen oder fehlgeschlagen ist (fürs Ladebild); ohne Modelle einmal mit (0, 0).
+// `items`: pro Objekt { id, def, group, content, triangles, hit, box, glow } – `content` ist das sichtbare Modell
+// (bzw. der Platzhalter), `box` die Weltbox, `glow` der gelbe Schein (F-20).
+export function createObjects(scene, renderer, defs, gltfLoader, { onChange, onProgress } = {}) {
     const groups = [];
     const hitTargets = [];
+    const items = [];
+    const models = defs.filter((def) => def.visible !== false && def.model).length;
+    let settled = 0;
+    const settle = () => onProgress?.(++settled, models);
 
     for (const def of defs) {
         if (def.visible === false) continue; // F-15
 
         const group = new THREE.Group();
-        const [x, z] = def.position ?? [0, 0];
-        group.position.set(x, 0, z);
-        group.rotation.y = THREE.MathUtils.degToRad(def.rotation ?? 0);
+        if (def.wall) {
+            // Wandobjekt: steht an der Wand, zur Mitte gedreht; `position` und `rotation` gelten hier nicht
+            const pose = wallPose(def.wall.angle ?? 0, def.wall.width ?? 1);
+            group.position.set(pose.x, 0, pose.z);
+            group.rotation.y = pose.rotation;
+        } else {
+            const [x, z] = def.position ?? [0, 0];
+            group.position.set(x, 0, z);
+            group.rotation.y = THREE.MathUtils.degToRad(def.rotation ?? 0);
+        }
         group.scale.setScalar(def.scale ?? 1);
         group.userData.id = def.id;
         scene.add(group);
@@ -34,29 +48,88 @@ export function createObjects(scene, renderer, defs, gltfLoader, onChange) {
         group.add(hit);
         hitTargets.push(hit);
 
+        const item = { id: def.id, def, group, content: null, triangles: 0, hit, box: new THREE.Box3(), glow: null };
+        items.push(item);
+
         let content = null;
-        let shadow = null;
+        const localBox = new THREE.Box3(); // Box im Raum der Gruppe
         const show = (next) => {
-            if (content) group.remove(content);
-            if (shadow) scene.remove(shadow);
-            content = next;
-            // Box im lokalen Raum der Gruppe: Inhalt hat hier noch keinen Parent, Welt = lokal
+            if (content) { group.remove(content); dispose(content); } // nur Platzhalter werden ersetzt
+            if (item.glow) { scene.remove(item.glow); item.glow.geometry.dispose(); item.glow.material.dispose(); }
+            content = item.content = def.wall ? toWall(next) : next;
+            item.triangles = 0;
+            content.traverse((o) => { if (o.isMesh) item.triangles += (o.geometry.index ?? o.geometry.attributes.position).count / 3; });
+            // Inhalt hat hier noch keinen Parent, Welt = lokal
             content.updateMatrixWorld(true);
-            const box = new THREE.Box3().setFromObject(content);
-            box.getSize(hit.scale);
-            box.getCenter(hit.position);
+            localBox.setFromObject(content);
+            localBox.getSize(hit.scale);
+            localBox.getCenter(hit.position);
             group.add(content);
-            shadow = addContactShadow(renderer, scene, content);
-            onChange();
+            group.updateMatrixWorld(true); // Weltlage für Schatten, Schein und Label
+            item.box.setFromObject(content);
+            item.glow = glow(item.box);
+            scene.add(item.glow);
+        };
+        // Sobald das Objekt so dasteht, wie es bleibt: Schatten backen und Bescheid geben. Der Platzhalter eines
+        // Objekts mit Modell bekommt keinen Schatten, er steht nur kurz da, meist noch hinter dem Ladebild.
+        const finish = () => {
+            addContactShadow(renderer, scene, content);
+            if (def.wall) addWallShadow(renderer, scene, content, group, localBox);
+            onChange?.();
         };
 
         show(placeholder(def));
-        if (def.model) {
-            gltfLoader.load(def.model, (gltf) => show(gltf.scene), undefined,
-                (err) => console.warn(`${def.id}: Modell nicht geladen, Platzhalter bleibt`, err));
-        }
+        if (!def.model) { finish(); continue; }
+        onChange?.();
+        gltfLoader.load(def.model, (gltf) => {
+            show(onTable(withDecals(gltf.scene, def.decals), def.table));
+            finish();
+            settle();
+        }, undefined, (err) => {
+            console.warn(`${def.id}: Modell nicht geladen, Platzhalter bleibt`, err);
+            finish();
+            settle();
+        });
     }
-    return { groups, hitTargets };
+    if (!models) onProgress?.(0, 0);
+    return { groups, hitTargets, items };
+}
+
+function dispose(object) {
+    object.traverse((o) => {
+        if (!o.isMesh) return;
+        o.geometry.dispose();
+        for (const m of [o.material].flat()) m.dispose();
+    });
+}
+
+// Gelber Lichtschein auf dem Boden unter dem Objekt (F-20, N-09). Liegt direkt in der Szene, nicht in der
+// Objektgruppe, damit er den Bildausschnitt nicht verändert. Sichtbarkeit über `material.opacity`.
+let glowTexture = null;
+function glow(box) {
+    if (!glowTexture) {
+        const c = document.createElement('canvas');
+        c.width = c.height = 128;
+        const g = c.getContext('2d');
+        const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+        grad.addColorStop(0, 'rgba(245,196,0,1)');
+        grad.addColorStop(0.45, 'rgba(245,196,0,0.55)');
+        grad.addColorStop(1, 'rgba(245,196,0,0)');
+        g.fillStyle = grad;
+        g.fillRect(0, 0, 128, 128);
+        glowTexture = new THREE.CanvasTexture(c);
+        glowTexture.colorSpace = THREE.SRGBColorSpace;
+    }
+    const w = (box.max.x - box.min.x) * 1.2 + 0.9;
+    const d = (box.max.z - box.min.z) * 1.2 + 0.9;
+    const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2),
+        new THREE.MeshBasicMaterial({ map: glowTexture, transparent: true, opacity: 0, depthWrite: false, toneMapped: false })
+    );
+    m.position.set((box.min.x + box.max.x) / 2, 0.004, (box.min.z + box.max.z) / 2);
+    m.renderOrder = 2; // über dem Kontaktschatten
+    m.visible = false;
+    return m;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -72,10 +145,58 @@ function placeholder(def) {
     switch (def.placeholder) {
         case 'avatar': return avatar(def.avatar);
         case 'suncafe': return sunCafe();
-        case 'desk': return desk();
         case 'car': return car();
         default: return box();
     }
+}
+
+// Modell auf einen Schreibtisch stellen (`table`: Höhe der Tischplatte in Metern vor `scale`), z. B. den
+// SunCafe-Monitor. Platte aus hellem Holz auf vier dunklen Stahlbeinen, Modell hinten, Tastatur und Maus davor.
+function onTable(model, height) {
+    if (!height) return model;
+    const g = new THREE.Group();
+    model.updateMatrixWorld(true);
+    const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
+    const w = Math.max(size.x + 0.5, 1.2), d = Math.max(size.z + 0.35, 0.65), t = 0.03;
+    const steel = mat(DARK, 0.5, 0.4);
+    g.add(mesh(new THREE.BoxGeometry(w, t, d), mat(0xd8c3a0, 0.6), 0, height - t / 2, 0));
+    for (const x of [-1, 1]) for (const z of [-1, 1]) {
+        g.add(mesh(new THREE.BoxGeometry(0.03, height - t, 0.03), steel, x * (w / 2 - 0.05), (height - t) / 2, z * (d / 2 - 0.05)));
+    }
+    model.position.set(0, height, -d / 2 + size.z / 2 + 0.05);
+    g.add(model);
+    g.add(mesh(new THREE.BoxGeometry(0.36, 0.015, 0.12), mat(0xf4f4f6, 0.5), -0.04, height + 0.0075, d / 2 - 0.12));
+    const mouse = mesh(new THREE.SphereGeometry(0.03, 16, 8), mat(0xf4f4f6, 0.4), 0.24, height, d / 2 - 0.12);
+    mouse.scale.set(0.7, 0.45, 1);
+    g.add(mouse);
+    return g;
+}
+
+// Dünne Auflagen (`decals`: Materialnamen), die knapp vor einer anderen Fläche liegen, z. B. ein Monitorbild
+// 0,2 mm vor dem Rahmen: Polygon-Offset zieht sie im Tiefenpuffer nach vorn, damit sie aus der Ferne nicht flackern.
+function withDecals(model, names) {
+    if (!names?.length) return model;
+    model.traverse((o) => {
+        for (const m of o.isMesh ? [o.material].flat() : []) {
+            if (!names.includes(m.name)) continue;
+            m.polygonOffset = true;
+            m.polygonOffsetFactor = -2;
+            m.polygonOffsetUnits = -4;
+        }
+    });
+    return model;
+}
+
+// Wandobjekt an die Wand rücken: Rückseite (kleinstes z) knapp vor die Wand bei z = 0, seitlich mittig.
+// Der Abstand von 1,5 cm hält die Rückseite auch bei 16-Bit-Tiefenpuffer vor dem Wandschatten (addWallShadow).
+function toWall(model) {
+    const g = new THREE.Group();
+    model.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(model);
+    model.position.x -= (box.min.x + box.max.x) / 2;
+    model.position.z -= box.min.z - 0.015;
+    g.add(model);
+    return g;
 }
 
 function mesh(geometry, material, x = 0, y = 0, z = 0) {
@@ -154,6 +275,7 @@ const EDGE_WHITE = 0xf4f4f2;
 const CSS_BLACK = '#141416', CSS_ORANGE = '#f26b1d', CSS_WHITE = '#f4f4f2';
 const TIRE_R = 0.207;
 
+// TU Edge (Platzhalter für später): flacher Rennwagen-Körper mit vier Rädern
 function car() {
     const g = new THREE.Group();
     const carbon = mat(EDGE_BLACK, 0.35, 0.15);

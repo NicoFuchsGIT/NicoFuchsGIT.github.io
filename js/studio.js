@@ -5,18 +5,30 @@ import { Reflector } from 'three/addons/objects/Reflector.js';
 import { HorizontalBlurShader } from 'three/addons/shaders/HorizontalBlurShader.js';
 import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
 
-const WALL_Z = -4.5;     // Rückwand
-const COVE_R = 2.2;      // Radius der Hohlkehle
+// Die Wand ist ein Stück: links gerade (x = −WALL_R), hinten links ein Viertelkreis um die Mitte, hinten
+// gerade weiter nach rechts (z = −WALL_R). Wandobjekte stehen mit der Rückseite auf dem Viertelkreis (wallPose).
+export const WALL_R = 6.4;
+const COVE_R = 0.3;      // Radius der Hohlkehle; klein, weil Werkbank & Co. direkt an der Wand stehen
 const WALL_H = 40;       // hoch genug, dass auch die weit entfernte Hochformat-Kamera nicht drüber schaut
-const WIDTH = 44;        // breit genug, dass man die Seiten nicht sieht
-const FLOOR_FRONT = 24;  // Boden reicht bis hinter die Kamera
+const WIDTH = 80;        // breit genug, dass man die Seiten auch mit Weitwinkel nicht sieht
+const FLOOR_FRONT = 45;  // Boden reicht bis hinter die Kamera, auch beim Einstieg im Hochformat
 
-// Hintergrund hinter der Hohlkehle, passend zur oberen Wand.
+// Hintergrund oberhalb der Wand (nur bei sehr hoher Kamera zu sehen), passend zur oberen Wand.
 // Kein Nebel: Im Hochformat steht die Kamera weit weg, Nebel würde die Objekte ausbleichen.
 const AIR = new THREE.Color(0xdedee0);
 const DARK = new THREE.Color(0x141416); // Licht aus (Einstiegsfahrt)
 
-export function createStudio(renderer, scene, { mobile = false } = {}) {
+// Wo ein Wandobjekt steht: `angle` in Grad auf dem Viertelkreis (0 = hinten mittig, 90 = links), `width` = Breite
+// seiner Rückseite. Die Rückseite ist eine Sehne des Kreises, die Wand verläuft dort gerade (wallPath).
+// Rückgabe: Mitte der Rückseite am Boden und Drehung zur Mitte, in Radiant.
+export function wallPose(angle, width) {
+    const a = THREE.MathUtils.degToRad(angle);
+    const d = Math.sqrt(Math.max(0, WALL_R * WALL_R - (width / 2) ** 2));
+    return { x: -Math.sin(a) * d, z: -Math.cos(a) * d, rotation: a };
+}
+
+// `wallSpans`: [{ angle, width }] der Wandobjekte, dort wird die Wand gerade (siehe wallPose)
+export function createStudio(renderer, scene, { mobile = false, wallSpans = [] } = {}) {
     scene.background = AIR.clone();
 
     // Environment-Map: kleiner Studioraum mit Lichtband und zwei Softboxen als Leuchtflächen
@@ -32,11 +44,27 @@ export function createStudio(renderer, scene, { mobile = false } = {}) {
     scene.add(key);
 
     const band = lightBand();
-    scene.add(cove(), band);
+    scene.add(wall(wallSpans), band);
     scene.add(floor(mobile, [band]));
-    // Die Softboxen rahmen das Bild links und rechts; im Querformat nimmt die Kamera sie mit in den Bildausschnitt
-    const softboxes = [softbox(-5.4, 0.3), softbox(5.4, 0.3)];
+    // Die Softboxen stehen links und rechts knapp außerhalb des Bildes (placeSoftboxes)
+    const softboxes = [softbox(), softbox()];
     scene.add(...softboxes);
+
+    // Softboxen zwischen Kamera und Objekten, gerade so weit außen, dass sie in Ruhe nicht im Bild sind.
+    // Schwenkt die Kamera mit der Maus mit (MenuCamera), kommt die Softbox auf dieser Seite halb ins Bild.
+    // `eye`: Kamera in Ruhe, `target`: Mitte der Objekte.
+    function placeSoftboxes(camera, eye, target) {
+        const view = target.clone().sub(eye).setY(0);
+        const depth = view.length() * 0.55;
+        view.normalize();
+        const side = new THREE.Vector3(-view.z, 0, view.x);
+        const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
+        softboxes.forEach((box, i) => {
+            const s = i ? 1 : -1;
+            box.position.copy(eye).addScaledVector(view, depth).addScaledVector(side, s * (depth * tanH + 0.68)).setY(0);
+            box.userData.head.lookAt(target.x, 0.9, target.z);
+        });
+    }
 
     // Licht an/aus für die Einstiegsfahrt (F-05): 0 = dunkel, 1 = Studio hell
     function setLight(k) {
@@ -46,35 +74,91 @@ export function createStudio(renderer, scene, { mobile = false } = {}) {
     renderer.toneMapping = THREE.LinearToneMapping;
     setLight(1);
 
-    return { setLight, frameObjects: softboxes };
+    return { setLight, placeSoftboxes };
 }
 
-// Hohlkehle: Profil (z, y) vom Boden über einen Viertelkreis in die senkrechte Wand, entlang x gezogen.
-// Vertex-Farben machen die Wand nach oben leicht grauer, wie im Frontal-Mockup.
-function cove() {
-    const profile = [];
-    const zc = WALL_Z + COVE_R;
-    for (let i = 0; i <= 24; i++) {
-        const a = (i / 24) * Math.PI / 2;
-        profile.push([zc - COVE_R * Math.sin(a), COVE_R - COVE_R * Math.cos(a)]);
+// Grundriss der Wand als Linienzug (x, z) von vorne links bis hinten rechts: links gerade, dann Viertelkreis um die
+// Mitte, auf dem jedes Wandobjekt ein gerades Stück (seine Rückseite) bekommt, hinten gerade weiter.
+function wallPath(spans) {
+    const pts = [];
+    const add = (x, z) => {
+        const last = pts[pts.length - 1];
+        if (!last || Math.hypot(last[0] - x, last[1] - z) > 0.01) pts.push([x, z]);
+    };
+    const onCircle = (deg) => {
+        const a = THREE.MathUtils.degToRad(deg);
+        add(-Math.sin(a) * WALL_R, -Math.cos(a) * WALL_R);
+    };
+    add(-WALL_R, FLOOR_FRONT);
+    // Sehnen von links nach hinten; überlappen sich zwei, schließt die zweite direkt an
+    const chords = spans.map(({ angle, width }) => {
+        const h = THREE.MathUtils.radToDeg(Math.asin(Math.min(1, width / 2 / WALL_R)));
+        return [angle + h, angle - h];
+    }).sort((a, b) => b[0] - a[0]);
+    let at = 90;
+    const arcTo = (to) => {
+        const n = Math.max(1, Math.ceil((at - to) / 3));
+        for (let i = 0; i <= n; i++) onCircle(at + (to - at) * i / n);
+        at = to;
+    };
+    for (const [from, to] of chords) {
+        if (from < at) arcTo(from);
+        onCircle(to);
+        at = Math.min(at, to);
     }
-    for (let y = COVE_R + 0.5; y <= WALL_H; y += y < 8 ? 0.5 : 4) profile.push([WALL_Z, y]);
+    if (at > 0) arcTo(0);
+    add(WIDTH / 2, -WALL_R);
+    return pts;
+}
 
-    const pos = [], col = [], idx = [];
-    profile.forEach(([z, y], i) => {
-        const shade = THREE.MathUtils.lerp(1, 0.96, THREE.MathUtils.smoothstep(y, 1.5, 6));
-        pos.push(-WIDTH / 2, y, z, WIDTH / 2, y, z);
-        col.push(shade, shade, shade, shade, shade, shade);
+// Wand mit Hohlkehle: Profil (Abstand zur Wand, Höhe) entlang des Grundrisses gezogen. Im Viertelkreis zeigen die
+// Normalen zur Mitte, auch auf den geraden Stücken hinter den Wandobjekten: So schattiert die Wand wie aus einem Guss,
+// ohne Knick zwischen den Stücken. Vertex-Farben machen sie nach oben leicht grauer.
+function wall(spans) {
+    // In der Ecke den Linienzug in Stücke von höchstens 25 cm teilen, damit die Normalen fein genug verlaufen
+    const corner = ([x, z]) => x <= 0 && z <= 0;
+    const path = [];
+    wallPath(spans).forEach((q, i, all) => {
+        const p = all[i - 1];
+        const n = p && corner(p) && corner(q) ? Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) / 0.25) : 1;
+        for (let k = 1; k <= n; k++) path.push(p ? [p[0] + (q[0] - p[0]) * k / n, p[1] + (q[1] - p[1]) * k / n] : q);
+    });
+    // Normale zum Raum hin: links +x, hinten +z, in der Ecke zur Mitte
+    const normals = path.map(([x, z]) => {
+        if (x < 0 && z < 0) { const len = Math.hypot(x, z); return [-x / len, -z / len]; }
+        return x < 0 ? [1, 0] : [0, 1];
+    });
+
+    // Profil: Viertelkreis vom Boden in die senkrechte Wand, dann die Wand hinauf. `a`: Winkel für die Normale
+    const profile = [];
+    for (let i = 0; i <= 12; i++) {
+        const a = (i / 12) * Math.PI / 2;
+        profile.push({ d: COVE_R * (1 - Math.sin(a)), y: COVE_R * (1 - Math.cos(a)), a });
+    }
+    for (let y = COVE_R + 0.5; y <= WALL_H; y += y < 8 ? 0.5 : 4) profile.push({ d: 0, y, a: Math.PI / 2 });
+
+    const pos = [], nor = [], col = [], idx = [];
+    const rows = profile.length;
+    path.forEach(([x, z], i) => {
+        const [nx, nz] = normals[i];
+        for (const { d, y, a } of profile) {
+            pos.push(x + nx * d, y, z + nz * d);
+            nor.push(nx * Math.sin(a), Math.cos(a), nz * Math.sin(a));
+            const shade = THREE.MathUtils.lerp(1, 0.96, THREE.MathUtils.smoothstep(y, 1.5, 6));
+            col.push(shade, shade, shade);
+        }
         if (i > 0) {
-            const a = (i - 1) * 2, b = a + 1, c = a + 2, d = a + 3;
-            idx.push(a, b, c, b, d, c);
+            for (let j = 0; j < rows - 1; j++) {
+                const a = (i - 1) * rows + j, b = i * rows + j, c = a + 1, e = b + 1;
+                idx.push(a, b, c, b, e, c);
+            }
         }
     });
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
     geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
     geo.setIndex(idx);
-    geo.computeVertexNormals();
     return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, vertexColors: true }));
 }
 
@@ -83,8 +167,9 @@ function cove() {
 // `hidden`: Objekte, die nicht gespiegelt werden (das Lichtband würde sonst als Streifen am unteren Bildrand auftauchen).
 function floor(mobile, hidden) {
     const group = new THREE.Group();
-    const depth = FLOOR_FRONT - (WALL_Z + COVE_R);
-    const zMid = (FLOOR_FRONT + WALL_Z + COVE_R) / 2;
+    // reicht unter die Wand; was dahinter liegt, verdeckt sie
+    const depth = FLOOR_FRONT + WALL_R;
+    const zMid = (FLOOR_FRONT - WALL_R) / 2;
     const geo = new THREE.PlaneGeometry(WIDTH, depth);
     const size = mobile ? 512 : 1024;
 
@@ -111,22 +196,21 @@ function floor(mobile, hidden) {
 // Lichtband an der Decke: dunkles Gehäuse mit leuchtendem Streifen
 function lightBand() {
     const group = new THREE.Group();
-    group.position.set(0, 4.2, -3.4);
+    group.position.set(0.3, 3.5, -4.4); // über der Lücke hinten im Halbkreis, frei von der runden Wand links
     const housing = new THREE.Mesh(
-        new THREE.BoxGeometry(9, 0.14, 0.6),
+        new THREE.BoxGeometry(7, 0.14, 0.6),
         new THREE.MeshStandardMaterial({ color: 0x2a2a2c, roughness: 0.6 })
     );
     group.add(housing);
-    const strip = new THREE.Mesh(new THREE.BoxGeometry(8.8, 0.02, 0.44), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    const strip = new THREE.Mesh(new THREE.BoxGeometry(6.8, 0.02, 0.44), new THREE.MeshBasicMaterial({ color: 0xffffff }));
     strip.position.y = -0.075;
     group.add(strip);
     return group;
 }
 
-// Softbox auf Dreibein-Stativ, schaut schräg auf die Studiomitte
-function softbox(x, z) {
+// Softbox auf Dreibein-Stativ; der Kopf (`userData.head`) wird auf die Objekte ausgerichtet
+function softbox() {
     const group = new THREE.Group();
-    group.position.set(x, 0, z);
     const metal = new THREE.MeshStandardMaterial({ color: 0x2b2b2e, roughness: 0.4, metalness: 0.6 });
     const headH = 2.05;
 
@@ -146,7 +230,7 @@ function softbox(x, z) {
     const head = new THREE.Group();
     head.position.y = headH;
     group.add(head);
-    head.lookAt(0, 0.9, -1.5); // Weltkoordinaten: Studiomitte
+    group.userData.head = head;
     const shell = new THREE.Mesh(
         new THREE.CylinderGeometry(0.09, 0.62, 0.5, 16, 1, true),
         new THREE.MeshStandardMaterial({ color: 0x1d1d1f, roughness: 0.55, side: THREE.DoubleSide })
@@ -195,15 +279,52 @@ export function addContactShadow(renderer, scene, object, { height = 1.4, blur =
     object.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(object);
     if (box.isEmpty()) return null;
-    const w = box.max.x - box.min.x + margin * 2;
-    const d = box.max.z - box.min.z + margin * 2;
-    const res = 512;
-    const target = new THREE.WebGLRenderTarget(res, Math.max(64, Math.round(res * d / w)));
-    const targetBlur = target.clone();
-
     const group = new THREE.Group();
     group.position.set((box.min.x + box.max.x) / 2, 0.002, (box.min.z + box.max.z) / 2);
     scene.add(group);
+    bakeShadow(renderer, scene, object, group, box.max.x - box.min.x + margin * 2, box.max.z - box.min.z + margin * 2, { height, blur, opacity });
+    return group;
+}
+
+// Dasselbe an der Wand hinter einem Wandobjekt: Was nah an der Wand hängt (Regal, Kleidung, Lochwand), wirft einen
+// weichen Schatten auf sie, wie Licht von vorne. `parent`: Gruppe des Objekts, Wand bei z = 0, Raum bei +z.
+// `box`: Box des Objekts in diesem Raum.
+export function addWallShadow(renderer, scene, object, parent, box, { depth = 0.8, blur = 6, opacity = 0.5, margin = 0.35 } = {}) {
+    const group = new THREE.Group();
+    // Die Schattenebene liegt knapp vor der Wand; gedreht, damit „oben“ (+y) in den Raum zeigt wie beim Boden
+    group.position.set((box.min.x + box.max.x) / 2, (box.min.y + box.max.y) / 2, 0.006);
+    group.rotation.x = Math.PI / 2;
+    parent.add(group);
+    parent.updateMatrixWorld(true);
+    bakeShadow(renderer, scene, object, group, box.max.x - box.min.x + margin * 2, box.max.y - box.min.y + margin * 2, { height: depth, blur, opacity });
+    return group;
+}
+
+// Materialien fürs Backen: einmal anlegen und behalten. Für jeden Schatten neu angelegt und wieder freigegeben,
+// müsste der Browser die drei Shader jedes Mal neu übersetzen (am Handy spürbar beim Laden).
+let bake = null;
+function bakeMaterials() {
+    if (bake) return bake;
+    const depth = new THREE.MeshDepthMaterial({ side: THREE.DoubleSide });
+    depth.onBeforeCompile = (shader) => {
+        shader.fragmentShader = shader.fragmentShader.replace(
+            'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
+            'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) );'
+        );
+    };
+    const hBlur = new THREE.ShaderMaterial(HorizontalBlurShader);
+    const vBlur = new THREE.ShaderMaterial(VerticalBlurShader);
+    hBlur.depthTest = vBlur.depthTest = false;
+    bake = { depth, hBlur, vBlur };
+    return bake;
+}
+
+// Schatten in `group` backen: Ebene in deren xz-Ebene (w × d), Kamera knapp darunter blickt nach +y,
+// je näher ein Teil der Ebene ist, desto dunkler (bis `height` darüber)
+function bakeShadow(renderer, scene, object, group, w, d, { height, blur, opacity }) {
+    const res = 512;
+    const target = new THREE.WebGLRenderTarget(res, Math.max(64, Math.round(res * d / w)));
+    const targetBlur = target.clone();
 
     const plane = new THREE.Mesh(
         new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2),
@@ -221,14 +342,7 @@ export function addContactShadow(renderer, scene, object, { height = 1.4, blur =
     group.add(cam);
     group.updateMatrixWorld(true);
 
-    const depthMaterial = new THREE.MeshDepthMaterial({ side: THREE.DoubleSide });
-    depthMaterial.onBeforeCompile = (shader) => {
-        shader.fragmentShader = shader.fragmentShader.replace(
-            'gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );',
-            'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) );'
-        );
-    };
-
+    const { depth, hBlur, vBlur } = bakeMaterials();
     const meshes = [];
     object.traverse((o) => { if (o.isMesh) { o.layers.enable(SHADOW_LAYER); meshes.push(o); } });
 
@@ -236,7 +350,7 @@ export function addContactShadow(renderer, scene, object, { height = 1.4, blur =
     const clearColor = renderer.getClearColor(new THREE.Color());
     const clearAlpha = renderer.getClearAlpha();
     scene.background = null;
-    scene.overrideMaterial = depthMaterial;
+    scene.overrideMaterial = depth;
     renderer.setClearColor(0x000000, 0);
     renderer.setRenderTarget(target);
     renderer.clear();
@@ -248,9 +362,6 @@ export function addContactShadow(renderer, scene, object, { height = 1.4, blur =
     blurPlane.position.y = height / 2;
     group.add(blurPlane);
     blurPlane.updateMatrixWorld(true);
-    const hBlur = new THREE.ShaderMaterial(HorizontalBlurShader);
-    const vBlur = new THREE.ShaderMaterial(VerticalBlurShader);
-    hBlur.depthTest = vBlur.depthTest = false;
     const pass = (amount) => {
         blurPlane.material = hBlur;
         hBlur.uniforms.tDiffuse.value = target.texture;
@@ -269,10 +380,9 @@ export function addContactShadow(renderer, scene, object, { height = 1.4, blur =
 
     group.remove(blurPlane, cam);
     blurPlane.geometry.dispose();
-    hBlur.dispose(); vBlur.dispose(); depthMaterial.dispose(); targetBlur.dispose();
+    targetBlur.dispose();
     meshes.forEach((o) => o.layers.disable(SHADOW_LAYER));
     renderer.setRenderTarget(prev.target);
     renderer.setClearColor(clearColor, clearAlpha);
     scene.background = prev.bg;
-    return group;
 }

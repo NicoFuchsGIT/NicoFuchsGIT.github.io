@@ -1,19 +1,20 @@
-# SunCafe monitor (GLB for the 3D CV)
+# SunCafe screen (GLB for the 3D CV)
 
-27" monitor (597 x 336 mm active area), feet on y=0, front towards +Z, ~0.62 m x 0.54 m. Parts: `Monitor_body`, `Monitor_back`, `Stand_*`, `Power_LED`, `Screen`.
+A large hanging display (65", 1.47 x 0.84 m) on two rods under a short ceiling rail, without a table. Bottom
+edge 1.20 m above the floor, top of the rail 2.45 m, front towards +Z, origin on the floor below the centre.
+Parts: `Display`, `Screen`, `Stange` (2x), `Schiene`.
 
-`Screen` is a flat plane with UV 0..1 (upright) and an emissive material, so it stays readable without scene lights. Texture: `screen_suncafe.jpg` (screenshot of https://suncafe-nu.vercel.app/, Vienna, "Morgen früh").
+`Screen` is a flat plane with an emissive material (`Screen_SunCafe`), so it stays readable without scene
+lights. It lies 0.5 mm in front of the housing; the material name is listed as `decals` in
+`content/objects.json`. Texture: `screen_suncafe.jpg` (screenshot of https://suncafe-nu.vercel.app/, Vienna),
+stored as WebP in the model.
 
-```js
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-const gltf = await new GLTFLoader().loadAsync('models/suncafe-monitor/suncafe_monitor.glb');
-const screen = gltf.scene.getObjectByName('Screen');
-// optional: replace the texture with a sharper screenshot
-const tex = new THREE.TextureLoader().load('screen_hires.png');
-tex.colorSpace = THREE.SRGBColorSpace; tex.flipY = false;   // glTF UVs
-screen.material.emissiveMap = tex;
+Rebuild (no Blender needed, the model is built in code):
+
+```
+cd models/tools && npm install      # once
+node models/tools/build-suncafe-screen.mjs
 ```
 
-Click target: `Screen` (open the live site on click). For a live page use a `CSS3DRenderer` iframe at the screen's world transform.
-
-Rebuild: `blender -b -P build_monitor.py`.
+Sizes and heights are constants at the top of `models/tools/build-suncafe-screen.mjs`. To show another
+screenshot, replace `screen_suncafe.jpg` (16:9) and rebuild.
