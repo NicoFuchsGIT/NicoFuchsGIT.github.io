@@ -1,0 +1,14 @@
+{
+  "_readme": "Name, Titel und Kontaktdaten für die Bedienelemente und das Impressum. Felder: content/README.md",
+  "name": "Nico Fuchs",
+  "title": {
+    "en": "Sports Engineering Student · Motorsport, Composites, Data Science",
+    "de": "Student Sports Engineering · Motorsport, Composites, Data Science"
+  },
+  "wip": true,
+  "contact": {
+    "email": "nico.fuchs5@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/nicofuchs/",
+    "github": "https://github.com/NicoFuchsGIT"
+  }
+}
