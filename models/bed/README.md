@@ -1,25 +1,24 @@
-# Bed (woodworking project, Blender model)
+# Bed (woodworking project)
 
 Solid wood platform bed with headboard, built after photos of the real bed. Shown in the window of the
-woodworking object (`windowModel` in content/objects.json), not in the studio itself. Procedural Blender 5
-model, `source/build_bed.py` (bpy only). Dimensions are estimates (mattress 140 x 200 cm).
+woodworking object (`windowModel` in content/objects.json), not in the studio itself. Built in code by
+`models/tools/build-bed.mjs` (no Blender needed). Dimensions are estimates (mattress 140 x 200 cm).
 
-- Slatted base: 21 dark stained slats across the bed, cross lap joints with three longitudinal rails.
-  Slat and rail are each notched to half the slat thickness (2 cm), so the tops sit flush. The notches are
-  real geometry (segments), the light rail wood shows between the slats like on the photos.
-- Six square legs (7 x 7 cm), slat top at 30 cm.
-- Headboard of six horizontal boards, shelf on top, side panel on the right; it reaches 22 cm past the bed.
+- Slatted base: 15 dark stained slats (7 x 4 cm, about 3 cm apart) running the full length of 2.02 m.
+- They rest on two cross beams near the head and foot end, each on its own pair of square legs (7 x 7 cm),
+  like two trestles. Slat top at 30 cm.
+- Cross lap joints: slat and beam are each notched to half the slat thickness (2 cm), so the tops sit flush.
+  The notches are real geometry; the light beam wood shows between the slats like on the photos.
+- Headboard of six horizontal boards, shelf on top, back panel, side panel on the right. The slatted base is
+  centred to it (1.74 m headboard, 12 cm wider than the base on each side).
 
 ## Rebuild
 
 ```
-blender -b -P models/bed/source/build_bed.py
-npx @gltf-transform/cli draco models/bed/web/bed-raw.glb models/bed/web/bed.glb
-node models/tools/web-optimize.mjs models/bed/web/bed.glb models/bed/web/bed.glb --textures-only
+cd models/tools && npm install      # once
+node models/tools/build-bed.mjs
 ```
 
-Writes `bed.blend` and `web/bed-raw.glb`: the wood grain (wave texture in object coordinates, along the
-boards) is baked into 1024 px JPEGs on Smart-UV-projected meshes. Y-up metres, origin on the floor at the
-centre of the slatted base, foot end towards +Z. ~12.5k triangles, ~0.15 MB with Draco and the textures as
-WebP (second command, see `models/tools`).
-`review/web_preview.png` shows the web model in the window.
+Writes `web/bed.glb` directly (Draco, wood grain as generated 512 px WebP textures). Sizes are constants at
+the top of the script. Y-up metres, origin on the floor at the centre of the slatted base, foot end towards
++Z. ~1.8k triangles, ~25 KB. `review/web_preview.png` shows the model in the window.
