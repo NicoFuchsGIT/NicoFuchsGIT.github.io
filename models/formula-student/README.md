@@ -1,5 +1,9 @@
 # Formula Student car (Blender model)
 
+> Not used by the site right now: the studio shows the procedural edge17 (`car()` in `js/objects.js`,
+> black/orange/white livery). To switch back, set `"model": "models/formula-student/web/formula_student.glb"`
+> and `"rotation": -40.0` for `formula-student` in `content/objects.json`.
+
 Electric Formula Student car, loosely based on the EDGE cars of TU Wien Racing. Procedural Blender 5 model,
 built by `source/build_formula_student.py` (bpy only, no external assets). Wheelbase 1.55 m, track
 1.22 m front / 1.18 m rear, 10-inch wheels (tyre 0.41 m). Dimensions are estimates of a typical FS car,

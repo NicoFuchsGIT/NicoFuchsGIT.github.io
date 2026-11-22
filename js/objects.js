@@ -2,6 +2,7 @@
 // Jedes Objekt steht sofort als schlichter Platzhalter da; ist ein `model` (.glb) angegeben, ersetzt es den
 // Platzhalter, sobald es geladen ist. Schlägt das Laden fehl, bleibt der Platzhalter stehen (Rückfall, F-14).
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { addContactShadow, addWallShadow, wallPose } from './studio.js';
 
 export async function loadContent(url) {
@@ -388,7 +389,30 @@ function car() {
             g.add(mesh(new THREE.BoxGeometry(0.03, 0.2, 0.06), metal, up, 0.2, z)); // Radträger
         }
     }
-    return g;
+    return mergeByMaterial(g);
+}
+
+// Fasst alle Teile mit demselben Material zu einem Mesh zusammen (rund 120 Teile -> gut 20 Draw Calls).
+// Meshes mit mehreren Materialien (Monocoque, Seitenkästen) bleiben einzeln.
+function mergeByMaterial(root) {
+    root.updateMatrixWorld(true);
+    const byMaterial = new Map();
+    const out = new THREE.Group();
+    root.traverse((o) => {
+        if (!o.isMesh) return;
+        if (Array.isArray(o.material)) {
+            const m = new THREE.Mesh(o.geometry.clone().applyMatrix4(o.matrixWorld), o.material);
+            out.add(m);
+            return;
+        }
+        const geo = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(o.matrixWorld);
+        for (const name of Object.keys(geo.attributes)) if (!['position', 'normal', 'uv'].includes(name)) geo.deleteAttribute(name);
+        geo.clearGroups();
+        if (!byMaterial.has(o.material)) byMaterial.set(o.material, []);
+        byMaterial.get(o.material).push(geo);
+    });
+    for (const [material, geos] of byMaterial) out.add(new THREE.Mesh(mergeGeometries(geos), material));
+    return out;
 }
 
 // Röhre aus Querschnitten (abgerundete Rechtecke) entlang z; UV: x = Länge, y = Umfang (0 unten, 0,25 rechts,
