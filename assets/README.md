@@ -5,9 +5,10 @@ Dateien für die Fenster (PRD Abschnitt 8). Eine neue Version einfach mit **glei
 
 | Datei | Für | Hinweis |
 |---|---|---|
-| `cv/cv-en.pdf` | Download im CV-Fenster (ganzes CV mit Projekten) | CV auf Englisch, aus `CV_Fuchs_Praktikum.docx` **ohne Telefonnummer**. Bei jeder neuen Version die Nummer vorher entfernen. Für eine deutsche Version `cv/cv-de.pdf` (und die Kurzfassung `cv/cv-de-short.pdf`) ablegen und bei `nico` unter `download.url` bzw. `pdf` als `"de"` eintragen |
+| `cv/cv-en.pdf` | Download im CV-Fenster (ganzes CV mit Projekten) | CV auf Englisch, aus `CV_Fuchs_Praktikum.docx` **ohne Telefonnummer**. Bei jeder neuen Version die Nummer vorher entfernen. Die deutsche Fassung liegt daneben (siehe unten) |
 | `cv/cv-en-short.pdf` | Anzeige im CV-Fenster | Nur Seite 1 von `cv-en.pdf` (ohne Projekte, die stehen im Studio). Neu erzeugen: `python3 -c "import pymupdf; d=pymupdf.open('cv/cv-en.pdf'); d.select([0]); d.save('cv/cv-en-short.pdf')"` |
 | `cv/cv-en-preview.jpg` | CV-Vorschau am Handy | Erste Seite als Bild: `pdftoppm -jpeg -r 90 -singlefile cv/cv-en.pdf cv/cv-en-preview` |
+| `cv/cv-de.pdf`, `cv/cv-de-short.pdf`, `cv/cv-de-preview.jpg` | Dasselbe auf Deutsch, wenn die Seite auf Deutsch steht | Aus `Lebenslauf_Fuchs_DE.pdf` (Word) **ohne Telefonnummer**: Die Kopfzeile wurde ohne Nummer neu gesetzt (Liberation Sans, maßgleich zu Arial), Links bleiben. Kurzfassung und Vorschau wie bei EN aus Seite 1 |
 | `spikeball/paper.pdf` | Spikeball-Fenster | Projektbericht (nur Englisch). Die Matrikelnummern auf dem Deckblatt sind geschwärzt |
 | `martini/arouca-backpack.pdf` | Fenster „Performance Apparel“ (Wandhänger) | Präsentation zum Martini-Rucksack (nur Englisch). Die Matrikelnummern auf der Titelfolie sind geschwärzt. Die Case Study zur Motorradhose liegt bewusst **nicht** hier, nur als Text im Fenster |
 
