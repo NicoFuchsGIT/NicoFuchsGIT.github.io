@@ -179,7 +179,7 @@ function car() {
     ], { n: 3 });
     g.add(new THREE.Mesh(body, [new THREE.MeshStandardMaterial({ map: bodyLivery(1.32, -1.04), roughness: 0.35, metalness: 0.1 }), orange, carbon]));
 
-    // Cockpit: Öffnung mit weißem Rand, Lenkrad, Sitzlehne, Fahrer mit Helm
+    // Cockpit: Öffnung mit weißem Rand, Lenkrad, Sitzlehne
     const opening = stadium(0.19, 0.35);
     const holeShape = new THREE.Shape(opening.getPoints(24));
     const rimShape = stadium(0.215, 0.375);
@@ -191,13 +191,11 @@ function car() {
     hole.position.set(0, 0.505, -0.02);
     g.add(hole);
     g.add(mesh(new THREE.BoxGeometry(0.34, 0.2, 0.05), orange, 0, 0.6, -0.36)); // Kopfstütze
-    g.add(mesh(new THREE.CapsuleGeometry(0.15, 0.12, 6, 12), matte, 0, 0.6, -0.22)); // Schultern im Rennanzug
     const wheelHub = mesh(new THREE.BoxGeometry(0.24, 0.1, 0.03), carbon, 0, 0.6, 0.2);
     wheelHub.rotation.x = -0.5;
     g.add(wheelHub);
-    g.add(helmet(white, orange, 0, 0.8, -0.2));
 
-    // Überrollbügel: Hauptbügel hinter dem Fahrer mit Streben nach hinten, Frontbügel vor dem Lenkrad
+    // Überrollbügel: Hauptbügel hinter dem Sitz mit Streben nach hinten, Frontbügel vor dem Lenkrad
     g.add(tube([[-0.26, 0.46, -0.37], [-0.23, 0.9, -0.39], [-0.12, 0.98, -0.39], [0.12, 0.98, -0.39], [0.23, 0.9, -0.39], [0.26, 0.46, -0.37]], 0.016, carbon));
     g.add(tube([[-0.24, 0.47, 0.3], [-0.16, 0.6, 0.3], [0.16, 0.6, 0.3], [0.24, 0.47, 0.3]], 0.014, carbon));
     for (const s of [-1, 1]) g.add(rod([s * 0.2, 0.95, -0.4], [s * 0.18, 0.45, -0.78], 0.011, carbon));
@@ -352,21 +350,6 @@ function wheel(x, z, side, orange, metal) {
     return w;
 }
 
-function helmet(white, orange, x, y, z) {
-    const h = new THREE.Group();
-    h.position.set(x, y, z);
-    h.add(new THREE.Mesh(new THREE.SphereGeometry(0.135, 32, 20), white));
-    const band = new THREE.Mesh(new THREE.TorusGeometry(0.136, 0.018, 8, 40), orange);
-    band.rotation.x = Math.PI / 2;
-    band.rotation.y = 0.25;
-    band.position.y = 0.03;
-    h.add(band);
-    const visor = new THREE.Mesh(new THREE.SphereGeometry(0.138, 32, 12, Math.PI * 0.18, Math.PI * 0.64, Math.PI * 0.38, Math.PI * 0.2),
-        mat(0x15181e, 0.15, 0.6));
-    h.add(visor);
-    return h;
-}
-
 // Flache Platte (Endplatte) aus einem Seitenprofil in (z, y), Dicke quer zur Fahrtrichtung, mittig bei x
 function plate(profile, thickness, material, x) {
     const geo = new THREE.ExtrudeGeometry(new THREE.Shape(profile.map(([z, y]) => new THREE.Vector2(z, y))), { depth: thickness, bevelEnabled: false });
@@ -415,7 +398,7 @@ function decalMat(map) {
 }
 
 // Monocoque: orange Nase, die als schmaler Streifen oben an den Flanken nach hinten ausläuft, weiße Begleitlinie,
-// weiße 17 auf der Nase. Gezeichnet in (z, Umfang) und für die linke Seite gespiegelt (u -> 1 - u).
+// weiße Startnummer 41 auf der Nase. Gezeichnet in (z, Umfang) und für die linke Seite gespiegelt (u -> 1 - u).
 function bodyLivery(zFront, zRear) {
     return canvasTexture(2048, 1024, (ctx, W, H) => {
         const P = (z, u) => [(zFront - z) / (zFront - zRear) * W, (1 - u) * H];
@@ -443,7 +426,7 @@ function bodyLivery(zFront, zRear) {
         ctx.font = 'italic 900 130px Helvetica, Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('17', 0, 0);
+        ctx.fillText('41', 0, 0);
         ctx.restore();
     });
 }
@@ -458,9 +441,9 @@ function sidepodDecal() {
         ctx.fillRect(0, H * 0.56, W * 0.64, H * 0.03);
         ctx.font = 'italic 900 150px Helvetica, Arial, sans-serif';
         ctx.textBaseline = 'alphabetic';
-        ctx.fillText('17', W * 0.06, H * 0.5);
+        ctx.fillText('41', W * 0.06, H * 0.5);
         ctx.font = 'italic 800 54px Helvetica, Arial, sans-serif';
-        ctx.fillText('edge17', W * 0.32, H * 0.5);
+        ctx.fillText('EDGE17', W * 0.32, H * 0.5);
         ctx.fillStyle = CSS_BLACK;
         ctx.font = 'italic 800 44px Helvetica, Arial, sans-serif';
         ctx.fillText('TU WIEN RACING', W * 0.04, H * 0.88);
@@ -479,6 +462,6 @@ function endplateDecal() {
         ctx.fillRect(W * 0.08, H * 0.74, W * 0.84, H * 0.16);
         ctx.fillStyle = CSS_WHITE;
         ctx.font = 'italic 800 90px Helvetica, Arial, sans-serif';
-        ctx.fillText('edge17', W / 2, H * 0.86);
+        ctx.fillText('EDGE17', W / 2, H * 0.86);
     });
 }
