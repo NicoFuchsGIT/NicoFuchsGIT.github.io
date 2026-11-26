@@ -97,8 +97,6 @@ input[type=text],input[type=number]{font:inherit;font-size:16px;padding:11px 12p
 .pips i{width:10px;height:10px;border-radius:50%;background:var(--line)}
 .pips i.on{background:var(--accent)}
 .status{font-size:13px;color:var(--muted);min-height:18px}
-.risk{background:var(--accent-soft);border:1px dashed var(--accent);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:13px;display:flex;gap:10px;align-items:center}
-.risk .btn{flex:none;padding:9px 12px;font-size:13px}
 
 /* sheet */
 .sheetwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
@@ -169,7 +167,7 @@ thead th.cur{box-shadow:inset 0 -4px 0 var(--held)}
 <script>
 (function(){
 const RULES={
- d6:{key:'d6',title:'Kniffel',tag:'Klassisch · D6',faces:6,rolls:3,bonusAt:63,bonus:35,risk:false,lowMax:30,
+ d6:{key:'d6',title:'Kniffel',tag:'Klassisch · D6',faces:6,rolls:3,bonusAt:63,bonus:35,lowMax:30,
   intro:'Das Original – fünf sechsseitige Würfel, drei Würfe, dreizehn Felder.',
   rules:['Oben zählen nur die Augen der jeweiligen Zahl.','Bonus +35 ab 63 Punkten oben.','Full House 25 · Kleine Straße 30 · Große Straße 40 · Kniffel 50.','Chance: Summe aller Würfel, passt immer.'],
   cats:[
@@ -182,9 +180,9 @@ const RULES={
    {id:'gs',label:'Große Straße',hint:'5 in Folge · 40',sec:'L',fixed:40},
    {id:'kn',label:'Kniffel',hint:'5 gleiche · 50',sec:'L',fixed:50},
    {id:'ch',label:'Chance',hint:'Summe',sec:'L'}]},
- d12:{key:'d12',title:'Kniffel D12',tag:'Extreme · D12',faces:12,rolls:4,bonusAt:130,bonus:70,risk:true,lowMax:60,
+ d12:{key:'d12',title:'Kniffel D12',tag:'Extreme · D12',faces:12,rolls:4,bonusAt:130,bonus:70,lowMax:60,
   intro:'Fünf zwölfseitige Würfel, vier Würfe, vierzehn Felder.',
-  rules:['Oben zählen Paare: z. B. bei 7+8 alle 7er und 8er.','Bonus +70 ab 130 Punkten oben.','Viererpasch: 4 gleiche Augen · fest 100.','Full House zählt über Paar-Gruppen (7 und 8 gelten als gleich).','Große Straße: 5 verschiedene Zahlen innerhalb von 6 in Folge.','Alles oder nichts: ab 3 gleichen nach dem 4. Wurf ein 5. Wurf – Kniffel oder Kniffel gestrichen.'],
+  rules:['Oben zählen Paare: z. B. bei 7+8 alle 7er und 8er.','Bonus +70 ab 130 Punkten oben.','Viererpasch: 4 gleiche Augen · fest 100.','Full House zählt über Paar-Gruppen (7 und 8 gelten als gleich).','Große Straße: 5 verschiedene Zahlen innerhalb von 6 in Folge.'],
   cats:[
    {id:'u1',label:'1+2',sec:'U',vals:[1,2]},{id:'u2',label:'3+4',sec:'U',vals:[3,4]},{id:'u3',label:'5+6',sec:'U',vals:[5,6]},
    {id:'u4',label:'7+8',sec:'U',vals:[7,8]},{id:'u5',label:'9+10',sec:'U',vals:[9,10]},{id:'u6',label:'11+12',sec:'U',vals:[11,12]},
@@ -194,7 +192,7 @@ const RULES={
    {id:'ks',label:'Kleine Straße',hint:'4 in Folge · 60',sec:'L',fixed:60},
    {id:'gs',label:'Große Straße',hint:'5 aus 6 in Folge · 70',sec:'L',fixed:70},
    {id:'kn',label:'Kniffel',hint:'5 gleiche · 150',sec:'L',fixed:150},
-   {id:'lo',label:'Summe ≤ 12',hint:'60',sec:'L',fixed:60},
+   {id:'lo',label:'Summe ≤ 14',hint:'60',sec:'L',fixed:60},
    {id:'gu',label:'Gerade/Ungerade',hint:'alle gleich · Summe',sec:'L'}]}
 };
 const KEY='kniffel-d12-v1';
@@ -215,7 +213,7 @@ function score(id,d,R){
     case 'ks':return run(s,4,R.faces)?c.fixed:0;
     case 'gs':return R.key==='d12'?(s.size===5&&Math.max(...d)-Math.min(...d)<=5?c.fixed:0):(run(s,5,R.faces)?c.fixed:0);
     case 'kn':return cn[0]===5?c.fixed:0;
-    case 'lo':return sum(d)<=12?c.fixed:0;
+    case 'lo':return sum(d)<=14?c.fixed:0;
     case 'gu':return d.every(x=>x%2===0)||d.every(x=>x%2===1)?sum(d):0;
     case 'ch':return sum(d);
   }
@@ -308,15 +306,6 @@ function dieSVG(v,held){
   <text x="50" y="${held?62:66}" text-anchor="middle">${label}</text>${held?'<text class="lock" x="50" y="82" text-anchor="middle">HALTEN</text>':''}</svg>`;
 }
 
-function riskAvailable(){
-  const R=rules();
-  if(!R.risk||!S.digital||S.roll!==R.rolls)return false;
-  const p=S.players[S.cur];
-  if(p.scores.kn!=null)return false;
-  if(score('kn',S.dice)>0)return false;
-  return counts(S.dice)[0]>=3;
-}
-
 function renderGame(){
   const R=rules(),p=S.players[S.cur],N=R.cats.length;
   const round=Math.min(N,Math.min(...S.players.map(q=>Object.keys(q.scores).length))+1);
@@ -329,7 +318,6 @@ function renderGame(){
       <div class="dice">${S.dice.map((v,i)=>`<button class="die ${S.held[i]?'held':''} ${v==null?'blank':''} ${spin&&!S.held[i]?'spin':''}" data-die="${i}" ${!hasDice||maxed?'disabled':''} aria-label="Würfel ${i+1}: ${v==null?'noch nicht geworfen':v}${S.held[i]?', gehalten':''}">${dieSVG(v,S.held[i])}</button>`).join('')}</div>
       <div class="trayrow"><button class="btn" id="roll" ${maxed?'disabled':''}>${S.roll===0?'Würfeln':maxed?'Keine Würfe mehr':'Nochmal würfeln'}</button>
       <div class="pips" aria-label="Wurf ${Math.min(S.roll,R.rolls)} von ${R.rolls}">${Array.from({length:R.rolls},(_,k)=>`<i class="${k<S.roll?'on':''}"></i>`).join('')}</div></div>
-      ${riskAvailable()?`<div class="risk"><span><b>Alles oder nichts?</b> 5. Wurf auf den Kniffel – daneben heißt Kniffel gestrichen. Chance ${counts(S.dice)[0]===4?'1 : 12':'1 : 144'}.</span><button class="btn" id="risk">Wagen</button></div>`:''}
       <div class="status">${S.roll===0?(S.last?esc(S.last):'Tippe auf „Würfeln“.'):!maxed?'Würfel antippen zum Halten, dann ein Feld in deiner Spalte wählen.':'Wähle ein Feld in deiner Spalte.'}</div>
     </section>`;
   }else if(S.last){
@@ -365,7 +353,6 @@ function renderGame(){
   if(S.digital){
     document.getElementById('roll').onclick=doRoll;
     app.querySelectorAll('[data-die]').forEach(b=>b.onclick=()=>{const i=+b.dataset.die;S.held[i]=!S.held[i];save();render()});
-    const r=document.getElementById('risk');if(r)r.onclick=doRisk;
   }
   app.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>openEntry(b.dataset.cat));
   app.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>openExample(b.dataset.ex));
@@ -392,17 +379,7 @@ function enter(id,val,note){
   toast(S.last+' · '+S.players[S.cur].name+' ist dran');
 }
 
-function doRisk(){
-  const m={};S.dice.forEach(x=>m[x]=(m[x]||0)+1);
-  const val=+Object.keys(m).sort((a,b)=>m[b]-m[a]||b-a)[0];
-  S.roll=rules().rolls+1;
-  S.dice=S.dice.map(x=>x===val?x:rnd());
-  S.held=S.dice.map(x=>x===val);
-  spin=true;
-  const ok=score('kn',S.dice)>0;
-  render();
-  setTimeout(()=>{enter('kn',ok?150:0,ok?'Alles oder nichts geschafft!':'Alles oder nichts daneben')},900);
-}
+
 
 function openEntry(id){
   const R=rules(),c=R.cats.find(c=>c.id===id),p=S.players[S.cur];
@@ -454,7 +431,7 @@ const EXAMPLES={
   ks:{d:[7,8,9,10,2],hl:[0,1,2,3],x:'7-8-9-10 in Folge'},
   gs:{d:[3,4,5,7,8],hl:[0,1,2,3,4],x:'Fünf verschiedene Zahlen innerhalb von 3 bis 8'},
   kn:{d:[11,11,11,11,11],hl:[0,1,2,3,4],x:'Fünf gleiche'},
-  lo:{d:[1,2,2,3,4],hl:[0,1,2,3,4],x:'1 + 2 + 2 + 3 + 4 = 12, also höchstens 12'},
+  lo:{d:[1,2,3,4,4],hl:[0,1,2,3,4],x:'1 + 2 + 3 + 4 + 4 = 14, also höchstens 14'},
   gu:{d:[2,4,8,10,12],hl:[0,1,2,3,4],x:'Alle gerade: 2 + 4 + 8 + 10 + 12'}}
 };
 function openExample(id){
