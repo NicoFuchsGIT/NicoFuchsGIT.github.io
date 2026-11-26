@@ -66,6 +66,7 @@ a.btn{display:block;text-align:center;text-decoration:none;border-radius:10px}
 .namerow{display:flex;gap:8px}
 .namerow input{flex:1;min-width:0}
 input[type=text],input[type=number]{font:inherit;font-size:16px;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+input::placeholder{color:var(--muted);opacity:.6}
 .toggle{display:flex;align-items:center;gap:12px;justify-content:space-between}
 .switch{position:relative;width:48px;height:28px;flex:none}
 .switch input{opacity:0;width:100%;height:100%;margin:0;position:absolute;cursor:pointer}
@@ -227,10 +228,13 @@ function totals(p){
 }
 const done=p=>rules().cats.every(c=>p.scores[c.id]!=null);
 
+const PH=['Anna','Ben','Clara','David','Emma','Felix'];
+const blankDefaults=a=>a.map((n,i)=>n===PH[i]||n==='Spieler '+(i+1)?'':n);
 let S=load()||fresh();
 if(!S.mode)S.mode='d12';
+S.names=blankDefaults(S.names||['','','']);
 function rules(){return RULES[S.mode]||RULES.d12}
-function fresh(){return {phase:'setup',mode:'d12',names:['Anna','Ben','Clara'],digital:true,players:[],cur:0,dice:[null,null,null,null,null],held:[false,false,false,false,false],roll:0,last:'',hist:[]}}
+function fresh(){return {phase:'setup',mode:'d12',names:['','',''],digital:true,players:[],cur:0,dice:[null,null,null,null,null],held:[false,false,false,false,false],roll:0,last:'',hist:[]}}
 function load(){try{const t=localStorage.getItem(KEY);return t?JSON.parse(t):null}catch(e){return null}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 let spin=false,toastT;
@@ -258,7 +262,7 @@ function renderSetup(){
   <div class="card">
     <h2 style="font-size:20px">Mitspieler</h2>
     <div class="names" id="names">${S.names.map((n,i)=>`
-      <div class="namerow"><input type="text" id="name-${i}" value="${esc(n)}" maxlength="14" aria-label="Name Spieler ${i+1}">
+      <div class="namerow"><input type="text" id="name-${i}" value="${esc(n)}" placeholder="${PH[i]}" maxlength="14" autocomplete="off" aria-label="Name Spieler ${i+1}">
       <button class="btn ghost" data-del="${i}" aria-label="Spieler entfernen" ${S.names.length<=1?'disabled':''}>✕</button></div>`).join('')}
     </div>
     <button class="btn line" id="add" ${S.names.length>=6?'disabled':''}>+ Spieler hinzufügen</button>
@@ -280,12 +284,12 @@ function renderSetup(){
   const syncNames=()=>{S.names=S.names.map((_,i)=>document.getElementById('name-'+i).value)};
   app.querySelectorAll('input[name=mode]').forEach(r=>r.onchange=()=>{syncNames();S.mode=r.value;save();render();const f=document.getElementById('mode-'+S.mode);f&&f.focus()});
   app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{syncNames();S.names.splice(+b.dataset.del,1);save();render()});
-  document.getElementById('add').onclick=()=>{syncNames();S.names.push('Spieler '+(S.names.length+1));save();render();const i=document.getElementById('name-'+(S.names.length-1));i&&i.select()};
+  document.getElementById('add').onclick=()=>{syncNames();S.names.push('');save();render();const i=document.getElementById('name-'+(S.names.length-1));i&&i.focus()};
   document.getElementById('digital').onchange=e=>{S.digital=e.target.checked;save()};
   app.querySelectorAll('input[type=text]').forEach(i=>i.oninput=()=>{syncNames();save()});
   document.getElementById('start').onclick=()=>{
     syncNames();
-    const names=S.names.map((n,i)=>n.trim()||('Spieler '+(i+1)));
+    const names=S.names.map((n,i)=>n.trim()||PH[i]);
     S.players=names.map(n=>({name:n,scores:{}}));
     S.cur=0;S.phase='play';S.hist=[];resetDice();S.last='';save();render();
   };
@@ -448,16 +452,18 @@ function openMenu(){
   modal(`<h2>Menü</h2><div class="menu">
     <button class="btn ghost" id="undo" ${S.hist.length?'':'disabled'}>Letzten Eintrag rückgängig</button>
     <button class="btn ghost" id="mode">${S.digital?'Echte Würfel nutzen (nur eintippen)':'Digitale Würfel nutzen'}</button>
+    ${S.mode==='d12'?'<a class="btn ghost" href="Kniffel_D12_Regelwerk.pdf" target="_blank" rel="noopener">Regelwerk öffnen (PDF)</a>':'<button class="btn ghost" id="rules">Regeln anzeigen</button>'}
     <button class="btn line" id="new">Neues Spiel / Variante wechseln …</button>
     <button class="btn line" data-x>Schließen</button></div>`,
   m=>{
     m.querySelector('#undo').onclick=()=>{undo();close();toast('Letzter Eintrag zurückgenommen')};
     m.querySelector('#mode').onclick=()=>{S.digital=!S.digital;resetDice();save();close();render()};
     m.querySelector('#new').onclick=()=>confirmNew();
+    const r=m.querySelector('#rules');if(r)r.onclick=()=>modal(`<h2>Regeln · ${rules().tag}</h2><ul class="rules" style="font-size:14px">${rules().rules.map(x=>`<li>${x}</li>`).join('')}</ul><button class="btn line" data-x>Schließen</button>`);
   });
 }
 function undo(){const h=S.hist.pop();if(!h)return;const o=JSON.parse(h);S.players=o.players;S.cur=o.cur;S.last=o.last;S.phase='play';resetDice();save();render()}
-function toSetup(){const names=S.players.length?S.players.map(p=>p.name):S.names;const d=S.digital,mode=S.mode;S=fresh();S.names=names;S.digital=d;S.mode=mode;save();close();render()}
+function toSetup(){const names=S.players.length?S.players.map(p=>p.name):S.names;const d=S.digital,mode=S.mode;S=fresh();S.names=blankDefaults(names);S.digital=d;S.mode=mode;save();close();render()}
 function confirmNew(){
   modal(`<h2>Neues Spiel?</h2><div class="small">Der aktuelle Spielstand wird gelöscht. Namen bleiben erhalten, die Variante kannst du danach wählen.</div>
     <div class="row"><button class="btn ghost" data-x>Abbrechen</button><button class="btn" id="yes">Neues Spiel</button></div>`,
