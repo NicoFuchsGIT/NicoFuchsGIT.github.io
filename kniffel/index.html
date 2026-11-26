@@ -13,20 +13,14 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Kniffel D12</title>
 <style>
-/* Schriften liegen lokal unter fonts/ (latin-Subset), damit nichts von Drittanbietern geladen wird */
-@font-face{font-family:"Inter";font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/inter-latin.woff2) format("woff2")}
-@font-face{font-family:"Zilla Slab";font-style:normal;font-weight:600;font-display:swap;src:url(fonts/zilla-slab-600-latin.woff2) format("woff2")}
-@font-face{font-family:"Zilla Slab";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/zilla-slab-700-latin.woff2) format("woff2")}
-</style>
-<style>
 /* Layout: one phone column — sticky turn bar, dice tray, scoring sheet with a sticky field column */
 :root{
   --bg:#f5f3f2; --surface:#ffffff; --surface-2:#f0e9e7; --line:#ddd3d0;
   --fg:#231b1a; --muted:#73625f; --accent:#8b1e1e; --accent-fg:#ffffff;
   --accent-soft:#f6e3e1; --held:#2f5d50; --held-fg:#ffffff; --good:#2f6b3f; --warn:#9a5a00;
   --die:#ffffff; --die-edge:#c9bab6;
-  --display:"Zilla Slab", Georgia, "Times New Roman", serif;
-  --body:Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display:"Helvetica Neue", Helvetica, Arial, sans-serif;
+  --body:"Helvetica Neue", Helvetica, Arial, sans-serif;
   --r:12px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -190,12 +184,12 @@ const RULES={
    {id:'ch',label:'Chance',hint:'Summe',sec:'L'}]},
  d12:{key:'d12',title:'Kniffel D12',tag:'Extreme · D12',faces:12,rolls:4,bonusAt:130,bonus:70,risk:true,lowMax:60,
   intro:'Fünf zwölfseitige Würfel, vier Würfe, vierzehn Felder.',
-  rules:['Oben zählen Paare: z. B. bei 7+8 alle 7er und 8er.','Bonus +70 ab 130 Punkten oben.','Viererpasch und Full House zählen über Paar-Gruppen (7 und 8 gelten als gleich).','Große Straße: 5 verschiedene Zahlen innerhalb von 6 in Folge.','Alles oder nichts: ab 3 gleichen nach dem 4. Wurf ein 5. Wurf – Kniffel oder Kniffel gestrichen.'],
+  rules:['Oben zählen Paare: z. B. bei 7+8 alle 7er und 8er.','Bonus +70 ab 130 Punkten oben.','Viererpasch: 4 gleiche Augen · fest 100.','Full House zählt über Paar-Gruppen (7 und 8 gelten als gleich).','Große Straße: 5 verschiedene Zahlen innerhalb von 6 in Folge.','Alles oder nichts: ab 3 gleichen nach dem 4. Wurf ein 5. Wurf – Kniffel oder Kniffel gestrichen.'],
   cats:[
    {id:'u1',label:'1+2',sec:'U',vals:[1,2]},{id:'u2',label:'3+4',sec:'U',vals:[3,4]},{id:'u3',label:'5+6',sec:'U',vals:[5,6]},
    {id:'u4',label:'7+8',sec:'U',vals:[7,8]},{id:'u5',label:'9+10',sec:'U',vals:[9,10]},{id:'u6',label:'11+12',sec:'U',vals:[11,12]},
    {id:'p3',label:'Dreierpasch',hint:'3 gleiche · Summe',sec:'L'},
-   {id:'p4',label:'Viererpasch',hint:'4 aus einer Paar-Gruppe · Summe',sec:'L'},
+   {id:'p4',label:'Viererpasch',hint:'4 gleiche · 100',sec:'L',fixed:100},
    {id:'fh',label:'Full House',hint:'Gruppen 3 + 2 · 40',sec:'L',fixed:40},
    {id:'ks',label:'Kleine Straße',hint:'4 in Folge · 60',sec:'L',fixed:60},
    {id:'gs',label:'Große Straße',hint:'5 aus 6 in Folge · 70',sec:'L',fixed:70},
@@ -216,7 +210,7 @@ function score(id,d,R){
   const gc=R.key==='d12'?counts(d.map(x=>Math.ceil(x/2))):cn;
   switch(id){
     case 'p3':return cn[0]>=3?sum(d):0;
-    case 'p4':return gc[0]>=4?sum(d):0;
+    case 'p4':return cn[0]>=4?(c.fixed||sum(d)):0;
     case 'fh':return gc[0]===3&&gc[1]===2?c.fixed:0;
     case 'ks':return run(s,4,R.faces)?c.fixed:0;
     case 'gs':return R.key==='d12'?(s.size===5&&Math.max(...d)-Math.min(...d)<=5?c.fixed:0):(run(s,5,R.faces)?c.fixed:0);
@@ -455,7 +449,7 @@ const EXAMPLES={
   u1:{d:[1,2,2,7,9],x:'1 + 2 + 2'},u2:{d:[3,4,4,10,12],x:'3 + 4 + 4'},u3:{d:[5,6,6,2,11],x:'5 + 6 + 6'},
   u4:{d:[7,8,8,2,12],x:'7 + 8 + 8'},u5:{d:[5,9,9,10,10],x:'9 + 9 + 10 + 10'},u6:{d:[12,12,12,11,5],x:'12 + 12 + 12 + 11'},
   p3:{d:[9,9,9,2,5],hl:[0,1,2],x:'Drei 9er – alle Würfel zählen: 9 + 9 + 9 + 2 + 5'},
-  p4:{d:[7,8,8,7,3],hl:[0,1,2,3],x:'Vier aus der Gruppe 7+8 – alle Würfel zählen: 7 + 8 + 8 + 7 + 3'},
+  p4:{d:[7,7,3,7,7],hl:[0,1,3,4],x:'Vier 7er – feste 100 Punkte'},
   fh:{d:[3,4,3,11,12],hl:[0,1,2,3,4],x:'Drei aus 3+4 und zwei aus 11+12'},
   ks:{d:[7,8,9,10,2],hl:[0,1,2,3],x:'7-8-9-10 in Folge'},
   gs:{d:[3,4,5,7,8],hl:[0,1,2,3,4],x:'Fünf verschiedene Zahlen innerhalb von 3 bis 8'},
