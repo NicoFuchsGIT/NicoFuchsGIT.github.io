@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8b1e1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kniffel">
+<meta name="description" content="Digitaler Kniffel-Spielblock fürs Handy – klassisch mit D6 oder D12 Extreme.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='6' y='6' width='88' height='88' rx='18' fill='%238b1e1e'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Georgia,serif' font-weight='700' font-size='48' fill='%23fff'%3E12%3C/text%3E%3C/svg%3E">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Kniffel D12</title>
+<style>
+/* Schriften liegen lokal unter fonts/ (latin-Subset), damit nichts von Drittanbietern geladen wird */
+@font-face{font-family:"Inter";font-style:normal;font-weight:400 700;font-display:swap;src:url(fonts/inter-latin.woff2) format("woff2")}
+@font-face{font-family:"Zilla Slab";font-style:normal;font-weight:600;font-display:swap;src:url(fonts/zilla-slab-600-latin.woff2) format("woff2")}
+@font-face{font-family:"Zilla Slab";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/zilla-slab-700-latin.woff2) format("woff2")}
+</style>
+<style>
+/* Layout: one phone column — sticky turn bar, dice tray, scoring sheet with a sticky field column */
+:root{
+  --bg:#f5f3f2; --surface:#ffffff; --surface-2:#f0e9e7; --line:#ddd3d0;
+  --fg:#231b1a; --muted:#73625f; --accent:#8b1e1e; --accent-fg:#ffffff;
+  --accent-soft:#f6e3e1; --held:#2f5d50; --held-fg:#ffffff; --good:#2f6b3f; --warn:#9a5a00;
+  --die:#ffffff; --die-edge:#c9bab6;
+  --display:"Zilla Slab", Georgia, "Times New Roman", serif;
+  --body:Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#171213; --surface:#211a1b; --surface-2:#2b2223; --line:#3e3233;
+  --fg:#f1e9e8; --muted:#b19f9c; --accent:#e0625a; --accent-fg:#1a0f0f;
+  --accent-soft:#3a2223; --held:#6fbfa6; --held-fg:#0e1f1a; --good:#7fcf92; --warn:#f0b35a;
+  --die:#2e2526; --die-edge:#4d3f40; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#171213; --surface:#211a1b; --surface-2:#2b2223; --line:#3e3233;
+  --fg:#f1e9e8; --muted:#b19f9c; --accent:#e0625a; --accent-fg:#1a0f0f;
+  --accent-soft:#3a2223; --held:#6fbfa6; --held-fg:#0e1f1a; --good:#7fcf92; --warn:#f0b35a;
+  --die:#2e2526; --die-edge:#4d3f40; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.4;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1,h2{font-family:var(--display);margin:0;text-wrap:balance}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{background:var(--accent);color:var(--accent-fg);padding:12px 16px;font-weight:600}
+.btn.ghost{background:var(--surface-2);color:var(--fg)}
+.btn.line{background:transparent;color:var(--fg);border:1px solid var(--line)}
+a.btn{display:block;text-align:center;text-decoration:none;border-radius:10px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.small{font-size:13px;color:var(--muted)}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 8px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.bar h1{font-size:22px;color:var(--accent);letter-spacing:.02em}
+.turn{flex:1;min-width:0;text-align:right}
+.turn b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.turn span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.iconbtn{background:var(--surface-2);color:var(--fg);width:40px;height:40px;display:grid;place-items:center;flex:none}
+
+/* setup */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.hero{padding-block:28px 8px;display:flex;flex-direction:column;gap:6px}
+.hero h1{font-size:40px;color:var(--accent);line-height:1}
+.hero p{margin:0;color:var(--muted)}
+.names{display:flex;flex-direction:column;gap:8px}
+.namerow{display:flex;gap:8px}
+.namerow input{flex:1;min-width:0}
+input[type=text],input[type=number]{font:inherit;font-size:16px;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.toggle{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.switch{position:relative;width:48px;height:28px;flex:none}
+.switch input{opacity:0;width:100%;height:100%;margin:0;position:absolute;cursor:pointer}
+.switch i{position:absolute;inset:0;border-radius:99px;background:var(--line);pointer-events:none;transition:background .15s}
+.switch i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--surface);transition:transform .15s}
+.switch input:checked+i{background:var(--held)}
+.switch input:checked+i::after{transform:translateX(20px)}
+.switch input:focus-visible+i{outline:3px solid var(--accent);outline-offset:2px}
+.rules{margin:0;padding-left:18px;color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:3px}
+
+/* dice tray */
+.tray{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px}
+.dice{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.die{aspect-ratio:1;max-width:100%;position:relative;background:transparent;padding:0;border-radius:0}
+.die svg{width:100%;height:100%;display:block}
+.die .face{fill:var(--die);stroke:var(--die-edge);stroke-width:3}
+.die .inner{fill:none;stroke:var(--die-edge);stroke-width:1.5}
+.die text{font-family:var(--display);font-weight:700;font-size:34px;fill:var(--fg);font-variant-numeric:tabular-nums}
+.die.held .face{fill:var(--held);stroke:var(--held)}
+.die.held text{fill:var(--held-fg)}
+.die.blank text{fill:var(--muted)}
+.die.spin svg{animation:spin .35s ease-out}
+@keyframes spin{from{transform:rotate(-40deg) scale(.85)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.die.spin svg{animation:none}}
+.die .lock{font-family:var(--body);font-size:10px;font-weight:700;letter-spacing:.08em;fill:var(--held-fg)}
+.trayrow{display:flex;gap:8px;align-items:center}
+.trayrow .btn{flex:1}
+.pips{display:flex;gap:5px}
+.pips i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.pips i.on{background:var(--accent)}
+.status{font-size:13px;color:var(--muted);min-height:18px}
+.risk{background:var(--accent-soft);border:1px dashed var(--accent);color:var(--fg);padding:10px 12px;border-radius:10px;font-size:13px;display:flex;gap:10px;align-items:center}
+.risk .btn{flex:none;padding:9px 12px;font-size:13px}
+
+/* sheet */
+.sheetwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:0;border-bottom:1px solid var(--line);height:40px;text-align:center}
+th{font-weight:600;font-size:13px}
+thead th{background:var(--accent);color:var(--accent-fg);height:44px;padding:0 6px;font-weight:600;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis}
+thead th.field{font-family:var(--display);font-size:16px;letter-spacing:.03em}
+.field{position:sticky;left:0;background:var(--surface);text-align:left;padding:0 10px;min-width:128px;z-index:1;border-right:1px solid var(--line)}
+thead .field{background:var(--accent)}
+td.field .lab{display:block;font-weight:500;font-size:14px}
+td.field .hint{display:block;font-size:11px;color:var(--muted);line-height:1.1}
+tr.sum td{background:var(--surface-2);font-weight:700}
+tr.sum td.field{background:var(--surface-2)}
+tr.total td{background:var(--accent-soft);font-weight:700;font-size:16px}
+tr.total td.field{background:var(--accent-soft)}
+td.cur{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+thead th.cur{box-shadow:inset 0 -4px 0 var(--held)}
+.cell{width:100%;height:100%;min-width:52px;background:transparent;color:var(--fg);border-radius:0;font-weight:600;font-size:15px}
+.cell.open{color:var(--accent);font-weight:500}
+.cell.open.zero{color:var(--muted)}
+.cell.empty::after{content:"·";color:var(--muted)}
+.scratch{color:var(--muted);text-decoration:line-through;font-weight:500}
+.val{font-weight:600}
+.bonus-ok{color:var(--good)}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgb(0 0 0 / .45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--surface);width:100%;max-width:560px;border-radius:16px 16px 0 0;padding:20px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.modal h2{font-size:24px}
+.modal .big{font-family:var(--display);font-size:44px;color:var(--accent);line-height:1}
+.modal .row{display:flex;gap:8px;flex-wrap:wrap}
+.modal .row .btn{flex:1 1 120px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:10px;font-size:14px;z-index:30;max-width:calc(100% - 32px);text-align:center}
+.rank{display:flex;flex-direction:column;gap:6px}
+.rank div{display:flex;justify-content:space-between;padding:10px 12px;border-radius:10px;background:var(--surface-2);font-variant-numeric:tabular-nums}
+.rank div:first-child{background:var(--accent);color:var(--accent-fg);font-weight:700}
+.menu{display:flex;flex-direction:column;gap:8px}
+
+/* mode slider */
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--surface-2);border-radius:12px;padding:4px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{position:relative;z-index:1;text-align:center;padding:10px 6px;border-radius:9px;cursor:pointer;font-weight:600;line-height:1.2}
+.seg label small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
+.seg .thumb{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:9px;background:var(--accent);transition:transform .2s ease}
+.seg input:checked+label{color:var(--accent-fg)}
+.seg input:checked+label small{color:var(--accent-fg);opacity:.85}
+.seg input:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+.seg.right .thumb{transform:translateX(100%)}
+@media (prefers-reduced-motion:reduce){.seg .thumb{transition:none}}
+.modetag{font-family:var(--body);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block}
+.die .pip{fill:var(--fg)}
+.die.held .pip{fill:var(--held-fg)}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="layer"></div>
+
+<script>
+(function(){
+const RULES={
+ d6:{key:'d6',title:'Kniffel',tag:'Klassisch · D6',faces:6,rolls:3,bonusAt:63,bonus:35,risk:false,lowMax:30,
+  intro:'Das Original – fünf sechsseitige Würfel, drei Würfe, dreizehn Felder.',
+  rules:['Oben zählen nur die Augen der jeweiligen Zahl.','Bonus +35 ab 63 Punkten oben.','Full House 25 · Kleine Straße 30 · Große Straße 40 · Kniffel 50.','Chance: Summe aller Würfel, passt immer.'],
+  cats:[
+   {id:'u1',label:'Einser',sec:'U',vals:[1]},{id:'u2',label:'Zweier',sec:'U',vals:[2]},{id:'u3',label:'Dreier',sec:'U',vals:[3]},
+   {id:'u4',label:'Vierer',sec:'U',vals:[4]},{id:'u5',label:'Fünfer',sec:'U',vals:[5]},{id:'u6',label:'Sechser',sec:'U',vals:[6]},
+   {id:'p3',label:'Dreierpasch',hint:'3 gleiche · Summe',sec:'L'},
+   {id:'p4',label:'Viererpasch',hint:'4 gleiche · Summe',sec:'L'},
+   {id:'fh',label:'Full House',hint:'3 + 2 gleiche · 25',sec:'L',fixed:25},
+   {id:'ks',label:'Kleine Straße',hint:'4 in Folge · 30',sec:'L',fixed:30},
+   {id:'gs',label:'Große Straße',hint:'5 in Folge · 40',sec:'L',fixed:40},
+   {id:'kn',label:'Kniffel',hint:'5 gleiche · 50',sec:'L',fixed:50},
+   {id:'ch',label:'Chance',hint:'Summe',sec:'L'}]},
+ d12:{key:'d12',title:'Kniffel D12',tag:'Extreme · D12',faces:12,rolls:4,bonusAt:130,bonus:70,risk:true,lowMax:60,
+  intro:'Fünf zwölfseitige Würfel, vier Würfe, vierzehn Felder.',
+  rules:['Oben zählen Paare: z. B. bei 7+8 alle 7er und 8er.','Bonus +70 ab 130 Punkten oben.','Viererpasch und Full House zählen über Paar-Gruppen (7 und 8 gelten als gleich).','Große Straße: 5 verschiedene Zahlen innerhalb von 6 in Folge.','Alles oder nichts: ab 3 gleichen nach dem 4. Wurf ein 5. Wurf – Kniffel oder Kniffel gestrichen.'],
+  cats:[
+   {id:'u1',label:'1+2',sec:'U',vals:[1,2]},{id:'u2',label:'3+4',sec:'U',vals:[3,4]},{id:'u3',label:'5+6',sec:'U',vals:[5,6]},
+   {id:'u4',label:'7+8',sec:'U',vals:[7,8]},{id:'u5',label:'9+10',sec:'U',vals:[9,10]},{id:'u6',label:'11+12',sec:'U',vals:[11,12]},
+   {id:'p3',label:'Dreierpasch',hint:'3 gleiche · Summe',sec:'L'},
+   {id:'p4',label:'Viererpasch',hint:'4 aus einer Paar-Gruppe · Summe',sec:'L'},
+   {id:'fh',label:'Full House',hint:'Gruppen 3 + 2 · 40',sec:'L',fixed:40},
+   {id:'ks',label:'Kleine Straße',hint:'4 in Folge · 60',sec:'L',fixed:60},
+   {id:'gs',label:'Große Straße',hint:'5 aus 6 in Folge · 70',sec:'L',fixed:70},
+   {id:'kn',label:'Kniffel',hint:'5 gleiche · 150',sec:'L',fixed:150},
+   {id:'lo',label:'Summe ≤ 12',hint:'60',sec:'L',fixed:60},
+   {id:'gu',label:'Gerade/Ungerade',hint:'alle gleich · Summe',sec:'L'}]}
+};
+const KEY='kniffel-d12-v1';
+const sum=d=>d.reduce((a,b)=>a+b,0);
+const counts=a=>{const m={};a.forEach(x=>m[x]=(m[x]||0)+1);return Object.values(m).sort((a,b)=>b-a)};
+const run=(s,len,faces)=>{for(let x=1;x<=faces-len+1;x++){let ok=true;for(let i=0;i<len;i++)if(!s.has(x+i)){ok=false;break}if(ok)return true}return false};
+
+function score(id,d,R){
+  R=R||rules();
+  const c=R.cats.find(c=>c.id===id);
+  if(c.sec==='U')return sum(d.filter(x=>c.vals.includes(x)));
+  const cn=counts(d),s=new Set(d);
+  const gc=R.key==='d12'?counts(d.map(x=>Math.ceil(x/2))):cn;
+  switch(id){
+    case 'p3':return cn[0]>=3?sum(d):0;
+    case 'p4':return gc[0]>=4?sum(d):0;
+    case 'fh':return gc[0]===3&&gc[1]===2?c.fixed:0;
+    case 'ks':return run(s,4,R.faces)?c.fixed:0;
+    case 'gs':return R.key==='d12'?(s.size===5&&Math.max(...d)-Math.min(...d)<=5?c.fixed:0):(run(s,5,R.faces)?c.fixed:0);
+    case 'kn':return cn[0]===5?c.fixed:0;
+    case 'lo':return sum(d)<=12?c.fixed:0;
+    case 'gu':return d.every(x=>x%2===0)||d.every(x=>x%2===1)?sum(d):0;
+    case 'ch':return sum(d);
+  }
+  return 0;
+}
+function totals(p){
+  const R=rules();let up=0,lo=0;
+  R.cats.forEach(c=>{const v=p.scores[c.id];if(v==null)return;c.sec==='U'?up+=v:lo+=v});
+  const bonus=up>=R.bonusAt?R.bonus:0;
+  return {up,bonus,lo,total:up+bonus+lo};
+}
+const done=p=>rules().cats.every(c=>p.scores[c.id]!=null);
+
+let S=load()||fresh();
+if(!S.mode)S.mode='d12';
+function rules(){return RULES[S.mode]||RULES.d12}
+function fresh(){return {phase:'setup',mode:'d12',names:['Anna','Ben','Clara'],digital:true,players:[],cur:0,dice:[null,null,null,null,null],held:[false,false,false,false,false],roll:0,last:'',hist:[]}}
+function load(){try{const t=localStorage.getItem(KEY);return t?JSON.parse(t):null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let spin=false,toastT;
+
+const app=document.getElementById('app'),layer=document.getElementById('layer');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function render(){
+  if(S.phase==='setup')return renderSetup();
+  renderGame();
+}
+
+function renderSetup(){
+  const R=rules();
+  app.innerHTML=`
+  <div class="hero"><span class="modetag">${R.tag}</span><h1>${R.title}</h1><p>${R.intro}</p></div>
+  <div class="card">
+    <h2 style="font-size:20px">Spielvariante</h2>
+    <div class="seg ${S.mode==='d12'?'right':''}" role="radiogroup" aria-label="Spielvariante">
+      <span class="thumb"></span>
+      <input type="radio" name="mode" id="mode-d6" value="d6" ${S.mode==='d6'?'checked':''}><label for="mode-d6">Klassisch<small>5 × D6 · 3 Würfe</small></label>
+      <input type="radio" name="mode" id="mode-d12" value="d12" ${S.mode==='d12'?'checked':''}><label for="mode-d12">D12 Extreme<small>5 × D12 · 4 Würfe</small></label>
+    </div>
+  </div>
+  <div class="card">
+    <h2 style="font-size:20px">Mitspieler</h2>
+    <div class="names" id="names">${S.names.map((n,i)=>`
+      <div class="namerow"><input type="text" id="name-${i}" value="${esc(n)}" maxlength="14" aria-label="Name Spieler ${i+1}">
+      <button class="btn ghost" data-del="${i}" aria-label="Spieler entfernen" ${S.names.length<=1?'disabled':''}>✕</button></div>`).join('')}
+    </div>
+    <button class="btn line" id="add" ${S.names.length>=6?'disabled':''}>+ Spieler hinzufügen</button>
+    <label class="toggle"><span><b>Digitale Würfel</b><br><span class="small">Aus: echte Würfel werfen, Punkte nur eintippen</span></span>
+      <span class="switch"><input type="checkbox" id="digital" ${S.digital?'checked':''}><i></i></span></label>
+    <button class="btn" id="start">Spiel starten</button>
+  </div>
+  <div class="card">
+    <h2 style="font-size:18px">Regeln in Kürze</h2>
+    <ul class="rules">${R.rules.map(r=>`<li>${r}</li>`).join('')}</ul>
+  </div>
+  <div class="card">
+    <h2 style="font-size:18px">Zum Ausdrucken · D12</h2>
+    <div class="menu">
+      <a class="btn line" href="Kniffel_D12_Regelwerk.pdf" target="_blank" rel="noopener">Regelwerk (PDF)</a>
+      <a class="btn line" href="Kniffel_D12_Spielblock_4xA6.pdf" target="_blank" rel="noopener">Spielblock 4 × A6 (PDF)</a>
+    </div>
+  </div>`;
+  const syncNames=()=>{S.names=S.names.map((_,i)=>document.getElementById('name-'+i).value)};
+  app.querySelectorAll('input[name=mode]').forEach(r=>r.onchange=()=>{syncNames();S.mode=r.value;save();render();const f=document.getElementById('mode-'+S.mode);f&&f.focus()});
+  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{syncNames();S.names.splice(+b.dataset.del,1);save();render()});
+  document.getElementById('add').onclick=()=>{syncNames();S.names.push('Spieler '+(S.names.length+1));save();render();const i=document.getElementById('name-'+(S.names.length-1));i&&i.select()};
+  document.getElementById('digital').onchange=e=>{S.digital=e.target.checked;save()};
+  app.querySelectorAll('input[type=text]').forEach(i=>i.oninput=()=>{syncNames();save()});
+  document.getElementById('start').onclick=()=>{
+    syncNames();
+    const names=S.names.map((n,i)=>n.trim()||('Spieler '+(i+1)));
+    S.players=names.map(n=>({name:n,scores:{}}));
+    S.cur=0;S.phase='play';S.hist=[];resetDice();S.last='';save();render();
+  };
+}
+
+function resetDice(){S.dice=[null,null,null,null,null];S.held=[false,false,false,false,false];S.roll=0}
+
+function dieSVG(v,held){
+  if(S.mode==='d6'){
+    const P={1:[[50,50]],2:[[30,30],[70,70]],3:[[28,28],[50,50],[72,72]],4:[[30,30],[70,30],[30,70],[70,70]],5:[[28,28],[72,28],[50,50],[28,72],[72,72]],6:[[30,26],[70,26],[30,50],[70,50],[30,74],[70,74]]};
+    const pips=v==null?'':P[v].map(([x,y])=>`<circle class="pip" cx="${x}" cy="${y}" r="8"/>`).join('');
+    return `<svg viewBox="0 0 100 100" aria-hidden="true"><rect class="face" x="6" y="6" width="88" height="88" rx="16"/>${v==null?'<text x="50" y="62" text-anchor="middle">?</text>':pips}</svg>`;
+  }
+  const pts=[],inner=[];
+  for(let i=0;i<5;i++){const a=-Math.PI/2+i*2*Math.PI/5;pts.push((50+44*Math.cos(a)).toFixed(1)+','+(54+44*Math.sin(a)).toFixed(1));inner.push((50+30*Math.cos(a)).toFixed(1)+','+(54+30*Math.sin(a)).toFixed(1))}
+  const label=v==null?'?':(v===6||v===9?v+'.':v);
+  return `<svg viewBox="0 0 100 104" aria-hidden="true"><polygon class="face" points="${pts.join(' ')}"/><polygon class="inner" points="${inner.join(' ')}"/>
+  <text x="50" y="${held?62:66}" text-anchor="middle">${label}</text>${held?'<text class="lock" x="50" y="82" text-anchor="middle">HALTEN</text>':''}</svg>`;
+}
+
+function riskAvailable(){
+  const R=rules();
+  if(!R.risk||!S.digital||S.roll!==R.rolls)return false;
+  const p=S.players[S.cur];
+  if(p.scores.kn!=null)return false;
+  if(score('kn',S.dice)>0)return false;
+  return counts(S.dice)[0]>=3;
+}
+
+function renderGame(){
+  const R=rules(),p=S.players[S.cur],N=R.cats.length;
+  const round=Math.min(N,Math.min(...S.players.map(q=>Object.keys(q.scores).length))+1);
+  let html=`<div class="bar"><h1>${R.title}</h1>
+    <div class="turn"><span>Runde ${round} von ${N}</span><b>${esc(p.name)} ist dran</b></div>
+    <button class="iconbtn" id="menu" aria-label="Menü">☰</button></div>`;
+  if(S.digital){
+    const hasDice=S.roll>0,maxed=S.roll>=R.rolls;
+    html+=`<section class="tray" aria-label="Würfel">
+      <div class="dice">${S.dice.map((v,i)=>`<button class="die ${S.held[i]?'held':''} ${v==null?'blank':''} ${spin&&!S.held[i]?'spin':''}" data-die="${i}" ${!hasDice||maxed?'disabled':''} aria-label="Würfel ${i+1}: ${v==null?'noch nicht geworfen':v}${S.held[i]?', gehalten':''}">${dieSVG(v,S.held[i])}</button>`).join('')}</div>
+      <div class="trayrow"><button class="btn" id="roll" ${maxed?'disabled':''}>${S.roll===0?'Würfeln':maxed?'Keine Würfe mehr':'Nochmal würfeln'}</button>
+      <div class="pips" aria-label="Wurf ${Math.min(S.roll,R.rolls)} von ${R.rolls}">${Array.from({length:R.rolls},(_,k)=>`<i class="${k<S.roll?'on':''}"></i>`).join('')}</div></div>
+      ${riskAvailable()?`<div class="risk"><span><b>Alles oder nichts?</b> 5. Wurf auf den Kniffel – daneben heißt Kniffel gestrichen. Chance ${counts(S.dice)[0]===4?'1 : 12':'1 : 144'}.</span><button class="btn" id="risk">Wagen</button></div>`:''}
+      <div class="status">${S.roll===0?(S.last?esc(S.last):'Tippe auf „Würfeln“.'):!maxed?'Würfel antippen zum Halten, dann ein Feld in deiner Spalte wählen.':'Wähle ein Feld in deiner Spalte.'}</div>
+    </section>`;
+  }else if(S.last){
+    html+=`<div class="status">${esc(S.last)}</div>`;
+  }
+  html+=`<div class="sheetwrap"><table><thead><tr><th class="field">${R.title.toUpperCase()}</th>${S.players.map((q,i)=>`<th class="${i===S.cur?'cur':''}" title="${esc(q.name)}">${esc(q.name)}</th>`).join('')}</tr></thead><tbody>`;
+  const row=c=>{
+    let t=`<tr><td class="field"><span class="lab">${c.label}</span>${c.hint?`<span class="hint">${c.hint}</span>`:''}</td>`;
+    S.players.forEach((q,i)=>{
+      const v=q.scores[c.id],cur=i===S.cur;
+      if(v!=null){t+=`<td class="${cur?'cur':''}"><span class="${v===0?'scratch':'val'}">${v}</span></td>`;return}
+      if(cur&&S.phase==='play'){
+        const can=!S.digital||S.roll>0;
+        const pv=S.digital&&S.roll>0?score(c.id,S.dice):null;
+        t+=`<td class="cur"><button class="cell open ${pv===0?'zero':''} ${pv==null?'empty':''}" data-cat="${c.id}" ${can?'':'disabled'} aria-label="${c.label} eintragen">${pv==null?'':pv}</button></td>`;
+      }else t+=`<td></td>`;
+    });
+    return t+'</tr>';
+  };
+  const tots=S.players.map(totals);
+  const sumrow=(label,f,cls='sum')=>`<tr class="${cls}"><td class="field">${label}</td>${tots.map((t,i)=>`<td class="${i===S.cur?'cur':''}">${f(t)}</td>`).join('')}</tr>`;
+  R.cats.filter(c=>c.sec==='U').forEach(c=>html+=row(c));
+  html+=sumrow('Summe oben',t=>t.up);
+  html+=sumrow(`Bonus (ab ${R.bonusAt})`,t=>t.bonus?`<span class="bonus-ok">+${R.bonus}</span>`:`<span class="small">−${Math.max(0,R.bonusAt-t.up)}</span>`);
+  R.cats.filter(c=>c.sec==='L').forEach(c=>html+=row(c));
+  html+=sumrow('Summe unten',t=>t.lo);
+  html+=sumrow('Endsumme',t=>t.total,'total');
+  html+=`</tbody></table></div>`;
+  app.innerHTML=html;
+  spin=false;
+
+  document.getElementById('menu').onclick=openMenu;
+  if(S.digital){
+    document.getElementById('roll').onclick=doRoll;
+    app.querySelectorAll('[data-die]').forEach(b=>b.onclick=()=>{const i=+b.dataset.die;S.held[i]=!S.held[i];save();render()});
+    const r=document.getElementById('risk');if(r)r.onclick=doRisk;
+  }
+  app.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>openEntry(b.dataset.cat));
+}
+
+function rnd(){return 1+Math.floor(Math.random()*rules().faces)}
+function doRoll(){
+  if(S.roll>=rules().rolls)return;
+  if(S.roll===0)S.held=[false,false,false,false,false];
+  S.dice=S.dice.map((v,i)=>S.held[i]&&v!=null?v:rnd());
+  S.roll++;spin=true;save();render();
+}
+
+function snapshot(){S.hist.push(JSON.stringify({players:S.players,cur:S.cur,last:S.last}));if(S.hist.length>30)S.hist.shift()}
+function enter(id,val,note){
+  snapshot();
+  const p=S.players[S.cur],c=rules().cats.find(c=>c.id===id);
+  p.scores[id]=val;
+  const diceTxt=S.digital&&S.dice[0]!=null?S.dice.join('-')+' → ':'';
+  S.last=`${p.name}: ${diceTxt}${c.label} ${val===0?'gestrichen':val}`+(note?' · '+note:'');
+  if(S.players.every(done)){S.phase='end';resetDice();save();render();showEnd();return}
+  let n=S.cur;do{n=(n+1)%S.players.length}while(done(S.players[n]));
+  S.cur=n;resetDice();save();render();
+  toast(S.last+' · '+S.players[S.cur].name+' ist dran');
+}
+
+function doRisk(){
+  const m={};S.dice.forEach(x=>m[x]=(m[x]||0)+1);
+  const val=+Object.keys(m).sort((a,b)=>m[b]-m[a]||b-a)[0];
+  S.roll=rules().rolls+1;
+  S.dice=S.dice.map(x=>x===val?x:rnd());
+  S.held=S.dice.map(x=>x===val);
+  spin=true;
+  const ok=score('kn',S.dice)>0;
+  render();
+  setTimeout(()=>{enter('kn',ok?150:0,ok?'Alles oder nichts geschafft!':'Alles oder nichts daneben')},900);
+}
+
+function openEntry(id){
+  const R=rules(),c=R.cats.find(c=>c.id===id),p=S.players[S.cur];
+  if(S.digital){
+    const v=score(id,S.dice);
+    modal(`<h2>${c.label}</h2>
+      <div><div class="big">${v}</div><div class="small">${v===0?'Passt nicht – das Feld wird gestrichen.':'Punkte für '+esc(p.name)}</div></div>
+      <div class="row"><button class="btn ghost" data-x>Abbrechen</button><button class="btn" id="ok">${v===0?'Streichen':'Eintragen'}</button></div>`,
+      m=>{m.querySelector('#ok').onclick=()=>{close();enter(id,v)}});
+    return;
+  }
+  if(c.fixed){
+    modal(`<h2>${c.label}</h2><div class="small">${esc(p.name)} – geschafft oder streichen?</div>
+      <div class="row"><button class="btn ghost" id="zero">Streichen (0)</button><button class="btn" id="ok">${c.fixed} eintragen</button></div>
+      <button class="btn line" data-x>Abbrechen</button>`,
+      m=>{m.querySelector('#ok').onclick=()=>{close();enter(id,c.fixed)};m.querySelector('#zero').onclick=()=>{close();enter(id,0)}});
+    return;
+  }
+  const max=c.sec==='U'?Math.max(...c.vals)*5:R.lowMax;
+  modal(`<h2>${c.label}</h2><label class="small" for="pts">Punkte für ${esc(p.name)} (0–${max})</label>
+    <input type="number" id="pts" inputmode="numeric" min="0" max="${max}" placeholder="0–${max}">
+    <div class="small" id="err"></div>
+    <div class="row"><button class="btn ghost" id="zero">Streichen (0)</button><button class="btn" id="ok">Eintragen</button></div>
+    <button class="btn line" data-x>Abbrechen</button>`,
+    m=>{const inp=m.querySelector('#pts');setTimeout(()=>inp.focus(),50);
+      const go=()=>{const v=parseInt(inp.value,10);if(isNaN(v)||v<0||v>max){m.querySelector('#err').textContent=`Bitte eine Zahl von 0 bis ${max} eingeben.`;return}close();enter(id,v)};
+      m.querySelector('#ok').onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};
+      m.querySelector('#zero').onclick=()=>{close();enter(id,0)}});
+}
+
+function openMenu(){
+  modal(`<h2>Menü</h2><div class="menu">
+    <button class="btn ghost" id="undo" ${S.hist.length?'':'disabled'}>Letzten Eintrag rückgängig</button>
+    <button class="btn ghost" id="mode">${S.digital?'Echte Würfel nutzen (nur eintippen)':'Digitale Würfel nutzen'}</button>
+    <button class="btn line" id="new">Neues Spiel / Variante wechseln …</button>
+    <button class="btn line" data-x>Schließen</button></div>`,
+  m=>{
+    m.querySelector('#undo').onclick=()=>{undo();close();toast('Letzter Eintrag zurückgenommen')};
+    m.querySelector('#mode').onclick=()=>{S.digital=!S.digital;resetDice();save();close();render()};
+    m.querySelector('#new').onclick=()=>confirmNew();
+  });
+}
+function undo(){const h=S.hist.pop();if(!h)return;const o=JSON.parse(h);S.players=o.players;S.cur=o.cur;S.last=o.last;S.phase='play';resetDice();save();render()}
+function toSetup(){const names=S.players.length?S.players.map(p=>p.name):S.names;const d=S.digital,mode=S.mode;S=fresh();S.names=names;S.digital=d;S.mode=mode;save();close();render()}
+function confirmNew(){
+  modal(`<h2>Neues Spiel?</h2><div class="small">Der aktuelle Spielstand wird gelöscht. Namen bleiben erhalten, die Variante kannst du danach wählen.</div>
+    <div class="row"><button class="btn ghost" data-x>Abbrechen</button><button class="btn" id="yes">Neues Spiel</button></div>`,
+  m=>{m.querySelector('#yes').onclick=toSetup});
+}
+function showEnd(){
+  const r=S.players.map(p=>({name:p.name,...totals(p)})).sort((a,b)=>b.total-a.total||b.lo-a.lo);
+  modal(`<h2>${esc(r[0].name)} gewinnt!</h2><div class="rank">${r.map((x,i)=>`<div><span>${i+1}. ${esc(x.name)}</span><span>${x.total}</span></div>`).join('')}</div>
+    <div class="row"><button class="btn ghost" id="undo">Letzten Eintrag zurück</button><button class="btn" id="again">Neues Spiel</button></div>
+    <button class="btn line" data-x>Block ansehen</button>`,
+  m=>{m.querySelector('#again').onclick=toSetup;m.querySelector('#undo').onclick=()=>{close();undo()}});
+}
+
+function modal(inner,bind){
+  layer.innerHTML=`<div class="scrim" id="scrim"><div class="modal" role="dialog" aria-modal="true">${inner}</div></div>`;
+  const s=layer.querySelector('#scrim');
+  s.onclick=e=>{if(e.target===s)close()};
+  s.querySelectorAll('[data-x]').forEach(b=>b.onclick=close);
+  bind&&bind(s);
+}
+function close(){layer.innerHTML=''}
+function toast(t){
+  let el=document.querySelector('.toast');if(!el){el=document.createElement('div');el.className='toast';el.setAttribute('role','status');document.body.appendChild(el)}
+  el.textContent=t;clearTimeout(toastT);toastT=setTimeout(()=>el.remove(),2600);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+render();
+if(S.phase==='end')showEnd();
+window.__score=(id,d,m)=>score(id,d,RULES[m]);
+})();
+</script>
+
+</body>
+</html>
